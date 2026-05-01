@@ -42,7 +42,7 @@ export interface Project {
   _id: string
   title: string
   slug: string
-  category: string
+  categories: string
   summary: string
   outcomes: string[]
   tags: string[]
@@ -77,7 +77,7 @@ export async function getEmployerPage(slug: string): Promise<EmployerPage | null
       _id, "slug": slug.current, employerName, roleType,
       heroHeadline, heroSubline, showModules,
       featuredProjects[]->{ _id, title, "slug": slug.current,
-        category, summary, outcomes, tags, image, link },
+        categories, summary, outcomes, tags, image, link },
       customMessage, metaTitle, metaDescription
     }`,
     { slug }

@@ -21,7 +21,7 @@ export default function PortfolioClient({ projects }: Props) {
 
   const filtered = active === 'all'
     ? projects
-    : projects.filter((p) => p.category === active)
+    : projects.filter((p) => p.categories.includes(active))
 
   return (
     <>
@@ -79,7 +79,7 @@ function ProjectCard({ project }: { project: Project }) {
     <div className="group border border-ink-200 hover:border-signal transition-colors duration-300 flex flex-col h-full">
       {/* Category tag */}
       <div className="px-8 pt-8 pb-0">
-        <p className="label-tag">{CATEGORY_LABELS[project.category] ?? project.category}</p>
+        <p className="label-tag">{project.categories?.map(c => CATEGORY_LABELS[c] ?? c).join(', ')}</p>
       </div>
 
       {/* Content */}
