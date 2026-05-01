@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html {
+    font-family: var(--font-body);
+    background-color: #F4F2EE;
+    color: #0D0D0D;
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background: #E8490F;
+    color: #F4F2EE;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 6px; }
+  ::-webkit-scrollbar-track { background: #F4F2EE; }
+  ::-webkit-scrollbar-thumb { background: #0D0D0D; border-radius: 3px; }
+}
+
+@layer components {
+  .container-site {
+    @apply max-w-7xl mx-auto px-6 md:px-12 lg:px-20;
+  }
+
+  .text-display {
+    font-family: var(--font-display);
+    @apply font-light leading-none tracking-tight;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-ink-900 text-slate-site px-8 py-4
+           font-body text-sm font-medium tracking-widest uppercase
+           hover:bg-signal transition-colors duration-300;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2 border border-ink-900 text-ink-900 px-8 py-4
+           font-body text-sm font-medium tracking-widest uppercase
+           hover:bg-ink-900 hover:text-slate-site transition-colors duration-300;
+  }
+
+  .label-tag {
+    @apply font-mono text-xs tracking-widest uppercase text-ink-400;
+  }
+
+  /* Animated underline link */
+  .link-underline {
+    @apply relative;
+  }
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-px bg-signal transition-all duration-300;
+  }
+  .link-underline:hover::after { width: 100%; }
+
+  /* Section divider */
+  .divider {
+    @apply border-t border-ink-200;
+  }
+}
+
+/* Staggered animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Initially hidden for animate-on-scroll */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.animate-on-scroll.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
