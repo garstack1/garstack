@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
 const STATS = [
-  { value: '500+', label: 'Learners trained' },
-  { value: '12+',  label: 'Years experience' },
-  { value: '95%',  label: 'Avg. satisfaction' },
+  { value: '600+', label: 'Learners trained' },
+  { value: '15+',  label: 'Years experience' },
+  { value: '20+',  label: 'Countries trained in' },
   { value: '3',    label: 'Disciplines mastered' },
 ]
 
@@ -70,8 +70,9 @@ export default function Hero() {
 
         {/* Sub copy */}
         <p className="text-ink-500 text-lg md:text-xl max-w-xl leading-relaxed mb-12 animate-fade-up delay-300">
-          With 12+ years designing learning experiences and implementing solutions,
-          I help organisations build capability that sticks.
+          With 15+ years designing learning experiences and implementing solutions -
+classroom to boardroom, Seattle to Dubai - I help organisations build
+capability that sticks.
         </p>
 
         {/* CTAs */}
