@@ -185,11 +185,10 @@ export default function CVPage() {
               </p>
             </div>
             <a
-              href="/cv/garrett-stack-cv-implementation-consultant.pdf"
-              download
+              href="#download"
               className="btn-primary shrink-0"
             >
-              Download PDF
+              Download CV
               <span className="text-signal">↓</span>
             </a>
           </div>
@@ -272,6 +271,63 @@ export default function CVPage() {
                       </li>
                     ))}
                   </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Downloads ── */}
+        <section id="download" className="py-24 border-b border-ink-200 bg-ink-900">
+          <div className="container-site">
+            <p className="label-tag text-ink-500 mb-4">Download my CV</p>
+            <h2 className="text-display text-4xl text-slate-site mb-4">Choose the right version for your role.</h2>
+            <p className="text-ink-400 text-sm mb-16 max-w-xl">Each CV is tailored to a specific role type - same experience, different emphasis. Pick the one that matches your opening.</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-ink-700">
+              {[
+                {
+                  role: "Instructional Designer",
+                  description: "Curriculum design, LMS, eLearning development and enterprise learning strategy.",
+                  file: "/cv/garrett-stack-cv-instructional-designer.pdf",
+                },
+                {
+                  role: "Implementation Consultant",
+                  description: "Enterprise software rollouts, customer onboarding, Salesforce and DocuSign CLM.",
+                  file: "/cv/garrett-stack-cv-implementation-consultant.pdf",
+                },
+                {
+                  role: "Technical Writer",
+                  description: "API documentation, user guides, structured authoring and developer content.",
+                  file: "/cv/garrett-stack-cv-technical-writer.pdf",
+                },
+                {
+                  role: "Enablement / Onboarding",
+                  description: "Customer and partner enablement, time-to-productivity and adoption frameworks.",
+                  file: "/cv/garrett-stack-cv-enablement-onboarding.pdf",
+                },
+                {
+                  role: "Cybersecurity Training",
+                  description: "Security awareness training, SOC/NOC background and Google Cybersecurity cert.",
+                  file: "/cv/garrett-stack-cv-cybersecurity-training.pdf",
+                },
+                {
+                  role: "Data Analytics",
+                  description: "Analytics training, GIS data analysis, Python and Google Data Analytics cert.",
+                  file: "/cv/garrett-stack-cv-data-analytics.pdf",
+                },
+              ].map(({ role, description, file }) => (
+                <div key={role} className="bg-ink-900 p-8 flex flex-col justify-between gap-6 hover:bg-ink-800 transition-colors group">
+                  <div>
+                    <h3 className="text-display text-xl text-slate-site mb-3 group-hover:text-signal transition-colors">{role}</h3>
+                    <p className="text-ink-400 text-sm leading-relaxed">{description}</p>
+                  </div>
+                  <a
+                    href={file}
+                    download
+                    className="inline-flex items-center gap-2 font-mono text-xs text-signal tracking-widest uppercase hover:gap-4 transition-all"
+                  >
+                    Download PDF ↓
+                  </a>
                 </div>
               ))}
             </div>
