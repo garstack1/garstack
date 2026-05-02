@@ -84,6 +84,19 @@ export interface Testimonial {
 
 // ── Queries ──────────────────────────────────────────────────────────────────
 
+export interface SiteSettings {
+  profilePhoto?: any
+  photoAlt?: string
+  tagline?: string
+  bioShort?: string
+}
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+  return sanityClient.fetch(
+    `*[_type == "siteSettings"][0]{ profilePhoto, photoAlt, tagline, bioShort }`
+  )
+}
+
 export async function getEmployerPage(slug: string): Promise<EmployerPage | null> {
   return sanityClient.fetch(
     `*[_type == "employerPage" && slug.current == $slug][0]{

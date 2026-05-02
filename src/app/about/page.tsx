@@ -1,10 +1,12 @@
 import Nav from '@/components/layout/Nav'
+import Image from 'next/image'
+import { getSiteSettings, urlFor } from '@/lib/sanity'
 import Footer from '@/components/layout/Footer'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Garrett Stack — Instructional Designer, Technical Writer and Implementation Consultant based in Ireland.',
+  description: 'Garrett Stack - Instructional Designer, Technical Writer and Implementation Consultant based in Ireland.',
 }
 
 const ACHIEVEMENTS = [
@@ -18,13 +20,13 @@ const ACHIEVEMENTS = [
     num: '02',
     stat: '7',
     label: 'Enterprise organisations',
-    detail: 'Designed and rolled out a full Learning Management System at Amdocs — serving in-house staff and six major US telecommunications companies.',
+    detail: 'Designed and rolled out a full Learning Management System at Amdocs - serving in-house staff and six major US telecommunications companies.',
   },
   {
     num: '03',
     stat: 'EMEA',
     label: 'Regional reach',
-    detail: 'Consulted for Autodesk across Europe, the Middle East and Africa — rolling out Web GIS software training to distributors, resellers and end customers.',
+    detail: 'Consulted for Autodesk across Europe, the Middle East and Africa - rolling out Web GIS software training to distributors, resellers and end customers.',
   },
 ]
 
@@ -35,7 +37,12 @@ const SKILLS = [
   { category: 'Platforms & Tools', items: ['Salesforce', 'DocuSign CLM', 'Salesforce Apex', 'Web GIS / Autodesk'] },
 ]
 
-export default function AboutPage() {
+export const revalidate = 60
+
+export default async function AboutPage() {
+  const settings = await getSiteSettings()
+  const photoUrl = settings?.profilePhoto ? urlFor(settings.profilePhoto).width(800).height(1000).url() : null
+  const photoAlt = settings?.photoAlt ?? 'Garrett Stack'
   return (
     <>
       <Nav />
@@ -53,7 +60,7 @@ export default function AboutPage() {
             <div>
               <p className="text-ink-500 text-xl leading-relaxed">
                 I&rsquo;ve spent an extensive career at the intersection of
-                complex technology and the people who need to use it — turning
+                complex technology and the people who need to use it - turning
                 sophisticated systems into clear, confident capability.
               </p>
             </div>
@@ -67,8 +74,20 @@ export default function AboutPage() {
             {/* Photo placeholder */}
             <div className="md:col-span-4">
               <div className="relative">
-                <div className="aspect-[3/4] bg-ink-100 flex items-center justify-center">
-                  <p className="label-tag text-ink-300">Photo coming soon</p>
+                <div className="aspect-[3/4] bg-ink-100 overflow-hidden">
+                  {photoUrl ? (
+                    <Image
+                      src={photoUrl}
+                      alt={photoAlt}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 400px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <p className="label-tag text-ink-300">Photo coming soon</p>
+                    </div>
+                  )}
                 </div>
                 {/* Orange accent */}
                 <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-signal z-[-1]" />
@@ -80,7 +99,7 @@ export default function AboutPage() {
               <p className="label-tag mb-2">My story</p>
 
               <p className="text-ink-700 text-lg leading-relaxed">
-                My career began in Civil Engineering software — a world where
+                My career began in Civil Engineering software - a world where
                 precision is non-negotiable and the gap between what a system
                 can do and what an engineer actually needs it to do is vast.
                 That tension between technical complexity and real-world
@@ -89,7 +108,7 @@ export default function AboutPage() {
 
               <p className="text-ink-700 text-lg leading-relaxed">
                 From there I moved into the SaaS world, working with some of
-                the most demanding enterprise environments in the industry —
+                the most demanding enterprise environments in the industry -
                 telecommunications, contract management, geographic information
                 systems. In each case, my role was the same: make the
                 technology work for the people, not the other way around.
@@ -108,13 +127,8 @@ export default function AboutPage() {
                 What I&rsquo;ve learned across all of it: the best
                 implementation is the one people actually use. The best
                 documentation is the one people actually read. The best
-                training is the one that changes how people work — measurably,
+                training is the one that changes how people work - measurably,
                 lastingly.
-              </p>
-
-              <p className="text-ink-700 text-lg leading-relaxed">
-                I&rsquo;m based in Ireland, working remotely with organisations
-                across Europe and beyond.
               </p>
             </div>
           </div>
@@ -173,7 +187,7 @@ export default function AboutPage() {
               {[
                 {
                   title: 'I understand the technology',
-                  body: 'With a background spanning Civil Engineering software, SaaS platforms, CLM, and GIS — I can get up to speed on complex systems fast.',
+                  body: 'With a background spanning Civil Engineering software, SaaS platforms, CLM, and GIS - I can get up to speed on complex systems fast.',
                 },
                 {
                   title: 'I understand the people',
