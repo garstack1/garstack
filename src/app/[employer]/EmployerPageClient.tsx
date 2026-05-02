@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { trackEmployerVisit, trackCVDownload } from '@/lib/analytics'
-import { getCVPath } from '@/lib/cvMap'
 import type { EmployerPage } from '@/lib/sanity'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -52,7 +51,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
           </p>
           <div className="flex flex-wrap gap-4">
             <a
-              href={getCVPath(page.roleType)}
+              href="/cv/garrett-stack-cv.pdf"
               download
               onClick={() => trackCVDownload(employerSlug)}
               className="btn-primary"
@@ -87,7 +86,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
             <div className="grid md:grid-cols-2 gap-8">
               {page.featuredProjects.map((project) => (
                 <div key={project._id} className="border border-ink-200 p-8 hover:border-signal transition-colors group">
-                  <p className="label-tag mb-4">{project.categories?.[0]}</p>
+                  <p className="label-tag mb-4">{project.category}</p>
                   <h3 className="text-display text-2xl text-ink-900 mb-4 group-hover:text-signal transition-colors">
                     {project.title}
                   </h3>
@@ -116,6 +115,58 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
         </section>
       )}
 
+      {/* ── Certifications ── */}
+      {page.featuredCertifications?.length > 0 && (
+        <section className="py-24 border-b border-ink-200 bg-ink-900">
+          <div className="container-site">
+            <p className="label-tag text-ink-500 mb-4">Verified certifications</p>
+            <h2 className="text-display text-4xl text-slate-site mb-16">Credentials that back the claim.</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {page.featuredCertifications.map((cert) => (
+                <div
+                  key={cert._id}
+                  className="relative bg-ink-800 border border-ink-700 hover:border-signal transition-all duration-300 group overflow-hidden"
+                >
+                  {/* Top accent bar */}
+                  <div className="h-1 w-full bg-signal" />
+
+                  <div className="p-6">
+                    {/* Issuer tag */}
+                    <span className="inline-block font-mono text-xs text-signal tracking-widest uppercase mb-4 border border-signal/30 px-2 py-1">
+                      {cert.issuer}
+                    </span>
+
+                    {/* Cert name */}
+                    <p className="text-slate-site font-medium leading-snug mb-4 group-hover:text-signal transition-colors">
+                      {cert.name}
+                    </p>
+
+                    {/* Date */}
+                    {cert.issuedDate && (
+                      <p className="font-mono text-xs text-ink-500 mb-4">
+                        Issued {new Date(cert.issuedDate).toLocaleDateString('en-IE', { year: 'numeric', month: 'long' })}
+                      </p>
+                    )}
+
+                    {/* Verify link */}
+                    {cert.credentialUrl && (
+                      <a
+                        href={cert.credentialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 font-mono text-xs text-signal hover:gap-3 transition-all"
+                      >
+                        Verify credential →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── CV section ── */}
       {page.showModules.cv && (
         <section className="py-24 border-b border-ink-200 bg-ink-50">
@@ -127,7 +178,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
             <div className="flex gap-4">
               <Link href="/cv" className="btn-outline">View full CV</Link>
               <a
-                href={getCVPath(page.roleType)}
+                href="/cv/garrett-stack-cv.pdf"
                 download
                 onClick={() => trackCVDownload(employerSlug)}
                 className="btn-primary"

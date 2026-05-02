@@ -14,12 +14,9 @@ export default defineType({
     }),
     defineField({
       name: 'slug',
-      title: 'URL slug',
+      title: 'URL slug (e.g. acme-corp → garrettstack.com/acme-corp)',
       type: 'slug',
-      options: {
-        source: (doc: any) => `${doc.employerName}-${doc.roleType}`,
-        maxLength: 96,
-      },
+      options: { source: 'employerName', maxLength: 96 },
       validation: (R) => R.required(),
     }),
     defineField({
@@ -34,6 +31,7 @@ export default defineType({
           { title: 'Enablement / Onboarding',   value: 'enablement-onboarding' },
           { title: 'Cybersecurity Training',     value: 'cybersecurity-training' },
           { title: 'Data Analytics',             value: 'data-analytics' },
+          { title: 'L&D Partner',                value: 'ld-partner' },
         ],
       },
       validation: (R) => R.required(),
@@ -76,6 +74,13 @@ export default defineType({
       title: 'Featured projects for this page',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'project' }] }],
+    }),
+    defineField({
+      name: 'featuredCertifications',
+      title: 'Featured certifications for this page',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'certification' }] }],
+      description: 'Pick certifications relevant to this specific employer',
     }),
     defineField({
       name: 'metaTitle',

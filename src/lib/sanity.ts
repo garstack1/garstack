@@ -1,6 +1,6 @@
 import { createClient } from '@sanity/client'
 import imageUrlBuilder from '@sanity/image-url'
-type SanityImageSource = Parameters<ReturnType<typeof import('@sanity/image-url')['default']>['image']>[0]
+import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 export const sanityClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? '',
@@ -33,6 +33,7 @@ export interface EmployerPage {
     testimonials: boolean
   }
   featuredProjects: Project[]
+  featuredCertifications: Certification[]
   customMessage?: string
   metaTitle?: string
   metaDescription?: string
@@ -42,7 +43,7 @@ export interface Project {
   _id: string
   title: string
   slug: string
-  categories: string[]
+  category: string
   summary: string
   outcomes: string[]
   tags: string[]
@@ -58,6 +59,18 @@ export interface BlogPost {
   summary: string
   body: unknown[]
   tags: string[]
+}
+
+export interface Certification {
+  _id: string
+  name: string
+  issuer: string
+  issuedDate?: string
+  expiryDate?: string
+  credentialUrl?: string
+  badgeImage?: any
+  tier: 'core' | 'role' | 'company'
+  categories: string[]
 }
 
 export interface Testimonial {
@@ -77,7 +90,8 @@ export async function getEmployerPage(slug: string): Promise<EmployerPage | null
       _id, "slug": slug.current, employerName, roleType,
       heroHeadline, heroSubline, showModules,
       featuredProjects[]->{ _id, title, "slug": slug.current,
-        categories, summary, outcomes, tags, image, link },
+        category, summary, outcomes, tags, image, link },
+      featuredCertifications[]->{ _id, name, issuer, issuedDate, credentialUrl, badgeImage, tier, categories },
       customMessage, metaTitle, metaDescription
     }`,
     { slug }
