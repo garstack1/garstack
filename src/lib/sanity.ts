@@ -42,7 +42,7 @@ export interface Project {
   _id: string
   title: string
   slug: string
-  categories: string
+  categories: string[]
   summary: string
   outcomes: string[]
   tags: string[]
