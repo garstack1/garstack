@@ -14,9 +14,12 @@ export default defineType({
     }),
     defineField({
       name: 'slug',
-      title: 'URL slug (e.g. acme-corp → garrettstack.com/acme-corp)',
+      title: 'URL slug',
       type: 'slug',
-      options: { source: 'employerName', maxLength: 96 },
+      options: {
+        source: (doc: any) => `${doc.employerName}-${doc.roleType}`,
+        maxLength: 96,
+      },
       validation: (R) => R.required(),
     }),
     defineField({
