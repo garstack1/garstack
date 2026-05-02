@@ -44,7 +44,7 @@ export interface Project {
   _id: string
   title: string
   slug: string
-  category: string
+  categories: string[]
   summary: string
   outcomes: string[]
   tags: string[]
@@ -118,7 +118,7 @@ export async function getEmployerPage(slug: string): Promise<EmployerPage | null
       _id, "slug": slug.current, employerName, roleType,
       heroHeadline, heroSubline, showModules,
       featuredProjects[]->{ _id, title, "slug": slug.current,
-        category, summary, outcomes, tags, image, link },
+        categories, summary, outcomes, tags, image, link },
       featuredCertifications[]->{ _id, name, issuer, issuedDate, credentialUrl, badgeImage, tier, categories },
       featuredTestimonials[]->{ _id, name, role, company, relationship, date, quote, linkedInUrl },
       customMessage, metaTitle, metaDescription
@@ -131,7 +131,7 @@ export async function getAllProjects(): Promise<Project[]> {
   return sanityClient.fetch(
     `*[_type == "project"] | order(_createdAt desc){
       _id, title, "slug": slug.current,
-      category, summary, outcomes, tags, image, link
+      categories, summary, outcomes, tags, image, link
     }`
   )
 }
