@@ -83,6 +83,13 @@ export default defineType({
       description: 'Pick certifications relevant to this specific employer',
     }),
     defineField({
+      name: 'featuredTestimonials',
+      title: 'Featured testimonials for this page',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'testimonial' }] }],
+      description: 'Pick testimonials to show on this employer page',
+    }),
+    defineField({
       name: 'metaTitle',
       title: 'SEO title (optional)',
       type: 'string',

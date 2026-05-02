@@ -34,6 +34,7 @@ export interface EmployerPage {
   }
   featuredProjects: Project[]
   featuredCertifications: Certification[]
+  featuredTestimonials: Testimonial[]
   customMessage?: string
   metaTitle?: string
   metaDescription?: string
@@ -91,6 +92,20 @@ export interface SiteSettings {
   bioShort?: string
 }
 
+export interface Testimonial {
+  _id: string
+  name: string
+  role: string
+  company: string
+  relationship?: string
+  date?: string
+  quote: string
+  avatar?: any
+  linkedInUrl?: string
+  featured: boolean
+  relevantRoles: string[]
+}
+
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   return sanityClient.fetch(
     `*[_type == "siteSettings"][0]{ profilePhoto, photoAlt, tagline, bioShort }`
@@ -105,6 +120,7 @@ export async function getEmployerPage(slug: string): Promise<EmployerPage | null
       featuredProjects[]->{ _id, title, "slug": slug.current,
         category, summary, outcomes, tags, image, link },
       featuredCertifications[]->{ _id, name, issuer, issuedDate, credentialUrl, badgeImage, tier, categories },
+      featuredTestimonials[]->{ _id, name, role, company, relationship, date, quote, linkedInUrl },
       customMessage, metaTitle, metaDescription
     }`,
     { slug }

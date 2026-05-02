@@ -190,6 +190,47 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
         </section>
       )}
 
+      {/* ── Testimonials ── */}
+      {page.featuredTestimonials?.length > 0 && (
+        <section className="py-24 border-b border-ink-200">
+          <div className="container-site">
+            <p className="label-tag mb-4">What colleagues say</p>
+            <h2 className="text-display text-4xl text-ink-900 mb-16">
+              Don&rsquo;t just take my word for it.
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              {page.featuredTestimonials.map((t) => (
+                <div key={t._id} className="border border-ink-200 p-8 hover:border-signal transition-colors">
+                  {/* Quote */}
+                  <p className="text-signal text-4xl font-serif leading-none mb-4">&ldquo;</p>
+                  <p className="text-ink-700 text-lg leading-relaxed mb-8 italic">
+                    {t.quote}
+                  </p>
+                  {/* Attribution */}
+                  <div className="border-t border-ink-100 pt-6">
+                    <p className="text-ink-900 font-medium">{t.name}</p>
+                    <p className="text-ink-400 text-sm mt-1">{t.role}{t.company ? ` - ${t.company}` : ''}</p>
+                    {t.relationship && (
+                      <p className="font-mono text-xs text-ink-300 mt-1">{t.relationship}</p>
+                    )}
+                    {t.linkedInUrl && (
+                      <a
+                        href={t.linkedInUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs text-signal hover:underline mt-2 inline-block"
+                      >
+                        View on LinkedIn →
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── Final CTA ── */}
       <section className="py-24">
         <div className="container-site text-center max-w-2xl mx-auto">
