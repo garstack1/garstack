@@ -87,7 +87,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
             <div className="grid md:grid-cols-2 gap-8">
               {page.featuredProjects.map((project) => (
                 <div key={project._id} className="border border-ink-200 p-8 hover:border-signal transition-colors group">
-                  <p className="label-tag mb-4">{project.category}</p>
+                  <p className="label-tag mb-4">{project.categories?.[0]}</p>
                   <h3 className="text-display text-2xl text-ink-900 mb-4 group-hover:text-signal transition-colors">
                     {project.title}
                   </h3>
