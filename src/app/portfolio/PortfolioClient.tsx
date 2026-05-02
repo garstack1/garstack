@@ -21,7 +21,7 @@ export default function PortfolioClient({ projects }: Props) {
 
   const filtered = active === 'all'
     ? projects
-    : projects.filter((p) => p.categories.includes(active))
+    : projects.filter((p) => p.categories?.includes(active))
 
   return (
     <>
