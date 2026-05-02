@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { trackEmployerVisit, trackCVDownload } from '@/lib/analytics'
+import { getCVPath } from '@/lib/cvMap'
 import type { EmployerPage } from '@/lib/sanity'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -51,7 +52,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
           </p>
           <div className="flex flex-wrap gap-4">
             <a
-              href="/cv/garrett-stack-cv.pdf"
+              href={getCVPath(page.roleType)}
               download
               onClick={() => trackCVDownload(employerSlug)}
               className="btn-primary"
@@ -126,7 +127,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
             <div className="flex gap-4">
               <Link href="/cv" className="btn-outline">View full CV</Link>
               <a
-                href="/cv/garrett-stack-cv.pdf"
+                href={getCVPath(page.roleType)}
                 download
                 onClick={() => trackCVDownload(employerSlug)}
                 className="btn-primary"

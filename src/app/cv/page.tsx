@@ -185,7 +185,7 @@ export default function CVPage() {
               </p>
             </div>
             <a
-              href="/cv/garrett-stack-cv.pdf"
+              href="/cv/garrett-stack-cv-implementation-consultant.pdf"
               download
               className="btn-primary shrink-0"
             >
