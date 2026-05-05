@@ -200,14 +200,14 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
               {page.featuredTestimonials.map((t) => (
-                <div key={t._id} className="border border-ink-200 p-8 hover:border-signal transition-colors">
+                <div key={t._id} className="border border-ink-200 p-8 hover:border-signal transition-colors flex flex-col">
                   {/* Quote */}
                   <p className="text-signal text-4xl font-serif leading-none mb-4">&ldquo;</p>
-                  <p className="text-ink-700 text-lg leading-relaxed mb-8 italic">
+                  <p className="text-ink-700 text-lg leading-relaxed mb-8 italic flex-1">
                     {t.quote}
                   </p>
                   {/* Attribution */}
-                  <div className="border-t border-ink-100 pt-6">
+                  <div className="border-t border-ink-100 pt-6 mt-auto">
                     <p className="text-ink-900 font-medium">{t.name}</p>
                     <p className="text-ink-400 text-sm mt-1">{t.role}{t.company ? ` - ${t.company}` : ''}</p>
                     {t.relationship && (
