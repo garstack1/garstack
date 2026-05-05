@@ -127,6 +127,14 @@ export async function getEmployerPage(slug: string): Promise<EmployerPage | null
   )
 }
 
+export async function getAllCertifications(): Promise<Certification[]> {
+  return sanityClient.fetch(
+    `*[_type == "certification"] | order(issuedDate desc){
+      _id, name, issuer, issuedDate, expiryDate, credentialUrl, tier, categories
+    }`
+  )
+}
+
 export async function getAllProjects(): Promise<Project[]> {
   return sanityClient.fetch(
     `*[_type == "project"] | order(_createdAt desc){

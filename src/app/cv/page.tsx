@@ -1,4 +1,6 @@
 import Nav from '@/components/layout/Nav'
+import { getAllCertifications } from '@/lib/sanity'
+import type { Certification } from '@/lib/sanity'
 import Footer from '@/components/layout/Footer'
 import type { Metadata } from 'next'
 
@@ -166,7 +168,17 @@ const CERTIFICATIONS = [
   },
 ]
 
-export default function CVPage() {
+export const revalidate = 60
+
+export default async function CVPage() {
+  const certifications = await getAllCertifications()
+
+  // Group by issuer
+  const certsByIssuer = certifications.reduce((acc, cert) => {
+    if (!acc[cert.issuer]) acc[cert.issuer] = []
+    acc[cert.issuer].push(cert)
+    return acc
+  }, {} as Record<string, Certification[]>)
   return (
     <>
       <Nav />
@@ -259,21 +271,36 @@ export default function CVPage() {
         <section className="py-24 border-b border-ink-200">
           <div className="container-site">
             <p className="label-tag mb-16">Licences & certifications</p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
-              {CERTIFICATIONS.map(({ category, items }) => (
-                <div key={category}>
-                  <h3 className="text-display text-xl text-ink-900 mb-6">{category}</h3>
-                  <ul className="space-y-3">
-                    {items.map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm text-ink-500 leading-relaxed">
-                        <span className="text-signal mt-0.5 shrink-0">→</span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+            {Object.keys(certsByIssuer).length > 0 ? (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
+                {Object.entries(certsByIssuer).map(([issuer, certs]) => (
+                  <div key={issuer}>
+                    <h3 className="text-display text-xl text-ink-900 mb-6">{issuer}</h3>
+                    <ul className="space-y-3">
+                      {certs.map((cert) => (
+                        <li key={cert._id} className="flex items-start gap-3 text-sm text-ink-500 leading-relaxed">
+                          <span className="text-signal mt-0.5 shrink-0">→</span>
+                          {cert.credentialUrl ? (
+                            <a
+                              href={cert.credentialUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-signal transition-colors"
+                            >
+                              {cert.name}
+                            </a>
+                          ) : (
+                            cert.name
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-ink-400 text-sm">Certifications loading...</p>
+            )}
           </div>
         </section>
 
