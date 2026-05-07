@@ -4,7 +4,6 @@ export default defineType({
   name: 'siteSettings',
   title: 'Site settings',
   type: 'document',
-  __experimental_actions: ['update', 'publish'],
   fields: [
     defineField({
       name: 'profilePhoto',
