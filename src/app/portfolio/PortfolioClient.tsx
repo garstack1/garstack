@@ -109,7 +109,7 @@ function ProjectCard({ project }: { project: Project }) {
           <ul className="space-y-2 mb-6">
             {project.outcomes.slice(0, 3).map((outcome, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-ink-600">
-                <span className="text-signal mt-0.5 shrink-0">->;</span>
+                <span className="text-signal mt-0.5 shrink-0">→</span>
                 {outcome}
               </li>
             ))}
