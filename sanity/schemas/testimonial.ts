@@ -51,6 +51,13 @@ export default defineType({
       type: 'url',
     }),
     defineField({
+      name: 'order',
+      title: 'Display order',
+      type: 'number',
+      description: 'Lower numbers appear first. e.g. 1 = first, 2 = second',
+      initialValue: 99,
+    }),
+    defineField({
       name: 'featured',
       title: 'Show on About page',
       type: 'boolean',

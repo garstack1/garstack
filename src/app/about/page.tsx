@@ -1,6 +1,7 @@
 import Nav from '@/components/layout/Nav'
 import Image from 'next/image'
-import { getSiteSettings, urlFor } from '@/lib/sanity'
+import { getSiteSettings, getFeaturedTestimonials, urlFor } from '@/lib/sanity'
+import type { Testimonial } from '@/lib/sanity'
 import Footer from '@/components/layout/Footer'
 import type { Metadata } from 'next'
 
@@ -41,6 +42,7 @@ export const revalidate = 60
 
 export default async function AboutPage() {
   const settings = await getSiteSettings()
+  const testimonials = await getFeaturedTestimonials()
   const photoUrl = settings?.profilePhoto ? urlFor(settings.profilePhoto).width(800).height(1000).url() : null
   const photoAlt = settings?.photoAlt ?? 'Garrett Stack'
   return (
@@ -206,6 +208,45 @@ export default async function AboutPage() {
             </div>
           </div>
         </section>
+
+        {/* ── Testimonials ── */}
+        {testimonials.length > 0 && (
+          <section className="py-24 border-b border-ink-200">
+            <div className="container-site">
+              <p className="label-tag mb-4">What colleagues say</p>
+              <h2 className="text-display text-4xl md:text-5xl text-ink-900 mb-16">
+                Don&rsquo;t just take my word for it.
+              </h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                {testimonials.map((t: Testimonial) => (
+                  <div key={t._id} className="border border-ink-200 p-8 hover:border-signal transition-colors flex flex-col">
+                    <p className="text-signal text-4xl font-serif leading-none mb-4">&ldquo;</p>
+                    <p className="text-ink-700 text-lg leading-relaxed mb-8 italic flex-1">
+                      {t.quote}
+                    </p>
+                    <div className="border-t border-ink-100 pt-6 mt-auto">
+                      <p className="text-ink-900 font-medium">{t.name}</p>
+                      <p className="text-ink-400 text-sm mt-1">{t.role}{t.company ? ` - ${t.company}` : ''}</p>
+                      {t.relationship && (
+                        <p className="font-mono text-xs text-ink-300 mt-1">{t.relationship}</p>
+                      )}
+                      {t.linkedInUrl && (
+                        <a
+                          href={t.linkedInUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-xs text-signal hover:underline mt-2 inline-block"
+                        >
+                          View on LinkedIn →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── CTA ── */}
         <section className="py-24">

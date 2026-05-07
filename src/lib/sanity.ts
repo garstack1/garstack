@@ -1,6 +1,6 @@
 import { createClient } from '@sanity/client'
 import imageUrlBuilder from '@sanity/image-url'
-type SanityImageSource = any
+import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 export const sanityClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? '',
@@ -104,6 +104,12 @@ export interface Testimonial {
   linkedInUrl?: string
   featured: boolean
   relevantRoles: string[]
+}
+
+export async function getFeaturedTestimonials(): Promise<Testimonial[]> {
+  return sanityClient.fetch(
+    `*[_type == "testimonial" && featured == true] | order(order asc){ _id, name, role, company, relationship, quote, linkedInUrl }`
+  )
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
