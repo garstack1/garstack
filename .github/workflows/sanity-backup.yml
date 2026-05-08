@@ -24,10 +24,8 @@ jobs:
       - name: Export Sanity dataset
         run: |
           sanity dataset export production sanity-backup.tar.gz \
-            --project ${{ secrets.SANITY_PROJECT_ID }} \
-            --dataset production \
-            --token ${{ secrets.SANITY_API_TOKEN }} \
-            --no-progress
+            -p ${{ secrets.SANITY_PROJECT_ID }} \
+            --overwrite
         env:
           SANITY_AUTH_TOKEN: ${{ secrets.SANITY_API_TOKEN }}
 
