@@ -8,22 +8,19 @@ export default defineType({
     defineField({ name: 'title',    type: 'string', title: 'Project title', validation: R => R.required() }),
     defineField({ name: 'slug',     type: 'slug',   title: 'Slug', options: { source: 'title' } }),
     defineField({
-      name: 'categories',
-      type: 'array',
-      title: 'Categories',
-      of: [{ type: 'string' }],
+      name: 'category',
+      type: 'string',
+      title: 'Category',
       options: {
         list: [
           { title: 'Instructional Design',   value: 'instructional-design' },
           { title: 'Technical Writing',      value: 'technical-writing' },
           { title: 'Implementation',         value: 'implementation' },
-          { title: 'Enablement / Onboarding', value: 'enablement-onboarding' },
-          { title: 'Cybersecurity Training', value: 'cybersecurity-training' },
-          { title: 'Data Analytics',         value: 'data-analytics' },
-          { title: 'GIS',                    value: 'gis' },
+          { title: 'Training',               value: 'training' },
+      { title: 'GIS',                    value: 'gis' },
           { title: 'Other',                  value: 'other' },
         ],
-     },
+      },
     }),
     defineField({ name: 'summary',  type: 'text',   title: 'Short summary', rows: 3 }),
     defineField({

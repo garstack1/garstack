@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const ACHIEVEMENTS = [
   {
     num: '01',
-    stat: '500+',
+    stat: '1000+',
     label: 'Professionals trained',
     detail: 'Delivered end-to-end training on DocuSign Contract Lifecycle Management, including Salesforce integration, eSignature workflows, and Apex Automation.',
   },

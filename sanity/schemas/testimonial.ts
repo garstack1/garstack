@@ -78,6 +78,7 @@ export default defineType({
           { title: 'Cybersecurity Training',     value: 'cybersecurity-training' },
           { title: 'Data Analytics',             value: 'data-analytics' },
           { title: 'L&D Partner',                value: 'ld-partner' },
+          { title: 'Training',                   value: 'training' },
         ],
       },
       description: 'Which role types is this testimonial relevant to?',

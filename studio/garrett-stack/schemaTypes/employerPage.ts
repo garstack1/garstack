@@ -32,6 +32,7 @@ export default defineType({
           { title: 'Cybersecurity Training',     value: 'cybersecurity-training' },
           { title: 'Data Analytics',             value: 'data-analytics' },
           { title: 'L&D Partner',                value: 'ld-partner' },
+          { title: 'Training',                   value: 'training' },
         ],
       },
       validation: (R) => R.required(),
