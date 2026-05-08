@@ -1,0 +1,49 @@
+name: Weekly Sanity Backup
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Every Sunday at midnight UTC
+  workflow_dispatch:      # Allow manual trigger from GitHub UI
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Sanity CLI
+        run: npm install -g @sanity/cli
+
+      - name: Export Sanity dataset
+        run: |
+          sanity dataset export production sanity-backup.tar.gz \
+            --project ${{ secrets.SANITY_PROJECT_ID }} \
+            --dataset production \
+            --token ${{ secrets.SANITY_API_TOKEN }} \
+            --no-progress
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_API_TOKEN }}
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanity-backup-${{ github.run_number }}-${{ github.run_id }}
+          path: sanity-backup.tar.gz
+          retention-days: 90
+
+      - name: Commit backup to repository
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          mkdir -p backups
+          mv sanity-backup.tar.gz backups/sanity-backup-$(date +%Y-%m-%d).tar.gz
+          git add backups/
+          git commit -m "Automated Sanity backup $(date +%Y-%m-%d)" || echo "No changes to commit"
+          git push
