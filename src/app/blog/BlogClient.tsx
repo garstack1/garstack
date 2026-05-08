@@ -145,7 +145,7 @@ export default function BlogClient({ posts }: Props) {
                   {/* Number */}
                   <div className="md:col-span-1 hidden md:flex items-start pt-1">
                     <span className="font-mono text-xs text-ink-300">
-                      {String((page - 1) * LIST_PAGE_SIZE + i + 1).padStart(2, '0')}
+                      {String(posts.length - ((page - 1) * LIST_PAGE_SIZE + i)).padStart(2, '0')}
                     </span>
                   </div>
 
