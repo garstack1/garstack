@@ -111,7 +111,7 @@ function ProjectCard({ project }: { project: Project }) {
           <ul className="space-y-2 mb-6">
             {project.outcomes.slice(0, 3).map((outcome, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-ink-600">
-                <span className="text-signal mt-0.5 shrink-0">->;</span>
+                <span className="text-signal mt-0.5 shrink-0">→</span>
                 {outcome}
               </li>
             ))}
@@ -135,7 +135,7 @@ function ProjectCard({ project }: { project: Project }) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 font-mono text-xs text-signal tracking-widest uppercase hover:gap-4 transition-all mt-auto border border-signal px-4 py-2 hover:bg-signal hover:text-slate-site w-fit"
           >
-            View project ->
+            View project →
           </a>
         )}
       </div>
