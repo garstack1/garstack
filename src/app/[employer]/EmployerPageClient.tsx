@@ -173,7 +173,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
           <div className="container-site flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div>
               <p className="label-tag mb-4">Experience & qualifications</p>
-              <h2 className="text-display text-4xl text-ink-900">12+ years. Measurable results.</h2>
+              <h2 className="text-display text-4xl text-ink-900">15+ years. Measurable results.</h2>
             </div>
             <div className="flex gap-4">
               <Link href="/cv" className="btn-outline">View full CV</Link>
