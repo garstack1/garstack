@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 
 const STATS = [
   { value: '1000+', label: 'Learners trained' },
-  { value: '15+',  label: 'Years experience' },
+  { value: '10+',  label: 'Years experience' },
   { value: '95%',  label: 'Avg. satisfaction' },
   { value: '3',    label: 'Disciplines mastered' },
 ]
@@ -70,7 +70,7 @@ export default function Hero() {
 
         {/* Sub copy */}
         <p className="text-ink-500 text-lg md:text-xl max-w-xl leading-relaxed mb-12 animate-fade-up delay-300">
-          With 15+ years designing learning experiences and implementing solutions,
+          With 10+ years designing learning experiences and implementing solutions,
           I help organisations build capability that sticks.
         </p>
 
