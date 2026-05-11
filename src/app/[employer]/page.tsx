@@ -19,6 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+export const revalidate = 0
+
 export default async function EmployerLandingPage({ params }: Props) {
   const page = await getEmployerPage(params.employer)
   if (!page) notFound()
