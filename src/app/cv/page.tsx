@@ -69,26 +69,8 @@ const EXPERIENCE = [
       'Collaborated with engineering and product teams to resolve complex cases and improve product reliability.',
     ],
   },
-  {
-    title: 'Trainer & Pre-Sales Consultant',
-    company: 'NTI Diatec',
-    period: 'Jun 2008 - Jun 2010',
-    location: 'Cork, Ireland',
-    highlights: [
-      'Delivered product training and pre-sales consultancy for technical software solutions across Ireland.',
-      'Supported sales teams with technical demonstrations and customer onboarding.',
-    ],
-  },
-  {
-    title: 'Customer Support Manager',
-    company: 'MiTek UK & Ireland',
-    period: 'Apr 2006 - Jun 2008',
-    location: 'Birmingham, UK',
-    highlights: [
-      'Managed customer support operations for Civil Engineering software across the UK and Ireland.',
-      'Led a support team delivering technical assistance and training to engineering professionals.',
-    ],
-  },
+
+
 ]
 
 const EDUCATION = [
