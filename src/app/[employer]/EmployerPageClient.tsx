@@ -18,7 +18,7 @@ interface Props {
 }
 
 export default function EmployerPageClient({ page, employerSlug }: Props) {
-  // Fire GA4 + PostHog events on mount
+  // Fire GA4 + PostHog events + email notification on mount
   useEffect(() => {
     trackEmployerVisit(employerSlug, page.roleType)
 
@@ -30,6 +30,17 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
       page_url:      window.location.href,
       referrer:      document.referrer || 'direct',
     })
+
+    // Send email notification via Resend
+    fetch('/api/track-visit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        employerName: page.employerName,
+        employerSlug,
+        roleType: page.roleType,
+      }),
+    }).catch(() => {}) // Silently ignore errors
   }, [employerSlug, page.roleType, page.employerName])
 
   const roleLabel = ROLE_LABELS[page.roleType] ?? page.roleType
