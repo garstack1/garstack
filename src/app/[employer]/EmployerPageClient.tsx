@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { trackEmployerVisit, trackCVDownload } from '@/lib/analytics'
+import posthog from 'posthog-js'
 import type { EmployerPage } from '@/lib/sanity'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -17,10 +18,19 @@ interface Props {
 }
 
 export default function EmployerPageClient({ page, employerSlug }: Props) {
-  // Fire GA event on mount
+  // Fire GA4 + PostHog events on mount
   useEffect(() => {
     trackEmployerVisit(employerSlug, page.roleType)
-  }, [employerSlug, page.roleType])
+
+    // PostHog - rich employer page visit event
+    posthog.capture('employer_page_viewed', {
+      employer:      page.employerName,
+      employer_slug: employerSlug,
+      role_type:     page.roleType,
+      page_url:      window.location.href,
+      referrer:      document.referrer || 'direct',
+    })
+  }, [employerSlug, page.roleType, page.employerName])
 
   const roleLabel = ROLE_LABELS[page.roleType] ?? page.roleType
 
@@ -53,7 +63,14 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
             <a
               href="/cv/garrett-stack-cv.pdf"
               download
-              onClick={() => trackCVDownload(employerSlug)}
+              onClick={() => {
+                trackCVDownload(employerSlug)
+                posthog.capture('cv_downloaded', {
+                  employer:      page.employerName,
+                  employer_slug: employerSlug,
+                  role_type:     page.roleType,
+                })
+              }}
               className="btn-primary"
             >
               Download CV
@@ -86,7 +103,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
             <div className="grid md:grid-cols-2 gap-8">
               {page.featuredProjects.map((project) => (
                 <div key={project._id} className="border border-ink-200 p-8 hover:border-signal transition-colors group">
-                  <p className="label-tag mb-4">{project.categories?.[0]}</p>
+                  <p className="label-tag mb-4">{project.category}</p>
                   <h3 className="text-display text-2xl text-ink-900 mb-4 group-hover:text-signal transition-colors">
                     {project.title}
                   </h3>
@@ -173,7 +190,7 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
           <div className="container-site flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div>
               <p className="label-tag mb-4">Experience & qualifications</p>
-              <h2 className="text-display text-4xl text-ink-900">10+ years. Measurable results.</h2>
+              <h2 className="text-display text-4xl text-ink-900">12+ years. Measurable results.</h2>
             </div>
             <div className="flex gap-4">
               <Link href="/cv" className="btn-outline">View full CV</Link>

@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { PostHogProvider } from '@/components/PostHogProvider'
+import { PostHogPageView } from '@/components/PostHogPageView'
+import { Suspense } from 'react'
 import '../styles/globals.css'
 
 export const metadata: Metadata = {
@@ -12,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IE',
-    url: 'https://garstack.com',
+    url: 'https://garrettstack.com',
     siteName: 'Garrett Stack',
   },
 }
@@ -27,7 +30,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {children}
+        <PostHogProvider>
+          <Suspense fallback={null}>
+            <PostHogPageView />
+          </Suspense>
+          {children}
+        </PostHogProvider>
         {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
       </body>
     </html>
