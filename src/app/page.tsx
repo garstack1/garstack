@@ -12,34 +12,21 @@ export default function HomePage() {
 
         {/* About teaser */}
         <section className="py-30 border-b border-ink-200">
-          <div className="container-site grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <p className="label-tag mb-6">About me</p>
-              <h2 className="text-display text-5xl md:text-6xl text-ink-900 mb-8 leading-tight">
-                Results don&rsquo;t happen<br />
-                <span className="italic text-signal">by accident.</span>
-              </h2>
-              <p className="text-ink-500 text-lg leading-relaxed mb-8">
-                I&rsquo;ve spent over a decade designing learning experiences,
-                writing technical documentation, and leading software rollouts.
-                Every project I take on is built around one question: what does
-                success actually look like for the people involved?
-              </p>
-              <Link href="/about" className="btn-outline">
-                Read my story →
-              </Link>
-            </div>
-
-            {/* Placeholder for photo — swap with Next/Image once you have a photo */}
-            <div className="relative">
-              <div className="aspect-[4/5] bg-ink-100 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="label-tag text-ink-300">Photo coming soon</p>
-                </div>
-              </div>
-              {/* Orange accent corner */}
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-signal z-[-1]" />
-            </div>
+          <div className="container-site max-w-3xl">
+            <p className="label-tag mb-6">About me</p>
+            <h2 className="text-display text-5xl md:text-6xl text-ink-900 mb-8 leading-tight">
+              Results don&rsquo;t happen<br />
+              <span className="italic text-signal">by accident.</span>
+            </h2>
+            <p className="text-ink-500 text-lg leading-relaxed mb-8">
+              I&rsquo;ve spent over a decade designing learning experiences,
+              writing technical documentation, and leading software rollouts.
+              Every project I take on is built around one question: what does
+              success actually look like for the people involved?
+            </p>
+            <Link href="/about" className="btn-outline">
+              Read my story →
+            </Link>
           </div>
         </section>
 
