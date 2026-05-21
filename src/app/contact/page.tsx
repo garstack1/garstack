@@ -23,8 +23,8 @@ const SOCIAL_LINKS = [
   },
   {
     label: 'Email',
-    href: 'mailto:hello@garstack.com',
-    description: 'hello@garstack.com',
+    href: 'mailto:garstack@gmail.com',
+    description: 'garstack@gmail.com',
   },
 ]
 
