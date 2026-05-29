@@ -153,7 +153,7 @@
     <div class="section">
       <div class="section-title">NPS trend over time</div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Avg NPS per session</span><span class="card-meta" id="nps-sessions">—</span></div>
+        <div class="card-header"><span class="card-title">Avg NPS per session</span><span class="card-meta" id="nps-sessions">-</span></div>
         <div class="card-body">
           <div class="chart-wrap" style="height:200px"><canvas id="nps-chart" role="img" aria-label="NPS trend over sessions">NPS trend chart.</canvas></div>
         </div>
@@ -162,7 +162,7 @@
     <div class="section">
       <div class="section-title">Quiz accuracy trend</div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Avg accuracy per session</span><span class="card-meta" id="acc-sessions">—</span></div>
+        <div class="card-header"><span class="card-title">Avg accuracy per session</span><span class="card-meta" id="acc-sessions">-</span></div>
         <div class="card-body">
           <div class="chart-wrap" style="height:200px"><canvas id="acc-chart" role="img" aria-label="Accuracy trend over sessions">Accuracy trend chart.</canvas></div>
         </div>
@@ -181,7 +181,7 @@
   <div class="section">
     <div class="section-title">Hardest questions across all courses</div>
     <div class="card">
-      <div class="card-header"><span class="card-title">Ranked by accuracy — lowest first</span><span class="card-meta">questions learners struggle with most</span></div>
+      <div class="card-header"><span class="card-title">Ranked by accuracy - lowest first</span><span class="card-meta">questions learners struggle with most</span></div>
       <div class="card-body" style="padding:0">
         <table class="q-table" id="q-table">
           <thead><tr><th>#</th><th>Question</th><th>Course</th><th>Accuracy</th><th>Responses</th></tr></thead>
@@ -255,14 +255,14 @@ async function render() {
   const totalSessions = [...new Set([...quizRows.map(r=>r.session_id), ...fbRows.map(r=>r.session_id)].filter(Boolean))].length;
   const overallAcc = quizRows.length ? Math.round(quizRows.filter(r=>r.is_correct).length/quizRows.length*100) : 0;
   const avgNps = fbRows.length ? Math.round(fbRows.filter(r=>r.nps!=null).reduce((s,r)=>s+r.nps,0)/fbRows.filter(r=>r.nps!=null).length) : 0;
-  const avgStar = fbRows.length ? (fbRows.reduce((s,r)=>s+(r.star||0),0)/fbRows.length).toFixed(1) : '—';
+  const avgStar = fbRows.length ? (fbRows.reduce((s,r)=>s+(r.star||0),0)/fbRows.length).toFixed(1) : '-';
 
   document.getElementById('metrics').innerHTML = `
     <div class="metric"><div class="metric-label">Total courses</div><div class="metric-val orange">${courses.length}</div><div class="metric-sub">with data</div></div>
     <div class="metric"><div class="metric-label">Total sessions</div><div class="metric-val">${totalSessions}</div><div class="metric-sub">delivered</div></div>
     <div class="metric"><div class="metric-label">Total learners</div><div class="metric-val">${totalLearners}</div><div class="metric-sub">quiz respondents</div></div>
-    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${quizRows.length?overallAcc+'%':'—'}</div><div class="metric-sub">correct answers</div></div>
-    <div class="metric"><div class="metric-label">Avg NPS</div><div class="metric-val ${valClass(avgNps,8,6)}">${fbRows.length?avgNps:'—'}</div><div class="metric-sub">out of 10</div></div>
+    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${quizRows.length?overallAcc+'%':'-'}</div><div class="metric-sub">correct answers</div></div>
+    <div class="metric"><div class="metric-label">Avg NPS</div><div class="metric-val ${valClass(avgNps,8,6)}">${fbRows.length?avgNps:'-'}</div><div class="metric-sub">out of 10</div></div>
     <div class="metric"><div class="metric-label">Avg star rating</div><div class="metric-val ${valClass(parseFloat(avgStar),4,3)}">${avgStar}</div><div class="metric-sub">out of 5</div></div>
   `;
 
@@ -285,9 +285,9 @@ async function render() {
           <div class="course-tag" style="color:${COLORS[ci%COLORS.length]}">${c}</div>
           <div class="course-name">${fmtCourse(c)}</div>
           <div class="course-stats">
-            <div class="cs"><div class="cs-val ${acc!=null?valClass(acc,70,40):''}">${acc!=null?acc+'%':'—'}</div><div class="cs-label">accuracy</div></div>
-            <div class="cs"><div class="cs-val ${nps!=null?valClass(nps,8,6):''}">${nps!=null?nps:'—'}</div><div class="cs-label">NPS</div></div>
-            <div class="cs"><div class="cs-val ${star?valClass(parseFloat(star),4,3):''}">${star||'—'}</div><div class="cs-label">stars</div></div>
+            <div class="cs"><div class="cs-val ${acc!=null?valClass(acc,70,40):''}">${acc!=null?acc+'%':'-'}</div><div class="cs-label">accuracy</div></div>
+            <div class="cs"><div class="cs-val ${nps!=null?valClass(nps,8,6):''}">${nps!=null?nps:'-'}</div><div class="cs-label">NPS</div></div>
+            <div class="cs"><div class="cs-val ${star?valClass(parseFloat(star),4,3):''}">${star||'-'}</div><div class="cs-label">stars</div></div>
           </div>
         </div>
         <div class="course-card-footer">
@@ -298,7 +298,7 @@ async function render() {
     }).join('');
   }
 
-  // NPS TREND — group by session_id
+  // NPS TREND - group by session_id
   const sessionsFb = groupBy(fbRows.filter(r=>r.nps!=null), 'session_id');
   const sessionDates = Object.keys(sessionsFb).sort();
   const npsPerSession = sessionDates.map(sid => {
@@ -337,7 +337,7 @@ async function render() {
     document.getElementById('nps-chart').parentElement.innerHTML = `<div class="empty"><div class="big">📈</div><p>No session data yet</p><small>Complete feedback forms to see trends</small></div>`;
   }
 
-  // ACCURACY TREND — group by session_id
+  // ACCURACY TREND - group by session_id
   const sessionsQ = groupBy(quizRows, 'session_id');
   const qSessionDates = Object.keys(sessionsQ).sort();
   const accPerSession = qSessionDates.map(sid => {
