@@ -117,6 +117,30 @@
 
 <script>
 const STORAGE_KEY = 'git_quiz_results';
+const SUPABASE_URL = 'https://skpyeipqipplsuzjofje.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcHllaXBxaXBwbHN1empvZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTU2MDAsImV4cCI6MjA5NTYzMTYwMH0.pzMoxPTauK0wlnedup17efCurVoGwMNbikTMZg-qN6Q';
+const COURSE = 'git-for-data-teams';
+
+function getLearnerId() {
+  let id = localStorage.getItem('learner_id');
+  if (!id) { id = 'l_' + Math.random().toString(36).substr(2,9); localStorage.setItem('learner_id', id); }
+  return id;
+}
+function getSessionId() {
+  let id = localStorage.getItem('session_id');
+  if (!id) { id = 's_' + Date.now(); localStorage.setItem('session_id', id); }
+  return id;
+}
+async function sbInsert(table, data) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(data)
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
 
 const questions = [
   {
@@ -219,14 +243,26 @@ function answer(idx) {
 function saveResult() {
   try {
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"responses":[]}');
-    const sessionId = localStorage.getItem('quiz_session_id') || ('sess_' + Date.now());
-    localStorage.setItem('quiz_session_id', sessionId);
+    const sessionId = getSessionId();
     const entry = { sessionId, timestamp: new Date().toISOString(), answers: Object.values(answers), score };
     const idx = existing.responses.findIndex(r => r.sessionId === sessionId);
     if (idx >= 0) existing.responses[idx] = entry;
     else existing.responses.push(entry);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
   } catch(e) {}
+
+  const q = questions[current];
+  const ans = answers[current];
+  sbInsert('quiz_answers', {
+    session_id: getSessionId(),
+    course: COURSE,
+    learner_id: getLearnerId(),
+    question_index: current,
+    question: q.q,
+    chosen: ans.chosen,
+    correct: ans.correct,
+    is_correct: ans.isCorrect
+  });
 }
 
 function nextQ() {
