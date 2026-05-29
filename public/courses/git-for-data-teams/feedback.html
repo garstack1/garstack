@@ -160,7 +160,7 @@
 
   <!-- NPS -->
   <div class="form-section">
-    <label class="field-label">How likely are you to recommend this training to a colleague? <span style="font-weight:400;color:var(--text-muted)">(0–10)</span></label>
+    <label class="field-label">How likely are you to recommend this training to a colleague? <span style="font-weight:400;color:var(--text-muted)">(0-10)</span></label>
     <div class="scale-row" id="nps-row" style="flex-wrap:wrap">
       <button class="scale-btn" onclick="setNps(0)">0</button>
       <button class="scale-btn" onclick="setNps(1)">1</button>
@@ -192,7 +192,7 @@
 <div class="container thankyou" id="thankyou">
   <div class="ty-icon">🙏</div>
   <div class="ty-title">Thanks for the feedback!</div>
-  <div class="ty-sub">Your response has been recorded. This kind of data helps make every session better — I appreciate you taking the time.</div>
+  <div class="ty-sub">Your response has been recorded. This kind of data helps make every session better - I appreciate you taking the time.</div>
   <div class="ty-links">
     <a href="index.html" class="ty-link primary">Back to session →</a>
     <a href="quiz.html" class="ty-link secondary">Retake the quiz</a>
@@ -276,7 +276,9 @@ async function submitForm() {
     nps: npsVal >= 0 ? npsVal : null,
     useful: useful,
     improve: improve,
-    free_text: freeText
+    free_text: freeText,
+    cohort: localStorage.getItem('session_cohort') || '',
+    location: localStorage.getItem('session_location') || ''
   });
 
   document.getElementById('form-container').style.display = 'none';
