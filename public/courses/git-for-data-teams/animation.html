@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Workflow · Visual Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --orange: #FF694A; --green: #1D9E75; --blue: #185FA5; --red: #E24B4A;
+  --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+  --bg: #ffffff; --bg-surface: #f9f9f8; --navy: #0d1117;
+  --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16);
+  --radius: 10px; --radius-lg: 14px;
+  --commit-main: #185FA5;
+  --commit-branch: #FF694A;
+  --commit-merged: #1D9E75;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --text: #f0f0f0; --text-muted: #8a8f9a; --text-light: #4a5060; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); }
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+.nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); }
+.nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+.nav-back:hover { color: var(--text); }
+
+.page { max-width: 860px; margin: 0 auto; padding: 36px 32px 80px; }
+.page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+
+/* SCENE STEPPER */
+.stepper { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+.step-btn {
+  padding: 7px 14px; border-radius: 20px; border: 0.5px solid var(--border-strong);
+  background: var(--bg); color: var(--text-muted); font-size: 12px;
+  font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.step-btn:hover { border-color: var(--orange); color: var(--text); }
+.step-btn.active { background: var(--orange); border-color: var(--orange); color: white; }
+.step-num { width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.step-btn:not(.active) .step-num { background: var(--bg-surface); color: var(--text-muted); }
+
+/* CANVAS */
+.canvas-wrap {
+  border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--bg-surface); overflow: hidden; margin-bottom: 20px;
+  position: relative;
+}
+canvas#git-canvas { display: block; width: 100%; }
+
+/* EXPLANATION */
+.explanation {
+  border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--bg); padding: 20px 24px; margin-bottom: 20px;
+}
+.exp-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.exp-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; }
+.exp-body { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+.exp-body strong { color: var(--text); font-weight: 500; }
+.exp-code { display: inline-block; font-family: 'DM Mono', monospace; font-size: 12px; background: var(--bg-surface); border: 0.5px solid var(--border-strong); padding: 3px 8px; border-radius: 4px; margin: 0 2px; color: var(--text); }
+
+/* NAV BUTTONS */
+.nav-btns { display: flex; gap: 10px; }
+.nav-btn { padding: 10px 20px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.12s; }
+.nav-btn:hover { background: var(--bg-surface); }
+.nav-btn.primary { background: var(--orange); border-color: var(--orange); color: white; }
+.nav-btn.primary:hover { opacity: 0.88; }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* LEGEND */
+.legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; }
+.leg-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); }
+.leg-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">⎇ git workflow · visual explainer</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+
+<div class="page">
+  <div class="page-tag">Interactive animation</div>
+  <div class="page-title">How Git branching works</div>
+  <div class="page-sub">Click through each scene or use the arrow keys. Each step builds on the last.</div>
+
+  <div class="stepper" id="stepper"></div>
+
+  <div class="canvas-wrap">
+    <canvas id="git-canvas" height="280"></canvas>
+  </div>
+
+  <div class="explanation" id="explanation"></div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px">
+    <div class="nav-btns">
+      <button class="nav-btn" id="prev-btn" onclick="prevScene()">← Previous</button>
+      <button class="nav-btn primary" id="next-btn" onclick="nextScene()">Next →</button>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#185FA5"></div>main branch</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#FF694A"></div>feature branch</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#1D9E75"></div>merged commit</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#E24B4A"></div>broken commit</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const W = 796, H = 280;
+const MAIN_Y = 140, BRANCH_Y = 70;
+const COMMIT_R = 14;
+const ORANGE = '#FF694A', GREEN = '#1D9E75', BLUE = '#185FA5', RED = '#E24B4A';
+const GRAY = '#888780', LIGHT = '#D3D1C7';
+
+const scenes = [
+  {
+    label: 'The problem',
+    title: 'Everyone commits directly to main',
+    body: 'Before Git branching, everyone pushes changes straight to the shared <strong>main</strong> branch. One bad commit breaks everything for the whole team. There\'s no safety net.',
+    draw: drawScene0
+  },
+  {
+    label: 'Create a branch',
+    title: 'git checkout -b fix/revenue',
+    body: 'You create a <strong>new branch</strong> - a safe, isolated copy of main at this moment in time. Your changes happen here. Main stays exactly as it was. Nothing you do on this branch affects anyone else.',
+    draw: drawScene1
+  },
+  {
+    label: 'Make commits',
+    title: 'git add · git commit',
+    body: 'You make your changes and create <strong>commits</strong> - snapshots - on your branch. Each commit is labelled with a message describing what you changed and why. Main is still untouched.',
+    draw: drawScene2
+  },
+  {
+    label: 'Open a PR',
+    title: 'git push · open pull request',
+    body: 'You push your branch to GitHub and open a <strong>pull request</strong>. This is a request for your teammate to review your changes before they go anywhere near main. They can comment, approve, or ask for changes.',
+    draw: drawScene3
+  },
+  {
+    label: 'Merge',
+    title: 'Approved · merged into main',
+    body: 'Your teammate approves and the branch <strong>merges into main</strong>. Your commits join the main history cleanly. The feature branch is deleted - its job is done. This is the complete Git workflow.',
+    draw: drawScene4
+  },
+  {
+    label: 'dbt connection',
+    title: 'This is exactly how dbt Cloud works',
+    body: 'In dbt Cloud, when you click <strong>Create branch</strong> and start editing a model - that\'s Scene 2. When you click <strong>Commit and push</strong> - that\'s Scene 3. When your PR is approved and merged - that\'s Scene 5. The UI just handles the git commands for you.',
+    draw: drawScene5
+  }
+];
+
+let cur = 0;
+let animFrame = null;
+let particles = [];
+
+const canvas = document.getElementById('git-canvas');
+const ctx = canvas.getContext('2d');
+
+function setup() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+}
+
+function isDark() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function colors() {
+  const dark = isDark();
+  return {
+    bg: dark ? '#161b22' : '#f9f9f8',
+    track: dark ? '#2a2f3a' : '#e5e7eb',
+    text: dark ? '#f0f0f0' : '#1a1a1a',
+    muted: dark ? '#8a8f9a' : '#6b7280',
+    light: dark ? '#2a2f3a' : '#d1d5db',
+    label_bg: dark ? '#0d1117' : '#ffffff',
+  };
+}
+
+function drawLine(x1, y1, x2, y2, color, width=2, dash=[]) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.setLineDash(dash);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawCurve(x1, y1, x2, y2, color, width=2, dash=[]) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.setLineDash(dash);
+  ctx.lineCap = 'round';
+  const mx = (x1 + x2) / 2;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.bezierCurveTo(mx, y1, mx, y2, x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawCommit(x, y, color, label='', sublabel='', ring=false) {
+  const C = colors();
+  ctx.save();
+  if (ring) {
+    ctx.beginPath();
+    ctx.arc(x, y, COMMIT_R + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.35;
+    ctx.setLineDash([3,3]);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.setLineDash([]);
+  }
+  ctx.beginPath();
+  ctx.arc(x, y, COMMIT_R, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = C.bg;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  if (label) {
+    ctx.fillStyle = C.label_bg;
+    const tw = ctx.measureText(label).width;
+    const pw = tw + 10, ph = 18;
+    const lx = x - pw/2, ly = y + COMMIT_R + 8;
+    ctx.beginPath();
+    ctx.roundRect(lx, ly, pw, ph, 4);
+    ctx.fill();
+    ctx.strokeStyle = C.light;
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    ctx.fillStyle = C.text;
+    ctx.font = '10px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x, ly + 13);
+  }
+  if (sublabel) {
+    ctx.fillStyle = C.muted;
+    ctx.font = '10px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(sublabel, x, y + COMMIT_R + 38);
+  }
+  ctx.restore();
+}
+
+function drawBranchLabel(x, y, text, color) {
+  const C = colors();
+  ctx.save();
+  ctx.font = '500 12px DM Mono, monospace';
+  const tw = ctx.measureText(text).width;
+  const pw = tw + 16, ph = 22;
+  const lx = x - pw/2, ly = y - 36;
+  ctx.fillStyle = color + '18';
+  ctx.beginPath();
+  ctx.roundRect(lx, ly, pw, ph, 11);
+  ctx.fill();
+  ctx.strokeStyle = color + '60';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, ly + 15);
+  ctx.restore();
+}
+
+function drawArrowHead(x, y, dir, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  if (dir === 'right') {
+    ctx.moveTo(x, y); ctx.lineTo(x-10, y-5); ctx.lineTo(x-10, y+5);
+  } else if (dir === 'down') {
+    ctx.moveTo(x, y); ctx.lineTo(x-5, y-10); ctx.lineTo(x+5, y-10);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawTrack(x1, x2, y, color) {
+  drawLine(x1, y, x2, y, color, 2.5);
+}
+
+function drawPRBadge(x, y) {
+  const C = colors();
+  ctx.save();
+  ctx.font = '500 11px DM Mono, monospace';
+  const text = 'PR open · awaiting review';
+  const tw = ctx.measureText(text).width;
+  const pw = tw + 20, ph = 26;
+  const lx = x - pw/2, ly = y;
+  ctx.fillStyle = '#185FA518';
+  ctx.beginPath();
+  ctx.roundRect(lx, ly, pw, ph, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#185FA560';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+  ctx.fillStyle = BLUE;
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, ly + 17);
+  ctx.restore();
+}
+
+function drawApprovedBadge(x, y) {
+  ctx.save();
+  ctx.font = '500 11px DM Mono, monospace';
+  const text = '✓ approved · merged';
+  const tw = ctx.measureText(text).width;
+  const pw = tw + 20, ph = 26;
+  const lx = x - pw/2, ly = y;
+  ctx.fillStyle = '#1D9E7518';
+  ctx.beginPath();
+  ctx.roundRect(lx, ly, pw, ph, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#1D9E7560';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+  ctx.fillStyle = GREEN;
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, ly + 17);
+  ctx.restore();
+}
+
+function drawDbtBadge(x, y, text, color) {
+  ctx.save();
+  ctx.font = '500 11px DM Mono, monospace';
+  const tw = ctx.measureText(text).width;
+  const pw = tw + 20, ph = 26;
+  const lx = x - pw/2, ly = y;
+  ctx.fillStyle = color + '18';
+  ctx.beginPath();
+  ctx.roundRect(lx, ly, pw, ph, 6);
+  ctx.fill();
+  ctx.strokeStyle = color + '60';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, ly + 17);
+  ctx.restore();
+}
+
+function clear() {
+  const C = colors();
+  ctx.fillStyle = C.bg;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawScene0() {
+  const C = colors();
+  clear();
+  const commits = [80, 180, 280, 380, 480, 580, 680];
+  drawTrack(40, 750, MAIN_Y, C.track);
+  drawArrowHead(750, MAIN_Y, 'right', C.track);
+  drawBranchLabel(380, MAIN_Y, 'main', BLUE);
+
+  commits.forEach((x, i) => {
+    const isBreak = i === 4;
+    drawCommit(x, MAIN_Y, isBreak ? RED : BLUE,
+      isBreak ? 'bad.sql' : `c${i+1}`,
+      isBreak ? '💥 broke prod' : '',
+      isBreak
+    );
+  });
+
+  ctx.fillStyle = RED + 'cc';
+  ctx.font = '500 13px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Someone pushed a broken change to main - everyone is affected', W/2, 238);
+}
+
+function drawScene1() {
+  const C = colors();
+  clear();
+  const mainCommits = [80, 180, 280];
+  drawTrack(40, 420, MAIN_Y, C.track);
+  drawArrowHead(420, MAIN_Y, 'right', C.track);
+  drawBranchLabel(200, MAIN_Y, 'main', BLUE);
+
+  mainCommits.forEach((x, i) => {
+    drawCommit(x, MAIN_Y, BLUE, `c${i+1}`);
+  });
+
+  drawCurve(280, MAIN_Y, 420, BRANCH_Y, ORANGE, 2, [5,4]);
+  drawTrack(420, 560, BRANCH_Y, ORANGE + '55');
+  drawArrowHead(560, BRANCH_Y, 'right', ORANGE + '55');
+  drawBranchLabel(490, BRANCH_Y, 'fix/revenue', ORANGE);
+
+  drawCommit(280, MAIN_Y, BLUE, 'c3', '', true);
+  ctx.save();
+  ctx.fillStyle = ORANGE;
+  ctx.font = '500 12px DM Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('git checkout -b fix/revenue', 420, BRANCH_Y - 46);
+  ctx.restore();
+
+  ctx.fillStyle = C.muted;
+  ctx.font = '13px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Branch created from commit c3. Main continues unchanged.', W/2, 238);
+}
+
+function drawScene2() {
+  const C = colors();
+  clear();
+  const mainCommits = [80, 180, 280];
+  drawTrack(40, 420, MAIN_Y, C.track);
+  drawArrowHead(420, MAIN_Y, 'right', C.track);
+  drawBranchLabel(200, MAIN_Y, 'main', BLUE);
+  mainCommits.forEach((x, i) => drawCommit(x, MAIN_Y, BLUE, `c${i+1}`));
+
+  drawCurve(280, MAIN_Y, 420, BRANCH_Y, ORANGE, 2);
+  drawTrack(420, 680, BRANCH_Y, ORANGE);
+  drawArrowHead(680, BRANCH_Y, 'right', ORANGE);
+  drawBranchLabel(570, BRANCH_Y, 'fix/revenue', ORANGE);
+
+  [420, 520, 620].forEach((x, i) => {
+    const msgs = ['fix null', 'add test', 'refactor'];
+    drawCommit(x, BRANCH_Y, ORANGE, msgs[i]);
+  });
+
+  ctx.fillStyle = C.muted;
+  ctx.font = '13px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Three commits on the branch. Main still has only c1, c2, c3.', W/2, 238);
+}
+
+function drawScene3() {
+  const C = colors();
+  clear();
+  const mainCommits = [80, 180, 280];
+  drawTrack(40, 420, MAIN_Y, C.track);
+  drawArrowHead(420, MAIN_Y, 'right', C.track);
+  drawBranchLabel(200, MAIN_Y, 'main', BLUE);
+  mainCommits.forEach((x, i) => drawCommit(x, MAIN_Y, BLUE, `c${i+1}`));
+
+  drawCurve(280, MAIN_Y, 420, BRANCH_Y, ORANGE, 2);
+  drawTrack(420, 680, BRANCH_Y, ORANGE);
+  drawArrowHead(680, BRANCH_Y, 'right', ORANGE);
+
+  [420, 520, 620].forEach((x, i) => {
+    const msgs = ['fix null', 'add test', 'refactor'];
+    drawCommit(x, BRANCH_Y, ORANGE, msgs[i]);
+  });
+
+  drawPRBadge(W/2, 185);
+
+  ctx.save();
+  ctx.setLineDash([4,4]);
+  ctx.strokeStyle = BLUE + '60';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(620, BRANCH_Y + COMMIT_R);
+  ctx.lineTo(620, 182);
+  ctx.lineTo(W/2, 182);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle = C.muted;
+  ctx.font = '13px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Branch pushed to GitHub. PR open - teammate is reviewing before anything merges.', W/2, 252);
+}
+
+function drawScene4() {
+  const C = colors();
+  clear();
+  const mainCommits = [60, 150, 240];
+  drawTrack(20, 760, MAIN_Y, C.track);
+  drawArrowHead(760, MAIN_Y, 'right', C.track);
+  drawBranchLabel(150, MAIN_Y, 'main', BLUE);
+
+  mainCommits.forEach((x, i) => drawCommit(x, MAIN_Y, BLUE, `c${i+1}`));
+
+  drawCurve(240, MAIN_Y, 340, BRANCH_Y, ORANGE, 2);
+  drawTrack(340, 580, BRANCH_Y, ORANGE);
+  [340, 430, 520].forEach((x, i) => {
+    const msgs = ['fix null', 'add test', 'refactor'];
+    drawCommit(x, BRANCH_Y, ORANGE, msgs[i]);
+  });
+
+  drawCurve(520, BRANCH_Y, 620, MAIN_Y, GREEN, 2.5);
+  [620, 700].forEach((x, i) => {
+    drawCommit(x, MAIN_Y, GREEN, i === 0 ? 'merge' : 'c5');
+  });
+
+  drawApprovedBadge(W/2 + 40, 200);
+
+  ctx.fillStyle = C.muted;
+  ctx.font = '13px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Branch merged into main. Commits join the history. Branch can now be deleted.', W/2, 252);
+}
+
+function drawScene5() {
+  const C = colors();
+  clear();
+
+  const panels = [
+    { x: 30,  label: 'dbt Cloud', badge: 'Create branch', color: ORANGE, y: BRANCH_Y },
+    { x: 230, label: 'dbt Cloud', badge: 'Edit model', color: ORANGE, y: BRANCH_Y },
+    { x: 430, label: 'dbt Cloud', badge: 'Commit & push', color: ORANGE, y: BRANCH_Y },
+    { x: 630, label: 'dbt Cloud', badge: 'Merge PR', color: GREEN, y: BRANCH_Y },
+  ];
+
+  const gitLabels = [
+    { x: 30,  text: 'git checkout -b', color: BLUE },
+    { x: 230, text: 'git add .', color: BLUE },
+    { x: 430, text: 'git commit + push', color: BLUE },
+    { x: 630, text: 'git merge', color: GREEN },
+  ];
+
+  panels.forEach((p, i) => {
+    const bw = 160, bh = 42;
+    const bx = p.x, by = 50;
+    ctx.fillStyle = p.color + '12';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 8);
+    ctx.fill();
+    ctx.strokeStyle = p.color + '50';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    ctx.fillStyle = p.color;
+    ctx.font = '500 12px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(p.badge, bx + bw/2, by + 25);
+
+    const gx = p.x, gy = 140;
+    ctx.fillStyle = BLUE + '10';
+    ctx.beginPath();
+    ctx.roundRect(gx, gy, bw, bh, 8);
+    ctx.fill();
+    ctx.strokeStyle = BLUE + '40';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    ctx.fillStyle = BLUE;
+    ctx.font = '500 11px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(gitLabels[i].text, gx + bw/2, gy + 25);
+
+    if (i < panels.length - 1) {
+      drawArrowHead(p.x + bw + 10, 71, 'right', p.color + '80');
+      drawLine(p.x + bw, 71, p.x + bw + 8, 71, p.color + '80', 1.5);
+      drawArrowHead(p.x + bw + 10, 161, 'right', BLUE + '80');
+      drawLine(p.x + bw, 161, p.x + bw + 8, 161, BLUE + '80', 1.5);
+    }
+
+    ctx.save();
+    ctx.setLineDash([3,3]);
+    ctx.strokeStyle = C.muted + '50';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(p.x + bw/2, 92);
+    ctx.lineTo(p.x + bw/2, 140);
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  ctx.fillStyle = C.muted;
+  ctx.font = '500 12px DM Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('dbt Cloud UI', 30, 38);
+  ctx.fillText('Git underneath', 30, 128);
+
+  ctx.fillStyle = C.muted;
+  ctx.font = '13px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Every dbt Cloud action maps to a Git command. The workflow is identical.', W/2, 225);
+}
+
+function renderScene(i) {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  scenes[i].draw();
+
+  const exp = document.getElementById('explanation');
+  exp.innerHTML = `
+    <div class="exp-label">Scene ${i+1} of ${scenes.length} · ${scenes[i].label}</div>
+    <div class="exp-title">${scenes[i].title}</div>
+    <div class="exp-body">${scenes[i].body}</div>
+  `;
+
+  document.querySelectorAll('.step-btn').forEach((b, j) => {
+    b.classList.toggle('active', j === i);
+  });
+
+  document.getElementById('prev-btn').disabled = i === 0;
+  document.getElementById('next-btn').disabled = i === scenes.length - 1;
+  document.getElementById('next-btn').textContent = i === scenes.length - 1 ? 'Done' : 'Next →';
+}
+
+function nextScene() { if (cur < scenes.length - 1) { cur++; renderScene(cur); } }
+function prevScene() { if (cur > 0) { cur--; renderScene(cur); } }
+
+function buildStepper() {
+  const el = document.getElementById('stepper');
+  scenes.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'step-btn' + (i === 0 ? ' active' : '');
+    btn.innerHTML = `<span class="step-num">${i+1}</span>${s.label}`;
+    btn.onclick = () => { cur = i; renderScene(i); };
+    el.appendChild(btn);
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextScene();
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevScene();
+});
+
+window.addEventListener('resize', () => { setup(); renderScene(cur); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => renderScene(cur));
+
+setup();
+buildStepper();
+renderScene(0);
+</script>
+</body>
+</html>
