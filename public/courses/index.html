@@ -1,1 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Courses · Garstack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF694A; --navy: #0d1117; --green: #1D9E75; --blue: #185FA5;
+    --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+    --bg: #ffffff; --bg-surface: #f9f9f8;
+    --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16);
+    --radius: 10px; --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #f0f0f0; --text-muted: #8a8f9a; --text-light: #4a5060; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); }
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 56px; border-bottom: 0.5px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); letter-spacing: 0.5px; text-decoration: none; }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .nav-link { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+  .nav-link:hover { color: var(--text); }
+  .nav-analytics { font-size: 12px; padding: 6px 14px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); color: var(--text-muted); text-decoration: none; transition: background 0.12s; font-family: 'DM Mono', monospace; }
+  .nav-analytics:hover { background: var(--bg-surface); color: var(--text); }
+
+  /* HERO */
+  .hero { max-width: 860px; margin: 0 auto; padding: 72px 40px 56px; }
+  .hero-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-family: 'DM Mono', monospace; color: var(--orange); border: 0.5px solid rgba(255,105,74,0.3); border-radius: 20px; padding: 5px 12px; margin-bottom: 20px; }
+  .hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(32px,5vw,50px); line-height: 1.1; margin-bottom: 16px; }
+  .hero h1 em { color: var(--orange); font-style: normal; }
+  .hero p { font-size: 17px; color: var(--text-muted); max-width: 520px; font-weight: 300; line-height: 1.7; }
+
+  /* STATS BAR */
+  .stats-bar { border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); }
+  .stats-inner { max-width: 860px; margin: 0 auto; padding: 0 40px; display: flex; }
+  .stat { padding: 18px 32px 18px 0; margin-right: 32px; border-right: 0.5px solid var(--border); }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 26px; }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* COURSES GRID */
+  .courses-section { max-width: 860px; margin: 0 auto; padding: 48px 40px; }
+  .section-label { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1.5px; color: var(--orange); text-transform: uppercase; margin-bottom: 20px; }
+  .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+  /* COURSE CARD */
+  .course-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; text-decoration: none; color: var(--text); display: flex; flex-direction: column; transition: border-color 0.15s, box-shadow 0.15s; }
+  .course-card:hover { border-color: var(--orange); }
+  .course-card-accent { height: 3px; }
+  .course-card-body { padding: 22px 22px 16px; flex: 1; }
+  .course-icon { font-size: 24px; margin-bottom: 14px; }
+  .course-level { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1px; margin-bottom: 7px; }
+  .course-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; line-height: 1.3; }
+  .course-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+  .course-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11px; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; background: var(--bg-surface); border: 0.5px solid var(--border-strong); color: var(--text-muted); }
+  .course-card-footer { padding: 14px 22px; border-top: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); }
+  .course-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; }
+  .course-meta span { display: flex; align-items: center; gap: 4px; }
+  .course-arrow { font-size: 12px; color: var(--orange); font-family: 'DM Mono', monospace; }
+
+  /* COMING SOON CARD */
+  .course-card.coming-soon { opacity: 0.5; pointer-events: none; }
+  .coming-badge { font-size: 11px; padding: 3px 9px; border-radius: 10px; background: rgba(255,105,74,0.1); color: var(--orange); font-family: 'DM Mono', monospace; }
+
+  /* HOW IT WORKS */
+  .how-section { border-top: 0.5px solid var(--border); }
+  .how-inner { max-width: 860px; margin: 0 auto; padding: 48px 40px; }
+  .how-inner h2 { font-family: 'DM Serif Display', serif; font-size: 24px; margin-bottom: 8px; }
+  .how-inner p { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; font-weight: 300; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .step { padding: 20px; border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--orange); color: white; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .step h4 { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .step p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* FOOTER */
+  footer { border-top: 0.5px solid var(--border); padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
+  footer p { font-size: 12px; color: var(--text-light); font-family: 'DM Mono', monospace; }
+  footer a { color: var(--text-light); text-decoration: none; }
+  footer a:hover { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">garstack.com</a>
+  <div class="nav-right">
+    <a href="/" class="nav-link">Home</a>
+    <a href="courses-analytics.html" class="nav-analytics">📊 Analytics</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">🎓 technical training</div>
+  <h1>Learn the tools that<br>power <em>modern data teams</em></h1>
+  <p>Live, hands-on technical training sessions covering Git, SQL, dbt, and the cloud data stack. Built for data professionals, not developers.</p>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num" id="s-courses">1</div><div class="stat-label">course available</div></div>
+    <div class="stat"><div class="stat-num">15</div><div class="stat-label">minutes per session</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">hands-on</div></div>
+    <div class="stat"><div class="stat-num">Live</div><div class="stat-label">quiz + feedback</div></div>
+  </div>
+</div>
+
+<!-- COURSES -->
+<section class="courses-section">
+  <div class="section-label">Available now</div>
+  <div class="courses-grid">
+
+    <!-- GIT FOR DATA TEAMS -->
+    <a href="git-for-data-teams/index.html" class="course-card">
+      <div class="course-card-accent" style="background:#FF694A"></div>
+      <div class="course-card-body">
+        <div class="course-icon">⎇</div>
+        <div class="course-level" style="color:#FF694A">Beginner · Git</div>
+        <div class="course-title">Git for Data Teams</div>
+        <div class="course-desc">Branches, commits, and pull requests — the version control workflow every data professional needs to work safely and collaboratively.</div>
+        <div class="course-tags">
+          <span class="tag">git</span>
+          <span class="tag">github</span>
+          <span class="tag">version control</span>
+          <span class="tag">dbt</span>
+        </div>
+      </div>
+      <div class="course-card-footer">
+        <div class="course-meta">
+          <span>⏱ 15 min</span>
+          <span>📋 4 quiz questions</span>
+        </div>
+        <span class="course-arrow">Start →</span>
+      </div>
+    </a>
+
+    <!-- SQL WINDOW FUNCTIONS — COMING SOON -->
+    <div class="course-card coming-soon">
+      <div class="course-card-accent" style="background:#185FA5"></div>
+      <div class="course-card-body">
+        <div class="course-icon">🪟</div>
+        <div class="course-level" style="color:#185FA5">Intermediate · SQL</div>
+        <div class="course-title">SQL Window Functions</div>
+        <div class="course-desc">ROW_NUMBER, RANK, LAG and LEAD — practical window functions for real analytical queries.</div>
+        <div class="course-tags">
+          <span class="tag">sql</span>
+          <span class="tag">analytics</span>
+          <span class="tag">window functions</span>
+        </div>
+      </div>
+      <div class="course-card-footer">
+        <div class="course-meta"><span>⏱ 15 min</span></div>
+        <span class="coming-badge">Coming soon</span>
+      </div>
+    </div>
+
+    <!-- DBT FUNDAMENTALS — COMING SOON -->
+    <div class="course-card coming-soon">
+      <div class="course-card-accent" style="background:#1D9E75"></div>
+      <div class="course-card-body">
+        <div class="course-icon">🔁</div>
+        <div class="course-level" style="color:#1D9E75">Beginner · dbt</div>
+        <div class="course-title">dbt Fundamentals</div>
+        <div class="course-desc">Models, sources, and refs — how dbt transforms raw data into analytics-ready tables in your warehouse.</div>
+        <div class="course-tags">
+          <span class="tag">dbt</span>
+          <span class="tag">sql</span>
+          <span class="tag">data modelling</span>
+        </div>
+      </div>
+      <div class="course-card-footer">
+        <div class="course-meta"><span>⏱ 15 min</span></div>
+        <span class="coming-badge">Coming soon</span>
+      </div>
+    </div>
+
+    <!-- SNOWFLAKE — COMING SOON -->
+    <div class="course-card coming-soon">
+      <div class="course-card-accent" style="background:#BA7517"></div>
+      <div class="course-card-body">
+        <div class="course-icon">❄️</div>
+        <div class="course-level" style="color:#BA7517">Beginner · Snowflake</div>
+        <div class="course-title">Snowflake Basics</div>
+        <div class="course-desc">Warehouses, databases, roles, and querying — getting productive in Snowflake from day one.</div>
+        <div class="course-tags">
+          <span class="tag">snowflake</span>
+          <span class="tag">cloud data</span>
+          <span class="tag">sql</span>
+        </div>
+      </div>
+      <div class="course-card-footer">
+        <div class="course-meta"><span>⏱ 15 min</span></div>
+        <span class="coming-badge">Coming soon</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="how-inner">
+    <h2>How a session works</h2>
+    <p>Every course follows the same live, interactive format — designed around how people actually learn technical tools.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Hook</h4>
+        <p>A real problem you've probably hit before. Sets the context for why this matters.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Concept</h4>
+        <p>The core idea explained clearly — no jargon, no assumptions about prior knowledge.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Live demo</h4>
+        <p>Watch it in action in a real terminal or tool — not a slide full of screenshots.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>Try it</h4>
+        <p>Your turn. A short task to apply what you just saw, with support available.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <h4>Live quiz</h4>
+        <p>Answer on your phone. Results appear live on screen. Instant feedback for everyone.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <h4>Next steps</h4>
+        <p>Where to go deeper, and how today's topic connects to the broader data stack.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><a href="/">garstack.com</a> · technical training</p>
+  <p>Privacy-first · all quiz data stored securely · <a href="courses-analytics.html">instructor analytics →</a></p>
+</footer>
+
+</body>
+</html>
