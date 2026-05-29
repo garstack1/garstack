@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Commands · Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --orange: #FF694A; --green: #1D9E75; --blue: #185FA5;
+  --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+  --bg: #ffffff; --bg-surface: #f9f9f8; --navy: #0d1117;
+  --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16);
+  --radius: 10px; --radius-lg: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --text: #f0f0f0; --text-muted: #8a8f9a; --text-light: #4a5060; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); }
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+.nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); }
+.nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+.nav-back:hover { color: var(--text); }
+
+.page { max-width: 760px; margin: 0 auto; padding: 36px 32px 80px; }
+.page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+
+.session-banner {
+  background: rgba(255,105,74,0.06); border: 0.5px solid rgba(255,105,74,0.25);
+  border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 28px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.banner-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.banner-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.banner-text strong { color: var(--orange); font-weight: 500; }
+
+.section-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+
+.cmd-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.cmd-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; cursor: pointer; transition: border-color 0.12s; }
+.cmd-card:hover { border-color: var(--border-strong); }
+.cmd-card.open { border-color: rgba(255,105,74,0.35); }
+.cmd-card.session-cmd { border-left: 3px solid var(--orange); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+.cmd-card.session-cmd.open { border-left-color: var(--orange); }
+
+.cmd-head { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+.cmd-name { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text); min-width: 200px; }
+.cmd-plain { flex: 1; font-size: 13px; color: var(--text-muted); }
+.cmd-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-family: 'DM Mono', monospace; flex-shrink: 0; background: rgba(255,105,74,0.1); color: var(--orange); border: 0.5px solid rgba(255,105,74,0.25); }
+.cmd-chevron { font-size: 13px; color: var(--text-light); margin-left: auto; flex-shrink: 0; transition: transform 0.15s; }
+.cmd-card.open .cmd-chevron { transform: rotate(180deg); }
+
+.cmd-body { display: none; padding: 0 16px 16px; border-top: 0.5px solid var(--border); }
+.cmd-card.open .cmd-body { display: block; }
+.cmd-detail { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-top: 12px; margin-bottom: 12px; }
+.cmd-detail strong { color: var(--text); font-weight: 500; }
+.cmd-terminal { background: var(--navy); border-radius: var(--radius); padding: 13px 16px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 2.0; }
+.tp { color: #1D9E75; } .tc { color: #f0f0f0; } .to { color: #8892a0; } .th { color: #FF694A; } .tb { color: #7fdbca; }
+
+.show-more-btn {
+  width: 100%; padding: 11px; border: 0.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg); background: none; color: var(--text-muted);
+  font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer;
+  transition: background 0.12s, color 0.12s; margin-top: 4px;
+}
+.show-more-btn:hover { background: var(--bg-surface); color: var(--text); }
+
+.step-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.step-pill { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: 'DM Mono', monospace; }
+.step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--orange); color: white; font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-arrow { color: var(--text-light); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">⎇ git commands · reference</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+
+<div class="page">
+  <div class="page-tag">Quick reference</div>
+  <div class="page-title">Git commands, plain English</div>
+  <div class="page-sub">Keep this open during the session. Click any command to see an example.</div>
+
+  <div class="session-banner">
+    <span class="banner-icon">⭐</span>
+    <div class="banner-text">
+      <strong>Today's session uses 6 commands.</strong> They're highlighted below with an orange left border. The rest are here for reference — you won't need them today.
+    </div>
+  </div>
+
+  <div class="step-row">
+    <div class="step-pill"><div class="step-num">1</div><span>checkout -b</span></div>
+    <span class="step-arrow">→</span>
+    <div class="step-pill"><div class="step-num">2</div><span>add</span></div>
+    <span class="step-arrow">→</span>
+    <div class="step-pill"><div class="step-num">3</div><span>commit -m</span></div>
+    <span class="step-arrow">→</span>
+    <div class="step-pill"><div class="step-num">4</div><span>push</span></div>
+    <span class="step-arrow">→</span>
+    <div class="step-pill" style="color:var(--text-muted)"><span>+ status &amp; log as bonus</span></div>
+  </div>
+
+  <div class="section-label">Session commands — used today</div>
+  <div class="cmd-list" id="session-list"></div>
+
+  <button class="show-more-btn" id="show-more-btn" onclick="showMore()">
+    + Show all Git commands
+  </button>
+
+  <div class="cmd-list" id="extra-list" style="display:none; margin-top:8px;"></div>
+</div>
+
+<script>
+const session = [
+  {
+    cmd: 'git checkout -b',
+    plain: 'Create a new branch and switch to it',
+    detail: 'This is how every piece of work starts. The <strong>-b</strong> flag means "create". Without it, checkout just switches to an existing branch. Name your branch something descriptive — it helps teammates understand what you\'re working on.',
+    lines: [
+      ['p','$ '],['c','git checkout -b '],['b','fix/revenue-null-values'],
+      ['o',"Switched to a new branch 'fix/revenue-null-values'"],
+    ]
+  },
+  {
+    cmd: 'git add',
+    plain: 'Stage files ready to be committed',
+    detail: 'Tells Git which files to include in your next commit. Think of it as putting things in a box before sealing it. <strong>git add .</strong> stages everything changed. <strong>git add filename</strong> stages just one file.',
+    lines: [
+      ['p','$ '],['c','git add models/revenue.sql'],
+      ['o',''],
+      ['p','$ '],['c','git add . '],['o','  ← stages everything'],
+    ]
+  },
+  {
+    cmd: 'git commit -m',
+    plain: 'Save a snapshot of your staged changes',
+    detail: 'Seals the box and takes a photo. The <strong>-m</strong> flag lets you write a message inline. Always write something meaningful — "fix bug" is useless, "handle null values in revenue calc" is helpful. Your teammates and future self will thank you.',
+    lines: [
+      ['p','$ '],['c','git commit -m '],['h','"handle null values in revenue calc"'],
+      ['o','[fix/revenue 3f2a1c] handle null values in revenue calc'],
+      ['o',' 1 file changed, 4 insertions(+), 1 deletion(-)'],
+    ]
+  },
+  {
+    cmd: 'git push',
+    plain: 'Upload your commits to GitHub',
+    detail: 'Sends your local commits up to GitHub so others can see them and you can open a pull request. <strong>origin</strong> is the standard name for your GitHub remote. You only need to specify the branch name the first time.',
+    lines: [
+      ['p','$ '],['c','git push origin '],['b','fix/revenue-null-values'],
+      ['o','Enumerating objects: 5, done.'],
+      ['h',' * [new branch]  fix/revenue-null-values -> fix/revenue-null-values'],
+    ]
+  },
+  {
+    cmd: 'git status',
+    plain: 'Show what\'s changed since your last commit',
+    detail: 'Your most-used command. Shows which files have been modified, which are staged and ready to commit, and which are new files Git doesn\'t know about yet. Run this constantly — before you add, before you commit, whenever you\'re unsure.',
+    lines: [
+      ['p','$ '],['c','git status'],
+      ['o','On branch fix/revenue-null-values'],
+      ['o','Changes not staged for commit:'],
+      ['h','  modified:   models/revenue.sql'],
+      ['o','Untracked files:'],
+      ['h','  tests/revenue_test.sql'],
+    ]
+  },
+  {
+    cmd: 'git log --oneline',
+    plain: 'See a compact history of commits',
+    detail: 'Shows every commit as a single line — the short hash and the message. Great for checking that your commit was recorded, or for understanding what changed and when. Run this after committing to see your work in the history.',
+    lines: [
+      ['p','$ '],['c','git log --oneline'],
+      ['b','3f2a1c '],['o','handle null values in revenue calc'],
+      ['b','a1b2c3 '],['o','add customer_id to orders model'],
+      ['b','d4e5f6 '],['o','initial revenue model'],
+    ]
+  },
+];
+
+const extra = [
+  {
+    cmd: 'git init',
+    plain: 'Start tracking a folder with Git',
+    detail: 'Turns any folder into a Git repository. Run this once when starting a brand new project. Creates a hidden <strong>.git</strong> folder that stores all the version history. Not needed today — your repo already exists.',
+    lines: [
+      ['p','$ '],['c','git init my-project'],
+      ['o','Initialized empty Git repository in my-project/.git/'],
+    ]
+  },
+  {
+    cmd: 'git clone',
+    plain: 'Download a copy of a repo from GitHub',
+    detail: 'Copies an entire repository from GitHub onto your machine — all files, all branches, full history. This is how you start working on an existing project. Not needed today as you already have the repo.',
+    lines: [
+      ['p','$ '],['c','git clone '],['h','https://github.com/org/repo.git'],
+      ['o',"Cloning into 'repo'..."],
+      ['o','remote: Counting objects: 245, done.'],
+    ]
+  },
+  {
+    cmd: 'git pull',
+    plain: 'Download and apply changes from GitHub',
+    detail: 'Fetches the latest commits from GitHub and merges them into your current branch. Do this at the start of each working session to make sure you have everyone else\'s latest work. Combines fetch + merge in one step.',
+    lines: [
+      ['p','$ '],['c','git pull origin main'],
+      ['o','remote: Counting objects: 3, done.'],
+      ['o','Updating a1b2c3..d4e5f6'],
+      ['h','Fast-forward'],
+      ['o',' models/customers.sql | 5 +++++'],
+    ]
+  },
+  {
+    cmd: 'git fetch',
+    plain: 'Download changes without applying them',
+    detail: 'Like git pull but cautious — downloads the latest from GitHub so you can inspect what changed before applying it. Nothing on your local branch changes until you explicitly merge. Good for checking what\'s new without risk.',
+    lines: [
+      ['p','$ '],['c','git fetch origin'],
+      ['o','remote: Counting objects: 8, done.'],
+      ['o','   a1b2c3..d4e5f6  main -> origin/main'],
+    ]
+  },
+  {
+    cmd: 'git branch',
+    plain: 'List, create, or delete branches',
+    detail: 'On its own, lists all your branches — the current one is marked with a *. <strong>git branch -d branch-name</strong> deletes a branch after it\'s been merged. <strong>git branch -a</strong> shows remote branches too.',
+    lines: [
+      ['p','$ '],['c','git branch'],
+      ['h','* fix/revenue-null-values'],
+      ['o','  main'],
+      ['o','  feature/new-dashboard'],
+    ]
+  },
+  {
+    cmd: 'git merge',
+    plain: 'Combine another branch into your current one',
+    detail: 'Brings commits from another branch into your current branch. In practice, you\'ll almost always do this via a pull request on GitHub rather than the command line — the merge button does this for you. Good to know for local merges.',
+    lines: [
+      ['p','$ '],['c','git checkout main'],
+      ['p','$ '],['c','git merge '],['b','fix/revenue-null-values'],
+      ['h','Fast-forward'],
+      ['o',' models/revenue.sql | 5 ++++-'],
+    ]
+  },
+  {
+    cmd: 'git diff',
+    plain: 'Show exactly what changed line by line',
+    detail: 'Shows line-by-line changes in files you\'ve modified but not yet staged. Lines starting with + were added, lines with - were removed. Useful before committing to double-check your work.',
+    lines: [
+      ['p','$ '],['c','git diff models/revenue.sql'],
+      ['o','@@ -12,6 +12,8 @@'],
+      ['h','-  where order_total is not null'],
+      ['b','+  where order_total is not null'],
+      ['b','+  and customer_id is not null'],
+    ]
+  },
+  {
+    cmd: 'git stash',
+    plain: 'Temporarily shelve uncommitted changes',
+    detail: 'Saves your work-in-progress to a temporary shelf and restores a clean state. Useful when you need to switch branches without committing half-finished work. <strong>git stash pop</strong> brings your changes back.',
+    lines: [
+      ['p','$ '],['c','git stash'],
+      ['o','Saved working directory and index state WIP on fix/revenue'],
+      ['o',''],
+      ['p','$ '],['c','git stash pop'],
+      ['o','On branch fix/revenue — changes restored'],
+    ]
+  },
+  {
+    cmd: 'git reset',
+    plain: 'Unstage files or undo recent commits',
+    detail: '<strong>git reset HEAD filename</strong> unstages a file. <strong>git reset --soft HEAD~1</strong> undoes your last commit but keeps the changes. Use with care — this rewrites history and can cause problems if you\'ve already pushed.',
+    lines: [
+      ['p','$ '],['c','git reset HEAD models/revenue.sql'],
+      ['o','Unstaged changes after reset:'],
+      ['h','M  models/revenue.sql'],
+    ]
+  },
+];
+
+let openId = null;
+
+function linesHtml(lines) {
+  const map = { p:'tp', c:'tc', o:'to', h:'th', b:'tb' };
+  return lines.map(([t,s]) => `<span class="${map[t]}">${s.replace(/</g,'&lt;')}</span>`).join('');
+}
+
+function makeCard(cmd, isSession, idx) {
+  const id = 'cmd-' + idx;
+  return `<div class="cmd-card${isSession ? ' session-cmd' : ''}" id="${id}" onclick="toggle('${id}')">
+    <div class="cmd-head">
+      <span class="cmd-name">${cmd.cmd}</span>
+      ${isSession ? `<span class="cmd-badge">today</span>` : ''}
+      <span class="cmd-plain">${cmd.plain}</span>
+      <span class="cmd-chevron">&#8964;</span>
+    </div>
+    <div class="cmd-body">
+      <div class="cmd-detail">${cmd.detail}</div>
+      <div class="cmd-terminal">${linesHtml(cmd.lines)}</div>
+    </div>
+  </div>`;
+}
+
+function toggle(id) {
+  const el = document.getElementById(id);
+  if (openId && openId !== id) {
+    const prev = document.getElementById(openId);
+    if (prev) prev.classList.remove('open');
+  }
+  el.classList.toggle('open');
+  openId = el.classList.contains('open') ? id : null;
+}
+
+function showMore() {
+  document.getElementById('extra-list').style.display = 'flex';
+  document.getElementById('show-more-btn').style.display = 'none';
+}
+
+document.getElementById('session-list').innerHTML = session.map((c,i) => makeCard(c, true, 's'+i)).join('');
+document.getElementById('extra-list').innerHTML = extra.map((c,i) => makeCard(c, false, 'e'+i)).join('');
+</script>
+</body>
+</html>
