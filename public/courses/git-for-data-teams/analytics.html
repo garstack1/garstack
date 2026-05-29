@@ -118,7 +118,7 @@
 <nav>
   <span class="nav-logo">📈 analytics dashboard</span>
   <div class="nav-right">
-    <span class="updated" id="updated">—</span>
+    <span class="updated" id="updated">-</span>
     <button class="btn-sm" onclick="refresh()">Refresh</button>
     <button class="btn-sm danger" onclick="resetAll()">Reset all data</button>
     <a href="index.html" class="nav-back">← Back</a>
@@ -129,7 +129,7 @@
   <div class="page-header">
     <div class="page-tag">Instructor view · session analytics</div>
     <div class="page-title">Session overview</div>
-    <div class="page-sub">All data is stored locally on this device — nothing is sent to any server.</div>
+    <div class="page-sub">Quiz and feedback data is stored in your Supabase database. Slide times are stored locally in this browser.</div>
   </div>
 
   <div class="privacy-note">
@@ -145,7 +145,7 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title">Time per slide</span>
-          <span class="card-meta" id="slide-total-time">—</span>
+          <span class="card-meta" id="slide-total-time">-</span>
         </div>
         <div class="card-body" id="slide-bars"></div>
       </div>
@@ -156,7 +156,7 @@
       <div class="card" id="quiz-card">
         <div class="card-header">
           <span class="card-title">Answers by question</span>
-          <span class="card-meta" id="quiz-respondents">—</span>
+          <span class="card-meta" id="quiz-respondents">-</span>
         </div>
         <div class="card-body" id="quiz-bars"></div>
       </div>
@@ -234,7 +234,7 @@ const questions = [
   { q: "Purpose of a Git branch?", opts: ["Delete old versions","Work safely without affecting main","Auto-deploy to production","Share files by email"], correct: 1 },
   { q: "Create + switch branch in one step?", opts: ["git branch","git merge","git checkout -b","git push"], correct: 2 },
   { q: "What is a pull request for?", opts: ["Download files","Review before merging","Delete a branch","Revert a commit"], correct: 1 },
-  { q: "dbt Cloud edits a model on a branch — what happens in Git?", opts: ["Emails changes","Saves locally","Commits to branch","Pushes to main"], correct: 2 }
+  { q: "dbt Cloud edits a model on a branch - what happens in Git?", opts: ["Emails changes","Saves locally","Commits to branch","Pushes to main"], correct: 2 }
 ];
 
 let scoreChartInstance = null;
@@ -288,13 +288,13 @@ async function render() {
 
   document.getElementById('metrics').innerHTML = `
     <div class="metric"><div class="metric-label">Quiz responses</div><div class="metric-val orange">${n}</div><div class="metric-sub">learners</div></div>
-    <div class="metric"><div class="metric-label">Avg quiz score</div><div class="metric-val ${valClass(avgScore,3,2)}">${n ? avgScore.toFixed(1) : '—'}</div><div class="metric-sub">out of 4</div></div>
-    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${qRows.length ? overallAcc+'%' : '—'}</div><div class="metric-sub">correct answers</div></div>
+    <div class="metric"><div class="metric-label">Avg quiz score</div><div class="metric-val ${valClass(avgScore,3,2)}">${n ? avgScore.toFixed(1) : '-'}</div><div class="metric-sub">out of 4</div></div>
+    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${qRows.length ? overallAcc+'%' : '-'}</div><div class="metric-sub">correct answers</div></div>
     <div class="metric"><div class="metric-label">Perfect scores</div><div class="metric-val green">${perfect}</div><div class="metric-sub">4/4 correct</div></div>
     <div class="metric"><div class="metric-label">Feedback responses</div><div class="metric-val orange">${fn}</div><div class="metric-sub">learners</div></div>
-    <div class="metric"><div class="metric-label">Avg star rating</div><div class="metric-val ${valClass(avgStar,4,3)}">${fn ? avgStar.toFixed(1) : '—'}</div><div class="metric-sub">out of 5</div></div>
-    <div class="metric"><div class="metric-label">Avg NPS</div><div class="metric-val ${valClass(avgNps,8,6)}">${fn ? avgNps : '—'}</div><div class="metric-sub">out of 10</div></div>
-    <div class="metric"><div class="metric-label">Time on slides</div><div class="metric-val">${totalSlideTime ? fmtTime(totalSlideTime) : '—'}</div><div class="metric-sub">total</div></div>
+    <div class="metric"><div class="metric-label">Avg star rating</div><div class="metric-val ${valClass(avgStar,4,3)}">${fn ? avgStar.toFixed(1) : '-'}</div><div class="metric-sub">out of 5</div></div>
+    <div class="metric"><div class="metric-label">Avg NPS</div><div class="metric-val ${valClass(avgNps,8,6)}">${fn ? avgNps : '-'}</div><div class="metric-sub">out of 10</div></div>
+    <div class="metric"><div class="metric-label">Time on slides</div><div class="metric-val">${totalSlideTime ? fmtTime(totalSlideTime) : '-'}</div><div class="metric-sub">total</div></div>
   `;
 
   // SLIDE TIMES
@@ -382,7 +382,7 @@ async function render() {
       <div class="fb-row"><span class="fb-label">⭐ Avg star rating</span><span class="fb-val ${valClass(avgStar,4,3)}">${avgStar.toFixed(1)} / 5</span></div>
       <div class="fb-row"><span class="fb-label">🎯 Clarity score</span><span class="fb-val ${valClass(avgClarity,7,5)}">${avgClarity} / 10</span></div>
       <div class="fb-row"><span class="fb-label">📡 Avg NPS</span><span class="fb-val ${valClass(avgNps,8,6)}">${avgNps} / 10</span></div>
-      <div class="fb-row"><span class="fb-label">⏱ Most common pace</span><span style="font-size:15px;font-weight:500">${topPace ? topPace[0] : '—'}</span></div>
+      <div class="fb-row"><span class="fb-label">⏱ Most common pace</span><span style="font-size:15px;font-weight:500">${topPace ? topPace[0] : '-'}</span></div>
       <div class="fb-row"><span class="fb-label">📝 Responses</span><span style="font-size:15px;font-weight:500">${fn} learner${fn!==1?'s':''}</span></div>
     `;
   }
@@ -393,7 +393,7 @@ async function render() {
     fbRows.forEach(r => { (r[key]||[]).forEach(v => { counts[v] = (counts[v]||0)+1; }); });
     const el = document.getElementById(containerId);
     if (Object.keys(counts).length === 0) {
-      el.innerHTML = `<div class="empty"><div class="big">—</div><p>No responses yet</p></div>`; return;
+      el.innerHTML = `<div class="empty"><div class="big">-</div><p>No responses yet</p></div>`; return;
     }
     const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
     el.innerHTML = `<div class="chip-cloud">${sorted.map(([v,c]) => `<span class="chip">${v}<span class="chip-count">${c}</span></span>`).join('')}</div>`;
@@ -416,7 +416,7 @@ async function render() {
 function refresh() { render(); }
 
 function resetAll() {
-  if (confirm('This clears local slide time data only — Supabase quiz and feedback data is kept. Continue?')) {
+  if (confirm('This clears local slide time data only - Supabase quiz and feedback data is kept. Continue?')) {
     localStorage.removeItem(SLIDE_KEY);
     render();
   }
