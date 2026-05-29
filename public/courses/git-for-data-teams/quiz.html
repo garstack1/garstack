@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Quiz · Git for Data Teams</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF694A; --navy: #0d1117; --green: #1D9E75;
+    --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+    --bg: #ffffff; --bg-surface: #f9f9f8;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
+    --radius: 12px; --radius-lg: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15); }
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 32px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--orange); border-radius: 2px; transition: width 0.4s ease; }
+
+  .q-header { margin-bottom: 28px; }
+  .q-num { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1px; margin-bottom: 10px; }
+  .q-text { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.35; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .opt {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 18px; border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius); cursor: pointer;
+    background: var(--bg); color: var(--text);
+    font-size: 15px; line-height: 1.4;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: left; width: 100%; font-family: 'DM Sans', sans-serif;
+  }
+  .opt:hover { border-color: var(--orange); background: var(--bg-surface); }
+  .opt.selected { border-color: var(--orange); background: rgba(255,105,74,0.06); }
+  .opt.correct { border-color: var(--green); background: rgba(29,158,117,0.08); }
+  .opt.wrong { border-color: #E24B4A; background: rgba(226,75,74,0.06); }
+  .opt.disabled { cursor: default; pointer-events: none; }
+  .opt-letter {
+    width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-family: 'DM Mono', monospace; flex-shrink: 0;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+  .opt.selected .opt-letter { border-color: var(--orange); background: var(--orange); color: white; }
+  .opt.correct .opt-letter { border-color: var(--green); background: var(--green); color: white; }
+  .opt.wrong .opt-letter { border-color: #E24B4A; background: #E24B4A; color: white; }
+
+  .feedback-box { display: none; padding: 14px 16px; border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
+  .feedback-box.correct { background: rgba(29,158,117,0.1); border: 0.5px solid rgba(29,158,117,0.3); color: #085041; }
+  .feedback-box.wrong { background: rgba(226,75,74,0.08); border: 0.5px solid rgba(226,75,74,0.2); color: #501313; }
+  @media (prefers-color-scheme: dark) {
+    .feedback-box.correct { color: #9FE1CB; }
+    .feedback-box.wrong { color: #F7C1C1; }
+  }
+
+  .btn-next { width: 100%; padding: 14px; background: var(--orange); color: white; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; display: none; transition: opacity 0.15s; }
+  .btn-next:hover { opacity: 0.88; }
+
+  /* Done screen */
+  .done-screen { display: none; text-align: center; padding: 40px 20px; }
+  .done-emoji { font-size: 52px; margin-bottom: 20px; }
+  .done-title { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 10px; }
+  .done-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+  .score-ring { width: 100px; height: 100px; margin: 0 auto 24px; position: relative; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring circle { fill: none; stroke-width: 8; }
+  .score-ring .track { stroke: var(--border); }
+  .score-ring .fill { stroke: var(--orange); stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+  .score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'DM Serif Display', serif; font-size: 24px; }
+  .done-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .done-link { padding: 10px 20px; border-radius: var(--radius); font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+  .done-link.primary { background: var(--orange); color: white; }
+  .done-link.secondary { border: 0.5px solid var(--border-strong); color: var(--text); }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">⚡ live quiz</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+
+<div class="container" id="quiz-container">
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:25%"></div></div>
+  <div id="q-area"></div>
+  <div class="feedback-box" id="feedback"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQ()">Next question →</button>
+</div>
+
+<div class="container done-screen" id="done-screen">
+  <div class="score-ring">
+    <svg width="100" height="100" viewBox="0 0 100 100">
+      <circle class="track" cx="50" cy="50" r="42"/>
+      <circle class="fill" id="score-arc" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/>
+    </svg>
+    <div class="score-num" id="score-num">0/4</div>
+  </div>
+  <div class="done-title" id="done-title">Nice work!</div>
+  <div class="done-sub" id="done-sub">Your answers have been recorded.</div>
+  <div class="done-links">
+    <a href="feedback.html" class="done-link primary">Leave feedback →</a>
+    <a href="index.html" class="done-link secondary">Back to slides</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'git_quiz_results';
+
+const questions = [
+  {
+    q: "What is the main purpose of a Git branch?",
+    opts: [
+      "To permanently delete old versions of a file",
+      "To work on changes safely without affecting the main codebase",
+      "To automatically deploy code to production",
+      "To share files with teammates over email"
+    ],
+    correct: 1,
+    explain: "A branch lets you experiment and make changes in isolation. The main branch stays clean until you're ready to merge."
+  },
+  {
+    q: "Which command creates a new branch AND switches to it in one step?",
+    opts: [
+      "git branch new-branch",
+      "git merge new-branch",
+      "git checkout -b new-branch",
+      "git push new-branch"
+    ],
+    correct: 2,
+    explain: "git checkout -b is the shortcut that both creates and switches to the new branch. Without -b, checkout just switches to an existing branch."
+  },
+  {
+    q: "What is a pull request (PR) used for?",
+    opts: [
+      "Downloading new files from the internet",
+      "Asking teammates to review your branch before it merges",
+      "Deleting a branch after it's merged",
+      "Reverting a commit that broke something"
+    ],
+    correct: 1,
+    explain: "A pull request is a request to merge your branch into main. It creates a space for teammates to review, comment, and approve your changes before they go live."
+  },
+  {
+    q: "In dbt Cloud, when you edit a model on a new branch, what Git action happens automatically behind the scenes?",
+    opts: [
+      "dbt emails your changes to the team",
+      "dbt saves a backup to your local machine",
+      "dbt commits your changes to the branch in Git",
+      "dbt pushes directly to main without review"
+    ],
+    correct: 2,
+    explain: "dbt Cloud is built on Git. Every model edit on a branch is committed to that branch automatically — which is why the branch workflow you learned today maps directly to how dbt Cloud works."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+const answers = {};
+
+function renderQ() {
+  const q = questions[current];
+  answered = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('feedback').className = 'feedback-box';
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('progress').style.width = ((current / questions.length) * 100) + '%';
+
+  let html = `<div class="q-header"><div class="q-num">Question ${current + 1} of ${questions.length}</div><div class="q-text">${q.q}</div></div><div class="options">`;
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    html += `<button class="opt" onclick="answer(${i})" id="opt-${i}"><div class="opt-letter">${letters[i]}</div>${opt}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('q-area').innerHTML = html;
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const isCorrect = idx === q.correct;
+  if (isCorrect) score++;
+  answers[current] = { question: q.q, chosen: idx, correct: q.correct, isCorrect };
+
+  for (let i = 0; i < q.opts.length; i++) {
+    const el = document.getElementById('opt-' + i);
+    el.classList.add('disabled');
+    if (i === q.correct) el.classList.add('correct');
+    else if (i === idx) el.classList.add('wrong');
+  }
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback-box ' + (isCorrect ? 'correct' : 'wrong');
+  fb.innerHTML = (isCorrect ? '✓ Correct! ' : '✗ Not quite. ') + q.explain;
+  fb.style.display = 'block';
+
+  const btn = document.getElementById('btn-next');
+  btn.style.display = 'block';
+  btn.textContent = current < questions.length - 1 ? 'Next question →' : 'See my results →';
+
+  saveResult();
+
+
+}
+
+function saveResult() {
+  try {
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"responses":[]}');
+    const sessionId = localStorage.getItem('quiz_session_id') || ('sess_' + Date.now());
+    localStorage.setItem('quiz_session_id', sessionId);
+    const entry = { sessionId, timestamp: new Date().toISOString(), answers: Object.values(answers), score };
+    const idx = existing.responses.findIndex(r => r.sessionId === sessionId);
+    if (idx >= 0) existing.responses[idx] = entry;
+    else existing.responses.push(entry);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+  } catch(e) {}
+}
+
+function nextQ() {
+  current++;
+  if (current >= questions.length) {
+    showDone();
+  } else {
+    renderQ();
+  }
+}
+
+function showDone() {
+  document.getElementById('quiz-container').style.display = 'none';
+  const done = document.getElementById('done-screen');
+  done.style.display = 'block';
+  document.getElementById('score-num').textContent = score + '/' + questions.length;
+  const pct = score / questions.length;
+  const circ = 264;
+  setTimeout(() => {
+    document.getElementById('score-arc').style.strokeDashoffset = circ * (1 - pct);
+  }, 100);
+  const titles = ['Keep practising!', 'Good effort!', 'Nice work!', 'Excellent!', 'Perfect score!'];
+  document.getElementById('done-title').textContent = titles[score] || 'Done!';
+  const subs = [
+    "Review the slides and try again — you've got this.",
+    "Almost there. Check the concept slides and try once more.",
+    "Solid foundation! The live demo section will reinforce the rest.",
+    "Great understanding of Git fundamentals. You're ready for dbt Cloud.",
+    "Brilliant — you clearly know this. dbt Cloud will feel very natural."
+  ];
+  document.getElementById('done-sub').textContent = (subs[score] || 'Your answers have been recorded.') + ' Head over to the feedback form to share your thoughts.';
+}
+
+renderQ();
+</script>
+</body>
+</html>
