@@ -216,6 +216,18 @@
 const QUIZ_KEY = 'git_quiz_results';
 const FEEDBACK_KEY = 'git_feedback_results';
 const SLIDE_KEY = 'git_slide_times';
+const SUPABASE_URL = 'https://skpyeipqipplsuzjofje.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcHllaXBxaXBwbHN1empvZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTU2MDAsImV4cCI6MjA5NTYzMTYwMH0.pzMoxPTauK0wlnedup17efCurVoGwMNbikTMZg-qN6Q';
+const COURSE = 'git-for-data-teams';
+
+async function sbSelect(table, params) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.ok ? await res.json() : [];
+  } catch(e) { return []; }
+}
 
 const slideNames = ['Title','Objectives','Agenda','Hook','Concepts','Demo','Practice','Quiz','Summary'];
 const questions = [
@@ -227,11 +239,11 @@ const questions = [
 
 let scoreChartInstance = null;
 
-function getQuizData() {
-  try { return JSON.parse(localStorage.getItem(QUIZ_KEY) || '{"responses":[]}'); } catch(e) { return { responses: [] }; }
+async function getQuizData() {
+  return await sbSelect('quiz_answers', `course=eq.${COURSE}&order=created_at.asc`);
 }
-function getFeedbackData() {
-  try { return JSON.parse(localStorage.getItem(FEEDBACK_KEY) || '{"responses":[]}'); } catch(e) { return { responses: [] }; }
+async function getFeedbackData() {
+  return await sbSelect('feedback', `course=eq.${COURSE}&order=created_at.asc`);
 }
 function getSlideData() {
   try { return JSON.parse(localStorage.getItem(SLIDE_KEY) || '{}'); } catch(e) { return {}; }
@@ -248,30 +260,36 @@ function valClass(val, goodThresh, midThresh) {
   return 'low';
 }
 
-function render() {
-  const quiz = getQuizData();
-  const feedback = getFeedbackData();
+async function render() {
+  document.getElementById('updated').textContent = 'Loading…';
+  const qRows = await getQuizData();
+  const fbRows = await getFeedbackData();
   const slideTimes = getSlideData();
-  const qResponses = quiz.responses || [];
-  const fbResponses = feedback.responses || [];
-  const n = qResponses.length;
-  const fn = fbResponses.length;
+
+  const learners = [...new Set(qRows.map(r => r.learner_id))];
+  const n = learners.length;
+  const fn = fbRows.length;
 
   document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
 
   // METRICS
-  const avgScore = n ? (qResponses.reduce((s,r) => s + (r.score||0), 0) / n) : 0;
-  const perfect = qResponses.filter(r => r.score === 4).length;
-  const allAnswers = qResponses.flatMap(r => r.answers || []);
-  const overallAcc = allAnswers.length ? Math.round((allAnswers.filter(a=>a.isCorrect).length / allAnswers.length) * 100) : 0;
-  const avgStar = fn ? (fbResponses.reduce((s,r) => s + (r.star||0), 0) / fn) : 0;
-  const avgNps = fn ? Math.round(fbResponses.reduce((s,r) => s + (r.nps >= 0 ? r.nps : 0), 0) / fn) : 0;
+  const scoresByLearner = {};
+  qRows.forEach(r => {
+    if (!scoresByLearner[r.learner_id]) scoresByLearner[r.learner_id] = 0;
+    if (r.is_correct) scoresByLearner[r.learner_id]++;
+  });
+  const scores = Object.values(scoresByLearner);
+  const avgScore = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : 0;
+  const perfect = scores.filter(s => s === 4).length;
+  const overallAcc = qRows.length ? Math.round((qRows.filter(r=>r.is_correct).length / qRows.length) * 100) : 0;
+  const avgStar = fn ? (fbRows.reduce((s,r) => s+(r.star||0),0)/fn) : 0;
+  const avgNps = fn ? Math.round(fbRows.reduce((s,r) => s+(r.nps!=null?r.nps:0),0)/fn) : 0;
   const totalSlideTime = Object.values(slideTimes).reduce((a,b) => a+b, 0);
 
   document.getElementById('metrics').innerHTML = `
     <div class="metric"><div class="metric-label">Quiz responses</div><div class="metric-val orange">${n}</div><div class="metric-sub">learners</div></div>
     <div class="metric"><div class="metric-label">Avg quiz score</div><div class="metric-val ${valClass(avgScore,3,2)}">${n ? avgScore.toFixed(1) : '—'}</div><div class="metric-sub">out of 4</div></div>
-    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${allAnswers.length ? overallAcc+'%' : '—'}</div><div class="metric-sub">correct answers</div></div>
+    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${qRows.length ? overallAcc+'%' : '—'}</div><div class="metric-sub">correct answers</div></div>
     <div class="metric"><div class="metric-label">Perfect scores</div><div class="metric-val green">${perfect}</div><div class="metric-sub">4/4 correct</div></div>
     <div class="metric"><div class="metric-label">Feedback responses</div><div class="metric-val orange">${fn}</div><div class="metric-sub">learners</div></div>
     <div class="metric"><div class="metric-label">Avg star rating</div><div class="metric-val ${valClass(avgStar,4,3)}">${fn ? avgStar.toFixed(1) : '—'}</div><div class="metric-sub">out of 5</div></div>
@@ -307,10 +325,7 @@ function render() {
     const letters = ['A','B','C','D'];
     questions.forEach((q, qi) => {
       const counts = new Array(q.opts.length).fill(0);
-      qResponses.forEach(r => {
-        const ans = (r.answers||[]).find(a => a.question && a.question.includes(q.q.substring(0,15)));
-        if (ans && ans.chosen >= 0) counts[ans.chosen]++;
-      });
+      qRows.filter(r => r.question_index === qi).forEach(r => { if (r.chosen >= 0) counts[r.chosen]++; });
       const total = counts.reduce((a,b)=>a+b,0);
       const acc = total ? Math.round((counts[q.correct]/total)*100) : 0;
       const maxC = Math.max(...counts, 1);
@@ -333,20 +348,14 @@ function render() {
 
   // SCORE CHART
   const scoreCounts = [0,0,0,0,0];
-  qResponses.forEach(r => { if (r.score >= 0 && r.score <= 4) scoreCounts[r.score]++; });
+  Object.values(scoresByLearner).forEach(s => { if (s >= 0 && s <= 4) scoreCounts[s]++; });
   if (scoreChartInstance) scoreChartInstance.destroy();
   if (n > 0) {
     scoreChartInstance = new Chart(document.getElementById('score-chart'), {
       type: 'bar',
       data: {
         labels: ['0/4','1/4','2/4','3/4','4/4'],
-        datasets: [{
-          label: 'Learners',
-          data: scoreCounts,
-          backgroundColor: ['#E24B4A','#EF9F27','#EF9F27','#1D9E75','#1D9E75'],
-          borderRadius: 4,
-          borderSkipped: false
-        }]
+        datasets: [{ label: 'Learners', data: scoreCounts, backgroundColor: ['#E24B4A','#EF9F27','#EF9F27','#1D9E75','#1D9E75'], borderRadius: 4, borderSkipped: false }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
@@ -365,9 +374,9 @@ function render() {
   if (fn === 0) {
     document.getElementById('fb-ratings').innerHTML = `<div class="empty"><div class="big">💬</div><p>No feedback yet</p><small>Ask learners to open feedback.html</small></div>`;
   } else {
-    const avgClarity = Math.round(fbResponses.reduce((s,r) => s+(r.clarity||0),0)/fn * 10) / 10;
+    const avgClarity = Math.round(fbRows.reduce((s,r) => s+(r.clarity||0),0)/fn * 10) / 10;
     const paceCount = {};
-    fbResponses.forEach(r => { if (r.pace) paceCount[r.pace] = (paceCount[r.pace]||0)+1; });
+    fbRows.forEach(r => { if (r.pace) paceCount[r.pace] = (paceCount[r.pace]||0)+1; });
     const topPace = Object.entries(paceCount).sort((a,b)=>b[1]-a[1])[0];
     document.getElementById('fb-ratings').innerHTML = `
       <div class="fb-row"><span class="fb-label">⭐ Avg star rating</span><span class="fb-val ${valClass(avgStar,4,3)}">${avgStar.toFixed(1)} / 5</span></div>
@@ -381,7 +390,7 @@ function render() {
   // USEFUL / IMPROVE CHIPS
   function renderChips(containerId, key) {
     const counts = {};
-    fbResponses.forEach(r => { (r[key]||[]).forEach(v => { counts[v] = (counts[v]||0)+1; }); });
+    fbRows.forEach(r => { (r[key]||[]).forEach(v => { counts[v] = (counts[v]||0)+1; }); });
     const el = document.getElementById(containerId);
     if (Object.keys(counts).length === 0) {
       el.innerHTML = `<div class="empty"><div class="big">—</div><p>No responses yet</p></div>`; return;
@@ -393,13 +402,13 @@ function render() {
   renderChips('improve-chips', 'improve');
 
   // COMMENTS
-  const comments = fbResponses.filter(r => r.freeText && r.freeText.trim());
+  const comments = fbRows.filter(r => r.free_text && r.free_text.trim());
   const commentsEl = document.getElementById('comments');
   if (comments.length === 0) {
     commentsEl.innerHTML = `<div class="empty"><div class="big">💭</div><p>No written comments yet</p></div>`;
   } else {
     commentsEl.innerHTML = `<div class="comments-list">${comments.map(r =>
-      `<div class="comment">"${r.freeText}"<div class="comment-time">${new Date(r.timestamp).toLocaleTimeString()}</div></div>`
+      `<div class="comment">"${r.free_text}"<div class="comment-time">${new Date(r.created_at).toLocaleTimeString()}</div></div>`
     ).join('')}</div>`;
   }
 }
@@ -407,9 +416,7 @@ function render() {
 function refresh() { render(); }
 
 function resetAll() {
-  if (confirm('Reset ALL data — quiz results, feedback, and slide times? This cannot be undone.')) {
-    localStorage.removeItem(QUIZ_KEY);
-    localStorage.removeItem(FEEDBACK_KEY);
+  if (confirm('This clears local slide time data only — Supabase quiz and feedback data is kept. Continue?')) {
     localStorage.removeItem(SLIDE_KEY);
     render();
   }
