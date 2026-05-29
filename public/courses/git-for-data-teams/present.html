@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git for Data Teams · Present</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF694A; --navy: #0d1117; --navy-mid: #161b22; --navy-border: #2a2f3a;
+    --green: #1D9E75; --blue: #185FA5;
+    --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+    --bg: #ffffff; --bg-surface: #f9f9f8;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
+    --radius: 10px; --radius-lg: 14px;
+  }
+
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #111; }
+
+  /* TOOLBAR */
+  .toolbar {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(13,17,23,0.92); border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 40px; padding: 8px 16px;
+    z-index: 100; backdrop-filter: blur(12px);
+    transition: opacity 0.3s;
+  }
+  .toolbar.hidden { opacity: 0; pointer-events: none; }
+  .tb-btn { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 6px 10px; border-radius: 20px; font-size: 13px; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 5px; transition: background 0.12s, color 0.12s; }
+  .tb-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+  .tb-btn:disabled { opacity: 0.3; cursor: default; }
+  .tb-counter { font-size: 12px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.4); padding: 0 8px; }
+  .tb-sep { width: 0.5px; height: 18px; background: rgba(255,255,255,0.15); }
+  .tb-key { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; }
+
+  /* SLIDE VIEWPORT */
+  .viewport { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .slide-scaler { position: relative; }
+
+  /* ALL SLIDES */
+  .slide { display: none; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; background: var(--bg); flex-direction: column; }
+  .slide.active { display: flex; }
+  .accent-bar { height: 5px; flex-shrink: 0; background: var(--orange); }
+  .accent-bar.teal { background: var(--green); }
+  .accent-bar.blue { background: var(--blue); }
+  .slide-inner { flex: 1; padding: 48px 56px 40px; display: flex; flex-direction: column; overflow: hidden; }
+
+  .slide-label { font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 1.5px; color: var(--orange); text-transform: uppercase; margin-bottom: 14px; }
+  .slide-title { font-family: 'DM Serif Display', serif; font-size: 38px; line-height: 1.1; margin-bottom: 10px; color: var(--text); }
+  .slide-subtitle { font-size: 17px; color: var(--text-muted); font-weight: 300; margin-bottom: 30px; line-height: 1.5; }
+  .slide-body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; }
+
+  /* TITLE SLIDE */
+  .title-slide .slide-inner { background: var(--navy); justify-content: center; }
+  .title-slide .slide-label { color: var(--orange); }
+  .title-slide .slide-title { color: #f8f8f8; font-size: 46px; }
+  .title-slide .slide-subtitle { color: #8a8f9a; margin-bottom: 40px; }
+  .dbt-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,105,74,0.12); border: 0.5px solid rgba(255,105,74,0.3); border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--orange); font-family: 'DM Mono', monospace; align-self: flex-start; margin-bottom: 22px; }
+  .presenter-row { display: flex; align-items: center; gap: 16px; border-top: 0.5px solid var(--navy-border); padding-top: 24px; margin-top: 10px; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,105,74,0.15); border: 1px solid rgba(255,105,74,0.35); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: var(--orange); flex-shrink: 0; }
+  .presenter-name { font-size: 15px; color: #c8cdd8; }
+  .presenter-meta { font-size: 13px; color: #5a6070; }
+
+  /* OBJ */
+  .obj-list { display: flex; flex-direction: column; gap: 14px; }
+  .obj-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px 20px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg-surface); }
+  .obj-num { width: 30px; height: 30px; border-radius: 50%; background: var(--orange); color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .obj-text { font-size: 17px; line-height: 1.5; }
+
+  /* AGENDA */
+  .agenda-grid { display: grid; grid-template-columns: 80px 1fr 90px; border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .ah { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1px; color: var(--text-muted); padding: 11px 16px; background: var(--bg-surface); border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
+  .ac { font-size: 14px; padding: 12px 16px; border-bottom: 0.5px solid var(--border); color: var(--text); display: flex; align-items: center; }
+  .ac.time { color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 13px; }
+  .ac.hl { background: rgba(255,105,74,0.04); font-weight: 500; }
+  .ac:nth-last-child(-n+3) { border-bottom: none; }
+  .tag { display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+  .tag-d { background: rgba(29,158,117,0.15); color: #0F6E56; }
+  .tag-c { background: rgba(24,95,165,0.15); color: #0C447C; }
+  .tag-a { background: rgba(255,105,74,0.15); color: #993C1D; }
+  .tag-k { background: rgba(186,117,23,0.15); color: #854F0B; }
+
+  /* HOOK */
+  .hook-box { border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 22px; background: var(--bg-surface); }
+  .hook-quote { font-family: 'DM Serif Display', serif; font-size: 26px; line-height: 1.4; font-style: italic; }
+  .hook-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .chip-bad { font-size: 13px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid rgba(226,75,74,0.3); color: #A32D2D; background: #FCEBEB; font-family: 'DM Mono', monospace; }
+  .hook-cta { font-size: 16px; color: var(--text-muted); line-height: 1.6; }
+
+  /* CONCEPTS */
+  .concept-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
+  .concept-card { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; background: var(--bg-surface); display: flex; flex-direction: column; }
+  .concept-card.accent { border-color: rgba(255,105,74,0.25); background: rgba(255,105,74,0.04); }
+  .concept-icon { font-size: 22px; margin-bottom: 12px; color: var(--orange); }
+  .concept-card h4 { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
+  .concept-card p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+  .code-pill { display: inline-block; background: var(--navy); color: #7fdbca; font-family: 'DM Mono', monospace; font-size: 12px; padding: 4px 10px; border-radius: 4px; margin-top: 10px; }
+
+  /* TERMINAL */
+  .terminal { background: var(--navy); border-radius: var(--radius); overflow: hidden; flex: 1; }
+  .term-bar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; background: var(--navy-mid); border-bottom: 0.5px solid var(--navy-border); }
+  .td { width: 13px; height: 13px; border-radius: 50%; }
+  .td-r { background: #ff5f57; } .td-y { background: #ffbd2e; } .td-g { background: #28c840; }
+  .term-title { font-size: 13px; color: #555; font-family: 'DM Mono', monospace; margin-left: 8px; }
+  .term-body { padding: 20px 24px; }
+  .tl { font-family: 'DM Mono', monospace; font-size: 15px; line-height: 2.1; }
+  .tp { color: #1D9E75; } .tc { color: #f0f0f0; } .tco { color: #444d5a; } .to { color: #8892a0; } .th { color: var(--orange); } .tbr { color: #7fdbca; }
+
+  /* ACTIVE LEARNING */
+  .al-scenario { background: var(--bg-surface); border: 0.5px solid var(--border); border-left: 4px solid var(--orange); border-radius: 0 var(--radius) var(--radius) 0; padding: 18px 22px; margin-bottom: 20px; font-size: 16px; line-height: 1.6; }
+  .al-steps { display: flex; flex-direction: column; gap: 12px; }
+  .al-step { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 15px; color: var(--text-muted); background: var(--bg); }
+  code { font-family: 'DM Mono', monospace; font-size: 13px; background: var(--bg-surface); border: 0.5px solid var(--border); padding: 2px 7px; border-radius: 4px; }
+
+  /* CFU */
+  .cfu-q { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.4; margin-bottom: 24px; }
+  .cfu-opts { display: flex; flex-direction: column; gap: 12px; }
+  .cfu-opt { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 16px; cursor: pointer; background: var(--bg); color: var(--text); transition: background 0.12s; }
+  .cfu-opt:hover { background: var(--bg-surface); }
+  .cfu-opt.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .cfu-opt.wrong { border-color: #E24B4A; background: #FCEBEB; color: #501313; }
+  .cfu-letter { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 13px; font-family: 'DM Mono', monospace; flex-shrink: 0; color: var(--text-muted); }
+  .cfu-opt.correct .cfu-letter { border-color: #1D9E75; background: #1D9E75; color: white; }
+  .cfu-opt.wrong .cfu-letter { border-color: #E24B4A; background: #E24B4A; color: white; }
+  .cfu-reveal { font-size: 14px; color: var(--text-muted); margin-top: 16px; display: none; line-height: 1.5; padding: 14px 16px; border-radius: var(--radius); background: var(--bg-surface); border: 0.5px solid var(--border); }
+
+  /* SUMMARY */
+  .closing-inner { background: var(--navy); flex: 1; padding: 48px 56px 40px; display: flex; flex-direction: column; overflow: hidden; }
+  .summary-checks { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .sc { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: var(--radius); border: 0.5px solid rgba(29,158,117,0.3); background: rgba(29,158,117,0.08); font-size: 16px; color: #9FE1CB; }
+  .sc-icon { color: #1D9E75; font-size: 20px; flex-shrink: 0; }
+  .dbt-bridge { padding: 16px 20px; border-radius: var(--radius); background: rgba(255,105,74,0.08); border: 0.5px solid rgba(255,105,74,0.25); font-size: 15px; line-height: 1.6; color: #8a8f9a; }
+  .dbt-bridge strong { color: var(--orange); font-weight: 500; }
+  .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+  .res-card { padding: 16px 18px; border: 0.5px solid var(--navy-border); border-radius: var(--radius); }
+  .res-card h4 { font-size: 14px; font-weight: 500; color: #c8cdd8; margin-bottom: 4px; }
+  .res-card p { font-size: 13px; color: #5a6070; }
+
+  /* NOTES PANEL */
+  .notes-panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(13,17,23,0.96); border-top: 0.5px solid rgba(255,255,255,0.1);
+    padding: 16px 32px; transform: translateY(100%);
+    transition: transform 0.3s ease; z-index: 90;
+    max-height: 35vh; overflow-y: auto;
+  }
+  .notes-panel.visible { transform: translateY(0); }
+  .notes-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .notes-content { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+  .notes-content strong { color: white; }
+  .notes-content .timing { display: inline-block; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--orange); background: rgba(255,105,74,0.12); padding: 2px 8px; border-radius: 10px; margin-right: 8px; }
+  .notes-content .action { display: inline-block; font-family: 'DM Mono', monospace; font-size: 12px; color: #7fdbca; background: rgba(29,158,117,0.12); padding: 2px 8px; border-radius: 10px; margin-right: 6px; }
+  .notes-content .watch { display: inline-block; font-family: 'DM Mono', monospace; font-size: 12px; color: #ffbd2e; background: rgba(255,189,46,0.12); padding: 2px 8px; border-radius: 10px; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<div class="viewport" id="viewport">
+  <div class="slide-scaler" id="scaler">
+
+    <!-- SLIDE 1: Title -->
+    <div class="slide title-slide active" id="s1">
+      <div style="height:5px;background:var(--orange);flex-shrink:0"></div>
+      <div class="slide-inner">
+        <div class="dbt-badge">⎇ technical training</div>
+        <div class="slide-title">Git for Data Teams</div>
+        <div class="slide-subtitle">Branches, commits, and pull requests —<br>the version control workflow every data professional needs</div>
+        <div class="presenter-row">
+          <div class="avatar">YN</div>
+          <div><div class="presenter-name">Your Name</div><div class="presenter-meta">Technical Instructor · dbt Labs</div></div>
+          <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:12px;color:#3a3f4a">Session 1 of 1 · 15 min</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Objectives -->
+    <div class="slide" id="s2">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Learning objectives</div>
+        <div class="slide-title">By the end of this session…</div>
+        <div class="slide-subtitle">You will be able to confidently do all three of these things.</div>
+        <div class="slide-body">
+          <div class="obj-list">
+            <div class="obj-item"><div class="obj-num">1</div><div class="obj-text"><strong>Explain</strong> what a Git branch is and why it prevents broken production data</div></div>
+            <div class="obj-item"><div class="obj-num">2</div><div class="obj-text"><strong>Create</strong> a branch, commit a change, and open a pull request in a real terminal</div></div>
+            <div class="obj-item"><div class="obj-num">3</div><div class="obj-text"><strong>Connect</strong> this workflow to how dbt Cloud manages changes to your data models</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Agenda -->
+    <div class="slide" id="s3">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Agenda</div>
+        <div class="slide-title">What we're covering today</div>
+        <div class="slide-subtitle">15 minutes, structured to get you hands-on fast.</div>
+        <div class="slide-body">
+          <div class="agenda-grid">
+            <div class="ah">Time</div><div class="ah">Topic</div><div class="ah">Type</div>
+            <div class="ac time">0–2 min</div><div class="ac hl">Hook — the "final_final_v3" problem</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">2–5 min</div><div class="ac">What is a branch? Commits explained</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">5–10 min</div><div class="ac hl">Live demo — branch, commit, pull request</div><div class="ac"><span class="tag tag-d">demo</span></div>
+            <div class="ac time">10–12 min</div><div class="ac">Your turn — try it in the terminal</div><div class="ac"><span class="tag tag-a">active</span></div>
+            <div class="ac time">12–14 min</div><div class="ac hl">Check for understanding</div><div class="ac"><span class="tag tag-k">check</span></div>
+            <div class="ac time">14–15 min</div><div class="ac">Next steps + the dbt connection</div><div class="ac"><span class="tag tag-c">wrap</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Hook -->
+    <div class="slide" id="s4">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Hook · activation of prior knowledge</div>
+        <div class="slide-title">Sound familiar?</div>
+        <div class="slide-body">
+          <div class="hook-box">
+            <div class="hook-quote">"Has anyone ever had a file called <span style="color:var(--orange)">final_final_v3_REAL.sql</span> on their desktop?"</div>
+            <div class="hook-chips">
+              <span class="chip-bad">revenue_model_FINAL.sql</span>
+              <span class="chip-bad">revenue_model_v2.sql</span>
+              <span class="chip-bad">revenue_model_v2_fixed.sql</span>
+              <span class="chip-bad">revenue_FINAL_REAL.sql</span>
+              <span class="chip-bad">USE_THIS_ONE.sql</span>
+            </div>
+          </div>
+          <div class="hook-cta">We've all been there. This is the problem Git solves — not just for engineers, but for <strong>every data team</strong> that touches SQL, Python, or dbt models.<br><br>Today we'll fix this. For good.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Concepts -->
+    <div class="slide" id="s5">
+      <div class="accent-bar blue"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Core concept</div>
+        <div class="slide-title">Branches &amp; commits, explained</div>
+        <div class="slide-subtitle">Two ideas. That's it.</div>
+        <div class="slide-body">
+          <div class="concept-cols">
+            <div class="concept-card"><div class="concept-icon">⎇</div><h4>A branch is a safe copy</h4><p>Like a duplicate spreadsheet tab. Make changes freely — main stays untouched until you're ready.</p><span class="code-pill">git checkout -b my-fix</span></div>
+            <div class="concept-card"><div class="concept-icon">📦</div><h4>A commit is a snapshot</h4><p>Every meaningful save creates a photo. You can always roll back to any earlier state.</p><span class="code-pill">git commit -m "fix revenue"</span></div>
+            <div class="concept-card"><div class="concept-icon">🔀</div><h4>A PR is a review request</h4><p>Before merging into main, teammates review. No surprises in production data.</p><span class="code-pill">git push → open PR</span></div>
+            <div class="concept-card accent"><div class="concept-icon">💡</div><h4>The mental model</h4><p>Branch → change → commit → PR → merge.<br>Every dbt Cloud project uses this exact flow.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Demo -->
+    <div class="slide" id="s6">
+      <div class="accent-bar teal"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Live demo</div>
+        <div class="slide-title">Let's do this in the terminal</div>
+        <div class="slide-subtitle">Watch, then you'll try it yourself.</div>
+        <div class="slide-body">
+          <div class="terminal">
+            <div class="term-bar"><div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div><span class="term-title">bash — data-project</span></div>
+            <div class="term-body">
+              <div class="tl"><span class="tco"># Step 1: create a new branch</span></div>
+              <div class="tl"><span class="tp">$</span> <span class="tc">git checkout -b</span> <span class="tbr">fix/revenue-null-values</span></div>
+              <div class="tl"><span class="to">Switched to a new branch 'fix/revenue-null-values'</span></div>
+              <div class="tl">&nbsp;</div>
+              <div class="tl"><span class="tco"># Step 2: make your change, then stage it</span></div>
+              <div class="tl"><span class="tp">$</span> <span class="tc">git add</span> models/revenue.sql</div>
+              <div class="tl">&nbsp;</div>
+              <div class="tl"><span class="tco"># Step 3: commit with a meaningful message</span></div>
+              <div class="tl"><span class="tp">$</span> <span class="tc">git commit -m</span> <span class="th">"handle null values in revenue calc"</span></div>
+              <div class="tl"><span class="to">[fix/revenue-null-values 3f2a1c] handle null values in revenue calc</span></div>
+              <div class="tl">&nbsp;</div>
+              <div class="tl"><span class="tco"># Step 4: push and open a PR</span></div>
+              <div class="tl"><span class="tp">$</span> <span class="tc">git push origin</span> <span class="tbr">fix/revenue-null-values</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Practice -->
+    <div class="slide" id="s7">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Active learning · your turn</div>
+        <div class="slide-title">Try it yourself</div>
+        <div class="slide-subtitle">You have 2 minutes. I'll be watching and helping.</div>
+        <div class="slide-body">
+          <div class="al-scenario"><strong>Scenario:</strong> You've been asked to add a new column to a SQL model. You don't want to touch main yet. Create a branch, make a fake change, and commit it.</div>
+          <div class="al-steps">
+            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 1</strong> — Create a branch named <code>feature/add-customer-column</code></span></div>
+            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 2</strong> — Open any .sql file and add a comment line</span></div>
+            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 3</strong> — Stage with <code>git add</code> and commit with a meaningful message</span></div>
+            <div class="al-step"><span style="color:#ffbd2e">⭐</span><span><strong>Bonus</strong> — Run <code>git log --oneline</code> to see your commit history</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: CFU -->
+    <div class="slide" id="s8">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Check for understanding</div>
+        <div class="slide-title">Quick check</div>
+        <div class="slide-subtitle">Pick the best answer — no pressure.</div>
+        <div class="slide-body">
+          <div class="cfu-q">Your teammate asks you to review their SQL change before it goes to production. Which Git workflow handles this?</div>
+          <div class="cfu-opts">
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">A</div>Push directly to main so everyone gets the update immediately</div>
+            <div class="cfu-opt" onclick="cfuClick(this,true)"><div class="cfu-letter">B</div>Create a branch, commit the change, open a pull request for review</div>
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">C</div>Email the .sql file and ask them to copy-paste it manually</div>
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">D</div>Save a new file named revenue_v2_FINAL.sql</div>
+          </div>
+          <div class="cfu-reveal" id="cfu-reveal">✓ <strong>B is correct.</strong> A pull request is Git's built-in code review workflow — teammates comment on specific lines, approve, and merge when happy. All tracked in the project history forever.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Summary -->
+    <div class="slide" id="s9">
+      <div style="height:5px;background:var(--orange);flex-shrink:0"></div>
+      <div class="closing-inner">
+        <div class="slide-label" style="color:var(--orange)">Summary &amp; next steps</div>
+        <div class="slide-title" style="color:#f8f8f8;font-size:32px;margin-bottom:20px">What you can do now</div>
+        <div class="summary-checks">
+          <div class="sc"><span class="sc-icon">✓</span>Create a branch and work safely without touching main</div>
+          <div class="sc"><span class="sc-icon">✓</span>Commit changes with meaningful messages that explain the why</div>
+          <div class="sc"><span class="sc-icon">✓</span>Open a pull request so teammates can review before merging</div>
+        </div>
+        <div class="dbt-bridge"><strong>The dbt connection:</strong> Every dbt Cloud project is a Git repo. When you create a branch in dbt Cloud and edit a model, that's exactly the workflow you practised today — just with a UI on top. You're already thinking like a dbt developer.</div>
+        <div class="res-grid">
+          <div class="res-card"><h4>📖 Pro Git Book</h4><p>git-scm.com/book — free, comprehensive</p></div>
+          <div class="res-card"><h4>⚡ GitHub Skills</h4><p>skills.github.com — hands-on courses</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar" id="toolbar">
+  <button class="tb-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
+  <span class="tb-counter" id="counter">1 / 9</span>
+  <button class="tb-btn" id="next-btn" onclick="changeSlide(1)">Next →</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="toggleNotes()">📝 Notes</button>
+  <button class="tb-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+  <div class="tb-sep"></div>
+  <span class="tb-key">← →</span>
+  <span class="tb-key">N</span>
+  <span class="tb-key">F</span>
+</div>
+
+<!-- NOTES PANEL -->
+<div class="notes-panel" id="notes-panel">
+  <div class="notes-label">Speaker notes</div>
+  <div class="notes-content" id="notes-content"></div>
+</div>
+
+<script>
+const notes = [
+  // Slide 1 — Title
+  `<span class="timing">0:00 – 0:20</span><br>
+  <strong>Say:</strong> "Welcome everyone — I'm [name], and over the next 15 minutes we're going to cover something that every data professional needs but most haven't been properly taught: Git."<br><br>
+  <span class="action">Do:</span> Let the slide breathe. Smile. Don't rush into the content immediately — give people 10 seconds to settle.<br><br>
+  <span class="watch">Watch out for:</span> Nerves making you rush. Pause after introducing yourself.`,
+
+  // Slide 2 — Objectives
+  `<span class="timing">0:20 – 1:05</span><br>
+  <strong>Say:</strong> "By the end of today, you'll be able to do three concrete things." Read each objective slowly.<br><br>
+  "Number one: explain what a branch is. Number two: actually create one in a terminal. Number three: connect this directly to how dbt Cloud works."<br><br>
+  <span class="action">Do:</span> Point to each number as you say it. Make eye contact after each one.<br><br>
+  <span class="watch">Watch out for:</span> Reading verbatim off the slide. Know these three points cold.`,
+
+  // Slide 3 — Agenda
+  `<span class="timing">1:05 – 1:35</span><br>
+  <strong>Say:</strong> "Here's how we'll spend the time. We start with a quick hook, cover the core concept, do a live demo in the terminal, you'll try it yourself, then we'll do a quick check and wrap up with the dbt connection."<br><br>
+  <span class="action">Do:</span> Run through the agenda quickly — don't read every line. Just signal the shape of the session.<br><br>
+  <strong>Key phrase:</strong> "The hands-on part starts at minute 5. That's the most important bit."`,
+
+  // Slide 4 — Hook
+  `<span class="timing">1:35 – 3:05</span><br>
+  <strong>Say:</strong> "Before we get into Git — I have a question." Pause. "Has anyone here ever had a file on their desktop called something like final_final_v3_REAL.sql?"<br><br>
+  <span class="action">Do:</span> Wait for the laugh or the nod. Let it land. Then point to the chips on screen one by one.<br><br>
+  "Every one of these is someone trying to do version control manually. It doesn't work. It breaks things. And it's completely unnecessary once you know Git."<br><br>
+  <span class="watch">Watch out for:</span> Moving on too quickly. This moment of recognition is important — let people sit in it for a second.`,
+
+  // Slide 5 — Concepts
+  `<span class="timing">3:05 – 5:35</span><br>
+  <strong>Say:</strong> "Git has a reputation for being complicated. It isn't. There are two ideas you need to understand today."<br><br>
+  <strong>Branch:</strong> "Think of it like duplicating a spreadsheet tab. You work on the copy. The original stays clean until you're ready."<br><br>
+  <strong>Commit:</strong> "Every time you save a meaningful change, Git takes a snapshot. Like a photo. You can always go back to any earlier photo."<br><br>
+  <strong>PR:</strong> "Before your branch merges into main, your teammate reviews it. No surprises in production."<br><br>
+  <strong>Mental model card:</strong> "Branch → change → commit → PR → merge. That's the whole thing. And it's exactly how dbt Cloud works — which we'll come back to."<br><br>
+  <span class="watch">Watch out for:</span> Going too deep on any one card. Keep moving — the demo will make it concrete.`,
+
+  // Slide 6 — Demo
+  `<span class="timing">5:35 – 8:35</span><br>
+  <strong>Say:</strong> "Now let's do this for real. I'm going to run these commands in my terminal — watch what happens."<br><br>
+  <span class="action">Do:</span> Switch to your actual terminal. Run each command live. Narrate as you go:<br><br>
+  "git checkout -b — this creates the branch AND switches to it in one step."<br>
+  "git add — I'm staging the file, telling Git I want to include this change."<br>
+  "git commit -m — this is the snapshot. Notice the message is meaningful — future me will thank present me."<br>
+  "git push — now it's on GitHub. From here I'd open a pull request."<br><br>
+  <span class="action">Do:</span> Show the GitHub PR screen briefly if time allows.<br><br>
+  <span class="watch">Watch out for:</span> Terminal errors. Have a fallback screenshot ready. If something breaks, say "good — this is real life" and use the screenshot.`,
+
+  // Slide 7 — Practice
+  `<span class="timing">8:35 – 10:35</span><br>
+  <strong>Say:</strong> "Your turn. I want you to try these steps yourself. You've got 2 minutes."<br><br>
+  <span class="action">Do:</span> Read the scenario out loud. Then go quiet and let people work. Walk around if in person. Watch screens if remote.<br><br>
+  "Step 1: create the branch. Step 2: make any small change. Step 3: commit it."<br><br>
+  After 90 seconds: "If you've finished, try the bonus — run git log --oneline to see your commit history."<br><br>
+  <span class="watch">Watch out for:</span> Jumping in too quickly to help. Give people time to struggle a little — that's where learning happens. Help only if someone is completely stuck.`,
+
+  // Slide 8 — CFU
+  `<span class="timing">10:35 – 12:05</span><br>
+  <strong>Say:</strong> "Quick check — this is about the pull request workflow. Have a think before you answer."<br><br>
+  <span class="action">Do:</span> Read the question out loud. Give 15 seconds of silence. Then ask for a show of hands or have them call out the letter.<br><br>
+  If B: "Exactly right — the PR is Git's built-in review mechanism."<br>
+  If wrong answer: "Good attempt — let's look at why B is the right answer..." Then reveal and explain.<br><br>
+  <span class="watch">Watch out for:</span> Embarrassing anyone who gets it wrong. Keep it light — "these are designed to be tricky."<br><br>
+  <strong>Also mention:</strong> "By the way — I've sent you a link to a live quiz version of this. If you want to try the full 4-question version, it's on the course page."`,
+
+  // Slide 9 — Summary
+  `<span class="timing">12:05 – 15:00</span><br>
+  <strong>Say:</strong> "Let's land the plane. Three things you can now do." Read each check point.<br><br>
+  <strong>The dbt bridge — say this clearly:</strong> "Every dbt Cloud project is a Git repo. When you click 'create branch' in dbt Cloud and start editing a model — that's exactly what we just did in the terminal. The UI just handles it for you. You're already thinking like a dbt developer."<br><br>
+  <strong>Resources:</strong> "Pro Git book is free online — it's the best reference. GitHub Skills has interactive courses if you want to go deeper."<br><br>
+  <span class="action">Do:</span> End with: "Any questions? And if you have a moment, there's a feedback form on the course page — it takes 2 minutes and genuinely helps me improve."<br><br>
+  <span class="watch">Watch out for:</span> Rushing the dbt bridge. That connection is the whole point — slow down and let it land.`
+];
+
+let cur = 0;
+const total = 9;
+let notesVisible = false;
+let toolbarTimer;
+
+function goTo(i) {
+  document.getElementById('s' + (cur+1)).classList.remove('active');
+  cur = i;
+  document.getElementById('s' + (cur+1)).classList.add('active');
+  document.getElementById('counter').textContent = (cur+1) + ' / ' + total;
+  document.getElementById('prev-btn').disabled = cur === 0;
+  document.getElementById('next-btn').disabled = cur === total-1;
+  document.getElementById('notes-content').innerHTML = notes[cur];
+}
+
+function changeSlide(d) { goTo(Math.max(0, Math.min(total-1, cur+d))); }
+
+function toggleNotes() {
+  notesVisible = !notesVisible;
+  document.getElementById('notes-panel').classList.toggle('visible', notesVisible);
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+function cfuClick(el, correct) {
+  document.querySelectorAll('.cfu-opt').forEach(o => { o.classList.remove('correct','wrong'); o.onclick = null; });
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) document.querySelectorAll('.cfu-opt')[1].classList.add('correct');
+  document.getElementById('cfu-reveal').style.display = 'block';
+}
+
+// Scale slides to fill viewport
+function scaleSlides() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const aspect = 16/9;
+  let w, h;
+  if (vw/vh > aspect) { h = vh * 0.95; w = h * aspect; }
+  else { w = vw * 0.95; h = w / aspect; }
+  const scaler = document.getElementById('scaler');
+  scaler.style.width = w + 'px';
+  scaler.style.height = h + 'px';
+  document.querySelectorAll('.slide').forEach(s => { s.style.width = w + 'px'; s.style.height = h + 'px'; });
+}
+
+// Auto-hide toolbar
+function showToolbar() {
+  document.getElementById('toolbar').classList.remove('hidden');
+  clearTimeout(toolbarTimer);
+  toolbarTimer = setTimeout(() => document.getElementById('toolbar').classList.add('hidden'), 3000);
+}
+
+document.addEventListener('mousemove', showToolbar);
+document.addEventListener('keydown', e => {
+  showToolbar();
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); changeSlide(-1); }
+  if (e.key === 'n' || e.key === 'N') toggleNotes();
+  if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+});
+
+window.addEventListener('resize', scaleSlides);
+scaleSlides();
+goTo(0);
+showToolbar();
+</script>
+</body>
+</html>
