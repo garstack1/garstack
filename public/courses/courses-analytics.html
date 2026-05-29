@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Analytics · All Courses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF694A; --green: #1D9E75; --blue: #185FA5; --navy: #0d1117;
+    --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+    --bg: #ffffff; --bg-surface: #f9f9f8; --bg-dark: #f3f3f1;
+    --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16);
+    --radius: 10px; --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #f0f0f0; --text-muted: #8a8f9a; --text-light: #4a5060; --bg: #0d1117; --bg-surface: #161b22; --bg-dark: #0a0e14; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); }
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-link { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-link:hover { color: var(--text); }
+  .updated { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-light); }
+  .btn-sm { background: none; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 6px 14px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--text-muted); transition: background 0.12s; }
+  .btn-sm:hover { background: var(--bg-surface); color: var(--text); }
+
+  .page { max-width: 1040px; margin: 0 auto; padding: 36px 32px 80px; }
+
+  .page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+
+  /* HEADLINE METRICS */
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .metric { background: var(--bg-surface); border-radius: var(--radius); padding: 16px 18px; }
+  .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .metric-val { font-family: 'DM Serif Display', serif; font-size: 30px; line-height: 1; }
+  .metric-val.orange { color: var(--orange); }
+  .metric-val.green { color: var(--green); }
+  .metric-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+  /* SECTION */
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 12px; font-weight: 500; letter-spacing: 0.8px; color: var(--text-muted); text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 0.5px solid var(--border); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+  /* CARDS */
+  .card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; }
+  .card-header { padding: 14px 20px; border-bottom: 0.5px solid var(--border); background: var(--bg-surface); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .card-title { font-size: 14px; font-weight: 500; }
+  .card-meta { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  .card-body { padding: 20px; }
+
+  /* COURSE CARDS */
+  .course-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; transition: border-color 0.15s; }
+  .course-card:hover { border-color: var(--orange); }
+  .course-card-top { padding: 18px 20px 14px; border-bottom: 0.5px solid var(--border); }
+  .course-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1px; margin-bottom: 6px; }
+  .course-name { font-size: 15px; font-weight: 500; margin-bottom: 12px; }
+  .course-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .cs { text-align: center; padding: 10px 6px; background: var(--bg-surface); border-radius: var(--radius); }
+  .cs-val { font-family: 'DM Serif Display', serif; font-size: 20px; }
+  .cs-val.good { color: var(--green); }
+  .cs-val.mid { color: var(--orange); }
+  .cs-val.low { color: #E24B4A; }
+  .cs-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .course-card-footer { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .course-link { font-size: 12px; color: var(--orange); text-decoration: none; font-family: 'DM Mono', monospace; }
+  .course-link:hover { text-decoration: underline; }
+  .sessions-badge { font-size: 11px; color: var(--text-light); font-family: 'DM Mono', monospace; }
+
+  /* TREND CHART */
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* QUESTION TABLE */
+  .q-table { width: 100%; border-collapse: collapse; }
+  .q-table th { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-muted); text-align: left; padding: 8px 12px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 400; }
+  .q-table td { font-size: 13px; padding: 10px 12px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+  .q-table tr:last-child td { border-bottom: none; }
+  .q-table tr:hover td { background: var(--bg-surface); }
+  .acc-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .acc-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .acc-bar-fill { height: 100%; border-radius: 3px; }
+  .acc-bar-fill.good { background: var(--green); }
+  .acc-bar-fill.mid { background: var(--orange); }
+  .acc-bar-fill.low { background: #E24B4A; }
+  .acc-pct { font-size: 12px; font-family: 'DM Mono', monospace; min-width: 34px; text-align: right; }
+  .acc-pct.good { color: var(--green); }
+  .acc-pct.mid { color: var(--orange); }
+  .acc-pct.low { color: #E24B4A; }
+  .course-pill { font-size: 11px; padding: 3px 8px; border-radius: 10px; background: rgba(255,105,74,0.1); color: var(--orange); font-family: 'DM Mono', monospace; white-space: nowrap; }
+  .q-text-cell { max-width: 300px; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+  .empty .big { font-size: 36px; margin-bottom: 10px; }
+  .empty p { font-size: 14px; margin-bottom: 4px; }
+  .empty small { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text-light); }
+
+  /* FEEDBACK COMPARISON */
+  .fb-compare { display: flex; flex-direction: column; gap: 14px; }
+  .fbc-row { display: flex; align-items: center; gap: 12px; }
+  .fbc-label { font-size: 13px; color: var(--text-muted); min-width: 90px; }
+  .fbc-bars { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .fbc-bar-row { display: flex; align-items: center; gap: 8px; }
+  .fbc-course { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-light); min-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fbc-track { flex: 1; height: 14px; background: var(--bg-surface); border-radius: 3px; overflow: hidden; border: 0.5px solid var(--border); }
+  .fbc-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .fbc-val { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text-muted); min-width: 30px; text-align: right; }
+
+  /* COLORS per course index */
+  .c0 { background: #FF694A; }
+  .c1 { background: #1D9E75; }
+  .c2 { background: #185FA5; }
+  .c3 { background: #BA7517; }
+  .c4 { background: #7F77DD; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">📊 training analytics</span>
+  <div class="nav-right">
+    <span class="updated" id="updated">Loading…</span>
+    <button class="btn-sm" onclick="refresh()">Refresh</button>
+    <a href="index.html" class="nav-link">← Courses</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-tag">Instructor view · all courses</div>
+  <div class="page-title">Training analytics</div>
+  <div class="page-sub">Aggregated quiz and feedback data across every course and session.</div>
+
+  <div class="metrics" id="metrics">
+    <div class="metric"><div class="metric-label">Loading</div><div class="metric-val">…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Courses</div>
+    <div id="course-cards" class="three-col"></div>
+  </div>
+
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">NPS trend over time</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Avg NPS per session</span><span class="card-meta" id="nps-sessions">—</span></div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:200px"><canvas id="nps-chart" role="img" aria-label="NPS trend over sessions">NPS trend chart.</canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Quiz accuracy trend</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Avg accuracy per session</span><span class="card-meta" id="acc-sessions">—</span></div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:200px"><canvas id="acc-chart" role="img" aria-label="Accuracy trend over sessions">Accuracy trend chart.</canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Feedback comparison across courses</div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Star rating · Clarity · NPS by course</span></div>
+      <div class="card-body" id="fb-compare"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Hardest questions across all courses</div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Ranked by accuracy — lowest first</span><span class="card-meta">questions learners struggle with most</span></div>
+      <div class="card-body" style="padding:0">
+        <table class="q-table" id="q-table">
+          <thead><tr><th>#</th><th>Question</th><th>Course</th><th>Accuracy</th><th>Responses</th></tr></thead>
+          <tbody id="q-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Score distribution · all courses</div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">How learners scored across all quizzes</span></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:220px"><canvas id="score-dist-chart" role="img" aria-label="Score distribution across all courses">Score distribution chart.</canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://skpyeipqipplsuzjofje.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcHllaXBxaXBwbHN1empvZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTU2MDAsImV4cCI6MjA5NTYzMTYwMH0.pzMoxPTauK0wlnedup17efCurVoGwMNbikTMZg-qN6Q';
+
+const COURSE_NAMES = {
+  'git-for-data-teams': 'Git for Data Teams',
+  'sql-window-functions': 'SQL Window Functions',
+  'dbt-fundamentals': 'dbt Fundamentals',
+  'snowflake-basics': 'Snowflake Basics'
+};
+
+const COURSE_Q_COUNT = {
+  'git-for-data-teams': 4
+};
+
+let npsChart, accChart, scoreDistChart;
+
+async function sbSelect(table, params) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.ok ? await res.json() : [];
+  } catch(e) { return []; }
+}
+
+function valClass(v, g, m) { return v >= g ? 'good' : v >= m ? 'mid' : 'low'; }
+function fmtCourse(id) { return COURSE_NAMES[id] || id; }
+
+function groupBy(arr, key) {
+  return arr.reduce((acc, r) => {
+    const k = r[key];
+    if (!acc[k]) acc[k] = [];
+    acc[k].push(r);
+    return acc;
+  }, {});
+}
+
+async function render() {
+  document.getElementById('updated').textContent = 'Loading…';
+
+  const [quizRows, fbRows] = await Promise.all([
+    sbSelect('quiz_answers', 'order=created_at.asc'),
+    sbSelect('feedback', 'order=created_at.asc')
+  ]);
+
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+  const courses = [...new Set([...quizRows.map(r=>r.course), ...fbRows.map(r=>r.course)].filter(Boolean))];
+  const totalLearners = [...new Set(quizRows.map(r=>r.learner_id))].length;
+  const totalSessions = [...new Set([...quizRows.map(r=>r.session_id), ...fbRows.map(r=>r.session_id)].filter(Boolean))].length;
+  const overallAcc = quizRows.length ? Math.round(quizRows.filter(r=>r.is_correct).length/quizRows.length*100) : 0;
+  const avgNps = fbRows.length ? Math.round(fbRows.filter(r=>r.nps!=null).reduce((s,r)=>s+r.nps,0)/fbRows.filter(r=>r.nps!=null).length) : 0;
+  const avgStar = fbRows.length ? (fbRows.reduce((s,r)=>s+(r.star||0),0)/fbRows.length).toFixed(1) : '—';
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Total courses</div><div class="metric-val orange">${courses.length}</div><div class="metric-sub">with data</div></div>
+    <div class="metric"><div class="metric-label">Total sessions</div><div class="metric-val">${totalSessions}</div><div class="metric-sub">delivered</div></div>
+    <div class="metric"><div class="metric-label">Total learners</div><div class="metric-val">${totalLearners}</div><div class="metric-sub">quiz respondents</div></div>
+    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${quizRows.length?overallAcc+'%':'—'}</div><div class="metric-sub">correct answers</div></div>
+    <div class="metric"><div class="metric-label">Avg NPS</div><div class="metric-val ${valClass(avgNps,8,6)}">${fbRows.length?avgNps:'—'}</div><div class="metric-sub">out of 10</div></div>
+    <div class="metric"><div class="metric-label">Avg star rating</div><div class="metric-val ${valClass(parseFloat(avgStar),4,3)}">${avgStar}</div><div class="metric-sub">out of 5</div></div>
+  `;
+
+  // COURSE CARDS
+  const courseCardsEl = document.getElementById('course-cards');
+  if (courses.length === 0) {
+    courseCardsEl.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="big">📚</div><p>No course data yet</p><small>Complete the quiz or feedback on any course to see data here</small></div>`;
+  } else {
+    const COLORS = ['#FF694A','#1D9E75','#185FA5','#BA7517','#7F77DD'];
+    courseCardsEl.innerHTML = courses.map((c, ci) => {
+      const cq = quizRows.filter(r=>r.course===c);
+      const cf = fbRows.filter(r=>r.course===c);
+      const learners = [...new Set(cq.map(r=>r.learner_id))].length;
+      const sessions = [...new Set([...cq.map(r=>r.session_id),...cf.map(r=>r.session_id)].filter(Boolean))].length;
+      const acc = cq.length ? Math.round(cq.filter(r=>r.is_correct).length/cq.length*100) : null;
+      const nps = cf.filter(r=>r.nps!=null).length ? Math.round(cf.filter(r=>r.nps!=null).reduce((s,r)=>s+r.nps,0)/cf.filter(r=>r.nps!=null).length) : null;
+      const star = cf.length ? (cf.reduce((s,r)=>s+(r.star||0),0)/cf.length).toFixed(1) : null;
+      return `<div class="course-card">
+        <div class="course-card-top">
+          <div class="course-tag" style="color:${COLORS[ci%COLORS.length]}">${c}</div>
+          <div class="course-name">${fmtCourse(c)}</div>
+          <div class="course-stats">
+            <div class="cs"><div class="cs-val ${acc!=null?valClass(acc,70,40):''}">${acc!=null?acc+'%':'—'}</div><div class="cs-label">accuracy</div></div>
+            <div class="cs"><div class="cs-val ${nps!=null?valClass(nps,8,6):''}">${nps!=null?nps:'—'}</div><div class="cs-label">NPS</div></div>
+            <div class="cs"><div class="cs-val ${star?valClass(parseFloat(star),4,3):''}">${star||'—'}</div><div class="cs-label">stars</div></div>
+          </div>
+        </div>
+        <div class="course-card-footer">
+          <a href="${c}/analytics.html" class="course-link">View analytics →</a>
+          <span class="sessions-badge">${sessions} session${sessions!==1?'s':''} · ${learners} learner${learners!==1?'s':''}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // NPS TREND — group by session_id
+  const sessionsFb = groupBy(fbRows.filter(r=>r.nps!=null), 'session_id');
+  const sessionDates = Object.keys(sessionsFb).sort();
+  const npsPerSession = sessionDates.map(sid => {
+    const rows = sessionsFb[sid];
+    return Math.round(rows.reduce((s,r)=>s+r.nps,0)/rows.length);
+  });
+  const sessionLabels = sessionDates.map((sid, i) => {
+    const first = sessionsFb[sid][0];
+    return first ? new Date(first.created_at).toLocaleDateString('en-IE',{month:'short',day:'numeric'}) : `S${i+1}`;
+  });
+
+  document.getElementById('nps-sessions').textContent = sessionDates.length + ' session' + (sessionDates.length!==1?'s':'');
+  if (npsChart) npsChart.destroy();
+  if (sessionDates.length > 0) {
+    npsChart = new Chart(document.getElementById('nps-chart'), {
+      type: 'line',
+      data: {
+        labels: sessionLabels,
+        datasets: [{
+          label: 'NPS', data: npsPerSession,
+          borderColor: '#FF694A', backgroundColor: 'rgba(255,105,74,0.08)',
+          pointBackgroundColor: '#FF694A', pointRadius: 5,
+          fill: true, tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#888', font: { size: 11 } } },
+          y: { min: 0, max: 10, ticks: { color: '#888', font: { size: 11 }, stepSize: 2 }, grid: { color: 'rgba(0,0,0,0.04)' } }
+        }
+      }
+    });
+  } else {
+    document.getElementById('nps-chart').parentElement.innerHTML = `<div class="empty"><div class="big">📈</div><p>No session data yet</p><small>Complete feedback forms to see trends</small></div>`;
+  }
+
+  // ACCURACY TREND — group by session_id
+  const sessionsQ = groupBy(quizRows, 'session_id');
+  const qSessionDates = Object.keys(sessionsQ).sort();
+  const accPerSession = qSessionDates.map(sid => {
+    const rows = sessionsQ[sid];
+    return Math.round(rows.filter(r=>r.is_correct).length/rows.length*100);
+  });
+  const qSessionLabels = qSessionDates.map((sid,i) => {
+    const first = sessionsQ[sid][0];
+    return first ? new Date(first.created_at).toLocaleDateString('en-IE',{month:'short',day:'numeric'}) : `S${i+1}`;
+  });
+
+  document.getElementById('acc-sessions').textContent = qSessionDates.length + ' session' + (qSessionDates.length!==1?'s':'');
+  if (accChart) accChart.destroy();
+  if (qSessionDates.length > 0) {
+    accChart = new Chart(document.getElementById('acc-chart'), {
+      type: 'line',
+      data: {
+        labels: qSessionLabels,
+        datasets: [{
+          label: 'Accuracy %', data: accPerSession,
+          borderColor: '#1D9E75', backgroundColor: 'rgba(29,158,117,0.08)',
+          pointBackgroundColor: '#1D9E75', pointRadius: 5,
+          fill: true, tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#888', font: { size: 11 } } },
+          y: { min: 0, max: 100, ticks: { color: '#888', font: { size: 11 }, callback: v => v+'%' }, grid: { color: 'rgba(0,0,0,0.04)' } }
+        }
+      }
+    });
+  } else {
+    document.getElementById('acc-chart').parentElement.innerHTML = `<div class="empty"><div class="big">📊</div><p>No session data yet</p></div>`;
+  }
+
+  // FEEDBACK COMPARISON
+  const fbCompEl = document.getElementById('fb-compare');
+  const COLORS = ['#FF694A','#1D9E75','#185FA5','#BA7517','#7F77DD'];
+  if (courses.length === 0 || fbRows.length === 0) {
+    fbCompEl.innerHTML = `<div class="empty"><div class="big">💬</div><p>No feedback yet</p></div>`;
+  } else {
+    const metrics = [
+      { label: 'Star rating', key: 'star', max: 5, fmt: v => v.toFixed(1) },
+      { label: 'Clarity', key: 'clarity', max: 10, fmt: v => v.toFixed(1) },
+      { label: 'NPS', key: 'nps', max: 10, fmt: v => Math.round(v) }
+    ];
+    fbCompEl.innerHTML = `<div class="fb-compare">${metrics.map(m => {
+      const bars = courses.map((c, ci) => {
+        const rows = fbRows.filter(r=>r.course===c && r[m.key]!=null);
+        if (!rows.length) return '';
+        const avg = rows.reduce((s,r)=>s+r[m.key],0)/rows.length;
+        const pct = Math.round((avg/m.max)*100);
+        return `<div class="fbc-bar-row">
+          <div class="fbc-course">${fmtCourse(c)}</div>
+          <div class="fbc-track"><div class="fbc-fill c${ci}" style="width:${pct}%"></div></div>
+          <div class="fbc-val">${m.fmt(avg)}</div>
+        </div>`;
+      }).join('');
+      return bars ? `<div class="fbc-row"><div class="fbc-label">${m.label}</div><div class="fbc-bars">${bars}</div></div>` : '';
+    }).join('')}</div>`;
+  }
+
+  // HARDEST QUESTIONS
+  const qByText = groupBy(quizRows, 'question');
+  const qStats = Object.entries(qByText).map(([q, rows]) => {
+    const acc = Math.round(rows.filter(r=>r.is_correct).length/rows.length*100);
+    return { q, acc, n: rows.length, course: rows[0].course };
+  }).sort((a,b) => a.acc - b.acc).slice(0, 10);
+
+  const tbody = document.getElementById('q-tbody');
+  if (qStats.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">No quiz data yet</td></tr>`;
+  } else {
+    tbody.innerHTML = qStats.map((qs, i) => {
+      const cls = valClass(qs.acc, 70, 40);
+      return `<tr>
+        <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
+        <td class="q-text-cell">${qs.q}</td>
+        <td><span class="course-pill">${fmtCourse(qs.course)}</span></td>
+        <td><div class="acc-bar-wrap">
+          <div class="acc-bar"><div class="acc-bar-fill ${cls}" style="width:${qs.acc}%"></div></div>
+          <span class="acc-pct ${cls}">${qs.acc}%</span>
+        </div></td>
+        <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${qs.n}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // SCORE DISTRIBUTION
+  const scoreBuckets = [0,0,0,0,0];
+  const learnerScores = {};
+  quizRows.forEach(r => {
+    const k = r.learner_id + '_' + r.session_id;
+    if (!learnerScores[k]) learnerScores[k] = { correct: 0, total: 0, course: r.course };
+    learnerScores[k].total++;
+    if (r.is_correct) learnerScores[k].correct++;
+  });
+  Object.values(learnerScores).forEach(ls => {
+    const maxQ = COURSE_Q_COUNT[ls.course] || 4;
+    const score = Math.min(ls.correct, maxQ);
+    if (score >= 0 && score <= 4) scoreBuckets[score]++;
+  });
+
+  if (scoreDistChart) scoreDistChart.destroy();
+  if (quizRows.length > 0) {
+    scoreDistChart = new Chart(document.getElementById('score-dist-chart'), {
+      type: 'bar',
+      data: {
+        labels: ['0 correct','1 correct','2 correct','3 correct','4 correct'],
+        datasets: [{
+          label: 'Learners', data: scoreBuckets,
+          backgroundColor: ['#E24B4A','#EF9F27','#EF9F27','#1D9E75','#1D9E75'],
+          borderRadius: 5, borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#888', font: { size: 12 } } },
+          y: { beginAtZero: true, ticks: { stepSize: 1, color: '#888', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } }
+        }
+      }
+    });
+  } else {
+    document.getElementById('score-dist-chart').parentElement.innerHTML = `<div class="empty"><div class="big">📊</div><p>No scores yet</p></div>`;
+  }
+}
+
+function refresh() { render(); }
+render();
+setInterval(render, 10000);
+</script>
+</body>
+</html>
