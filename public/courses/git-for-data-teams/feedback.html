@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Feedback · Git for Data Teams</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF694A; --navy: #0d1117; --green: #1D9E75;
+    --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+    --bg: #ffffff; --bg-surface: #f9f9f8;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
+    --radius: 10px; --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15); }
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 48px 24px 80px; }
+  .page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 30px; margin-bottom: 8px; }
+  .page-sub { font-size: 15px; color: var(--text-muted); font-weight: 300; margin-bottom: 40px; line-height: 1.6; }
+
+  .form-section { margin-bottom: 36px; }
+  .field-label { font-size: 14px; font-weight: 500; margin-bottom: 12px; display: block; }
+  .field-hint { font-size: 13px; color: var(--text-muted); margin-top: -8px; margin-bottom: 12px; }
+
+  /* STARS */
+  .star-row { display: flex; gap: 8px; }
+  .star-btn { background: none; border: none; cursor: pointer; font-size: 28px; line-height: 1; padding: 4px; filter: grayscale(1); opacity: 0.3; transition: filter 0.15s, opacity 0.15s, transform 0.1s; }
+  .star-btn:hover, .star-btn.active { filter: none; opacity: 1; }
+  .star-btn:active { transform: scale(0.9); }
+  .star-label { font-size: 13px; color: var(--text-muted); margin-top: 8px; min-height: 20px; font-style: italic; }
+
+  /* SCALE */
+  .scale-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .scale-btn { width: 40px; height: 40px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 14px; font-family: 'DM Mono', monospace; cursor: pointer; transition: border-color 0.12s, background 0.12s; }
+  .scale-btn:hover { border-color: var(--orange); background: var(--bg-surface); }
+  .scale-btn.active { border-color: var(--orange); background: var(--orange); color: white; }
+  .scale-endpoints { display: flex; justify-content: space-between; margin-top: 8px; }
+  .scale-endpoints span { font-size: 12px; color: var(--text-muted); }
+
+  /* CHIPS */
+  .chips-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip-btn { padding: 8px 14px; border-radius: 20px; border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: border-color 0.12s, background 0.12s; }
+  .chip-btn:hover { border-color: var(--orange); background: var(--bg-surface); }
+  .chip-btn.active { border-color: var(--orange); background: rgba(255,105,74,0.08); color: var(--orange); }
+
+  /* TEXTAREA */
+  textarea { width: 100%; padding: 14px 16px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); resize: vertical; min-height: 100px; line-height: 1.6; transition: border-color 0.15s; outline: none; }
+  textarea:focus { border-color: var(--orange); }
+  textarea::placeholder { color: var(--text-light); }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 36px 0; }
+
+  /* SUBMIT */
+  .submit-btn { width: 100%; padding: 15px; background: var(--orange); color: white; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+  .submit-btn:hover { opacity: 0.88; }
+  .submit-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* THANK YOU */
+  .thankyou { display: none; text-align: center; padding: 60px 20px; }
+  .ty-icon { font-size: 52px; margin-bottom: 20px; }
+  .ty-title { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 10px; }
+  .ty-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; max-width: 380px; margin-left: auto; margin-right: auto; }
+  .ty-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .ty-link { padding: 10px 20px; border-radius: var(--radius); font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+  .ty-link.primary { background: var(--orange); color: white; }
+  .ty-link.secondary { border: 0.5px solid var(--border-strong); color: var(--text); }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">💬 session feedback</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+
+<div class="container" id="form-container">
+  <div class="page-tag">Post-session · 2 minutes</div>
+  <div class="page-title">How did we do?</div>
+  <div class="page-sub">Your honest feedback helps make the next session better. Takes about 2 minutes.</div>
+
+  <!-- OVERALL RATING -->
+  <div class="form-section">
+    <label class="field-label">Overall, how would you rate this session?</label>
+    <div class="star-row" id="star-row">
+      <button class="star-btn" data-val="1" onclick="setStar(1)" aria-label="1 star">⭐</button>
+      <button class="star-btn" data-val="2" onclick="setStar(2)" aria-label="2 stars">⭐</button>
+      <button class="star-btn" data-val="3" onclick="setStar(3)" aria-label="3 stars">⭐</button>
+      <button class="star-btn" data-val="4" onclick="setStar(4)" aria-label="4 stars">⭐</button>
+      <button class="star-btn" data-val="5" onclick="setStar(5)" aria-label="5 stars">⭐</button>
+    </div>
+    <div class="star-label" id="star-label">Tap a star to rate</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- PACE -->
+  <div class="form-section">
+    <label class="field-label">How was the pace of the session?</label>
+    <div class="chips-row" id="pace-row">
+      <button class="chip-btn" onclick="setPace('Too slow')">Too slow</button>
+      <button class="chip-btn" onclick="setPace('Just right')">Just right</button>
+      <button class="chip-btn" onclick="setPace('Slightly fast')">Slightly fast</button>
+      <button class="chip-btn" onclick="setPace('Too fast')">Too fast</button>
+    </div>
+  </div>
+
+  <!-- CLARITY -->
+  <div class="form-section">
+    <label class="field-label">How clear were the explanations? <span style="font-weight:400;color:var(--text-muted)">(1 = confusing, 10 = crystal clear)</span></label>
+    <div class="scale-row" id="clarity-row">
+      <button class="scale-btn" onclick="setClarity(1)">1</button>
+      <button class="scale-btn" onclick="setClarity(2)">2</button>
+      <button class="scale-btn" onclick="setClarity(3)">3</button>
+      <button class="scale-btn" onclick="setClarity(4)">4</button>
+      <button class="scale-btn" onclick="setClarity(5)">5</button>
+      <button class="scale-btn" onclick="setClarity(6)">6</button>
+      <button class="scale-btn" onclick="setClarity(7)">7</button>
+      <button class="scale-btn" onclick="setClarity(8)">8</button>
+      <button class="scale-btn" onclick="setClarity(9)">9</button>
+      <button class="scale-btn" onclick="setClarity(10)">10</button>
+    </div>
+    <div class="scale-endpoints"><span>Confusing</span><span>Crystal clear</span></div>
+  </div>
+
+  <!-- WHAT WORKED -->
+  <div class="form-section">
+    <label class="field-label">What was most useful?</label>
+    <div class="chips-row" id="useful-row">
+      <button class="chip-btn multi" onclick="toggleChip(this)">Live demo</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">Real examples</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">Practice task</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">Quiz questions</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">The dbt connection</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">Slide visuals</button>
+    </div>
+  </div>
+
+  <!-- WHAT TO IMPROVE -->
+  <div class="form-section">
+    <label class="field-label">What could be improved?</label>
+    <div class="chips-row" id="improve-row">
+      <button class="chip-btn multi" onclick="toggleChip(this)">More practice time</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">Slower pace</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">More examples</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">Less theory</button>
+      <button class="chip-btn multi" onclick="toggleChip(this)">More dbt context</button>
+    </div>
+  </div>
+
+  <!-- NPS -->
+  <div class="form-section">
+    <label class="field-label">How likely are you to recommend this training to a colleague? <span style="font-weight:400;color:var(--text-muted)">(0–10)</span></label>
+    <div class="scale-row" id="nps-row" style="flex-wrap:wrap">
+      <button class="scale-btn" onclick="setNps(0)">0</button>
+      <button class="scale-btn" onclick="setNps(1)">1</button>
+      <button class="scale-btn" onclick="setNps(2)">2</button>
+      <button class="scale-btn" onclick="setNps(3)">3</button>
+      <button class="scale-btn" onclick="setNps(4)">4</button>
+      <button class="scale-btn" onclick="setNps(5)">5</button>
+      <button class="scale-btn" onclick="setNps(6)">6</button>
+      <button class="scale-btn" onclick="setNps(7)">7</button>
+      <button class="scale-btn" onclick="setNps(8)">8</button>
+      <button class="scale-btn" onclick="setNps(9)">9</button>
+      <button class="scale-btn" onclick="setNps(10)">10</button>
+    </div>
+    <div class="scale-endpoints"><span>Not likely</span><span>Definitely</span></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- FREE TEXT -->
+  <div class="form-section">
+    <label class="field-label">Any other thoughts?</label>
+    <div class="field-hint">What did you learn? Anything that surprised you? Optional.</div>
+    <textarea id="free-text" placeholder="The demo was really helpful because…" rows="4"></textarea>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitForm()">Submit feedback →</button>
+</div>
+
+<div class="container thankyou" id="thankyou">
+  <div class="ty-icon">🙏</div>
+  <div class="ty-title">Thanks for the feedback!</div>
+  <div class="ty-sub">Your response has been recorded. This kind of data helps make every session better — I appreciate you taking the time.</div>
+  <div class="ty-links">
+    <a href="index.html" class="ty-link primary">Back to session →</a>
+    <a href="quiz.html" class="ty-link secondary">Retake the quiz</a>
+  </div>
+</div>
+
+<script>
+const FEEDBACK_KEY = 'git_feedback_results';
+let starVal = 0, paceVal = '', clarityVal = 0, npsVal = -1;
+
+const starLabels = ['', 'Not helpful', 'Needs work', 'Pretty good', 'Really good', 'Excellent!'];
+function setStar(v) {
+  starVal = v;
+  document.querySelectorAll('.star-btn').forEach((b,i) => b.classList.toggle('active', i < v));
+  document.getElementById('star-label').textContent = starLabels[v];
+
+}
+function setPace(v) {
+  paceVal = v;
+  document.querySelectorAll('#pace-row .chip-btn').forEach(b => b.classList.toggle('active', b.textContent === v));
+}
+function setClarity(v) {
+  clarityVal = v;
+  document.querySelectorAll('#clarity-row .scale-btn').forEach((b,i) => b.classList.toggle('active', i+1 === v));
+}
+function setNps(v) {
+  npsVal = v;
+  document.querySelectorAll('#nps-row .scale-btn').forEach((b,i) => b.classList.toggle('active', i === v));
+}
+function toggleChip(el) { el.classList.toggle('active'); }
+
+function submitForm() {
+  const useful = [...document.querySelectorAll('#useful-row .chip-btn.active')].map(b => b.textContent);
+  const improve = [...document.querySelectorAll('#improve-row .chip-btn.active')].map(b => b.textContent);
+  const freeText = document.getElementById('free-text').value.trim();
+
+  const entry = {
+    timestamp: new Date().toISOString(),
+    sessionId: localStorage.getItem('quiz_session_id') || 'anon_' + Date.now(),
+    star: starVal,
+    pace: paceVal,
+    clarity: clarityVal,
+    nps: npsVal,
+    useful,
+    improve,
+    freeText
+  };
+
+  try {
+    const existing = JSON.parse(localStorage.getItem(FEEDBACK_KEY) || '{"responses":[]}');
+    existing.responses.push(entry);
+    localStorage.setItem(FEEDBACK_KEY, JSON.stringify(existing));
+  } catch(e) {}
+
+
+
+  document.getElementById('form-container').style.display = 'none';
+  document.getElementById('thankyou').style.display = 'block';
+}
+</script>
+</body>
+</html>
