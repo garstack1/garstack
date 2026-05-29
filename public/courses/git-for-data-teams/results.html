@@ -106,6 +106,18 @@
 
 <script>
 const STORAGE_KEY = 'git_quiz_results';
+const SUPABASE_URL = 'https://skpyeipqipplsuzjofje.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcHllaXBxaXBwbHN1empvZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTU2MDAsImV4cCI6MjA5NTYzMTYwMH0.pzMoxPTauK0wlnedup17efCurVoGwMNbikTMZg-qN6Q';
+const COURSE = 'git-for-data-teams';
+
+async function sbSelect(table, params) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.ok ? await res.json() : [];
+  } catch(e) { return []; }
+}
 
 const questions = [
   {
@@ -130,24 +142,24 @@ const questions = [
   }
 ];
 
-function getData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { responses: [] };
-  } catch(e) { return { responses: [] }; }
+function getLocalData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"responses":[]}'); } catch(e) { return { responses: [] }; }
 }
 
-function resetData() {
+async function resetData() {
   if (confirm('Reset all quiz results? This cannot be undone.')) {
     localStorage.removeItem(STORAGE_KEY);
-    render();
+    await render();
   }
 }
 
-function render() {
-  const data = getData();
-  const responses = data.responses || [];
-  const n = responses.length;
+async function render() {
+  document.getElementById('last-update').textContent = 'Loading…';
+
+  const rows = await sbSelect('quiz_answers', `course=eq.${COURSE}&order=created_at.desc`);
+
+  const learners = [...new Set(rows.map(r => r.learner_id))];
+  const n = learners.length;
 
   document.getElementById('s-responses').textContent = n;
 
@@ -156,14 +168,21 @@ function render() {
     document.getElementById('s-acc').textContent = '—';
     document.getElementById('s-perfect').textContent = '0';
     document.getElementById('charts').innerHTML = `<div class="empty-state"><div class="big">📋</div><p>No responses yet</p><small>Ask learners to open quiz.html on their device</small></div>`;
+    document.getElementById('last-update').textContent = 'Updated ' + new Date().toLocaleTimeString();
     return;
   }
 
-  const avgScore = responses.reduce((s, r) => s + (r.score || 0), 0) / n;
-  const perfect = responses.filter(r => r.score === 4).length;
-  const totalAnswers = responses.flatMap(r => r.answers || []);
-  const totalCorrect = totalAnswers.filter(a => a.isCorrect).length;
-  const overallAcc = totalAnswers.length ? Math.round((totalCorrect / totalAnswers.length) * 100) : 0;
+  const totalCorrect = rows.filter(r => r.is_correct).length;
+  const overallAcc = rows.length ? Math.round((totalCorrect / rows.length) * 100) : 0;
+
+  const scoresByLearner = {};
+  rows.forEach(r => {
+    if (!scoresByLearner[r.learner_id]) scoresByLearner[r.learner_id] = 0;
+    if (r.is_correct) scoresByLearner[r.learner_id]++;
+  });
+  const scores = Object.values(scoresByLearner);
+  const avgScore = scores.length ? (scores.reduce((a,b)=>a+b,0) / scores.length) : 0;
+  const perfect = scores.filter(s => s === 4).length;
 
   document.getElementById('s-avg').textContent = avgScore.toFixed(1);
   document.getElementById('s-acc').textContent = overallAcc + '%';
@@ -174,12 +193,8 @@ function render() {
 
   questions.forEach((q, qi) => {
     const counts = new Array(q.opts.length).fill(0);
-    responses.forEach(r => {
-      const ans = (r.answers || []).find(a => a.question === q.q);
-      if (ans && ans.chosen !== undefined && ans.chosen >= 0 && ans.chosen < counts.length) {
-        counts[ans.chosen]++;
-      }
-    });
+    const qRows = rows.filter(r => r.question_index === qi);
+    qRows.forEach(r => { if (r.chosen >= 0 && r.chosen < counts.length) counts[r.chosen]++; });
     const total = counts.reduce((a,b) => a+b, 0);
     const correctCount = counts[q.correct];
     const accuracy = total ? Math.round((correctCount / total) * 100) : 0;
@@ -209,7 +224,6 @@ function render() {
     });
 
     const accClass = accuracy >= 70 ? 'good' : accuracy >= 40 ? 'mid' : 'low';
-
     card.innerHTML = `
       <div class="q-card-header">
         <div class="q-num-tag">Q${qi+1} of ${questions.length}</div>
@@ -220,13 +234,11 @@ function render() {
         <span class="q-total">${total} response${total !== 1 ? 's' : ''}</span>
         <span class="accuracy-badge ${accClass}">${accuracy}% correct</span>
       </div>`;
-
     chartsEl.appendChild(card);
   });
 
   document.getElementById('last-update').textContent = 'Updated ' + new Date().toLocaleTimeString();
 }
-
 render();
 setInterval(render, 3000);
 </script>
