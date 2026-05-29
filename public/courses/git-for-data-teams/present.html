@@ -167,7 +167,7 @@
       <div class="slide-inner">
         <div class="dbt-badge">⎇ technical training</div>
         <div class="slide-title">Git for Data Teams</div>
-        <div class="slide-subtitle">Branches, commits, and pull requests —<br>the version control workflow every data professional needs</div>
+        <div class="slide-subtitle">Branches, commits, and pull requests -<br>the version control workflow every data professional needs</div>
         <div class="presenter-row">
           <div class="avatar">YN</div>
           <div><div class="presenter-name">Your Name</div><div class="presenter-meta">Technical Instructor · dbt Labs</div></div>
@@ -203,12 +203,12 @@
         <div class="slide-body">
           <div class="agenda-grid">
             <div class="ah">Time</div><div class="ah">Topic</div><div class="ah">Type</div>
-            <div class="ac time">0–2 min</div><div class="ac hl">Hook — the "final_final_v3" problem</div><div class="ac"><span class="tag tag-c">concept</span></div>
-            <div class="ac time">2–5 min</div><div class="ac">What is a branch? Commits explained</div><div class="ac"><span class="tag tag-c">concept</span></div>
-            <div class="ac time">5–10 min</div><div class="ac hl">Live demo — branch, commit, pull request</div><div class="ac"><span class="tag tag-d">demo</span></div>
-            <div class="ac time">10–12 min</div><div class="ac">Your turn — try it in the terminal</div><div class="ac"><span class="tag tag-a">active</span></div>
-            <div class="ac time">12–14 min</div><div class="ac hl">Check for understanding</div><div class="ac"><span class="tag tag-k">check</span></div>
-            <div class="ac time">14–15 min</div><div class="ac">Next steps + the dbt connection</div><div class="ac"><span class="tag tag-c">wrap</span></div>
+            <div class="ac time">0-2 min</div><div class="ac hl">Hook - the "final_final_v3" problem</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">2-5 min</div><div class="ac">What is a branch? Commits explained</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">5-10 min</div><div class="ac hl">Live demo - branch, commit, pull request</div><div class="ac"><span class="tag tag-d">demo</span></div>
+            <div class="ac time">10-12 min</div><div class="ac">Your turn - try it in the terminal</div><div class="ac"><span class="tag tag-a">active</span></div>
+            <div class="ac time">12-14 min</div><div class="ac hl">Check for understanding</div><div class="ac"><span class="tag tag-k">check</span></div>
+            <div class="ac time">14-15 min</div><div class="ac">Next steps + the dbt connection</div><div class="ac"><span class="tag tag-c">wrap</span></div>
           </div>
         </div>
       </div>
@@ -231,7 +231,7 @@
               <span class="chip-bad">USE_THIS_ONE.sql</span>
             </div>
           </div>
-          <div class="hook-cta">We've all been there. This is the problem Git solves — not just for engineers, but for <strong>every data team</strong> that touches SQL, Python, or dbt models.<br><br>Today we'll fix this. For good.</div>
+          <div class="hook-cta">We've all been there. This is the problem Git solves - not just for engineers, but for <strong>every data team</strong> that touches SQL, Python, or dbt models.<br><br>Today we'll fix this. For good.</div>
         </div>
       </div>
     </div>
@@ -245,7 +245,7 @@
         <div class="slide-subtitle">Two ideas. That's it.</div>
         <div class="slide-body">
           <div class="concept-cols">
-            <div class="concept-card"><div class="concept-icon">⎇</div><h4>A branch is a safe copy</h4><p>Like a duplicate spreadsheet tab. Make changes freely — main stays untouched until you're ready.</p><span class="code-pill">git checkout -b my-fix</span></div>
+            <div class="concept-card"><div class="concept-icon">⎇</div><h4>A branch is a safe copy</h4><p>Like a duplicate spreadsheet tab. Make changes freely - main stays untouched until you're ready.</p><span class="code-pill">git checkout -b my-fix</span></div>
             <div class="concept-card"><div class="concept-icon">📦</div><h4>A commit is a snapshot</h4><p>Every meaningful save creates a photo. You can always roll back to any earlier state.</p><span class="code-pill">git commit -m "fix revenue"</span></div>
             <div class="concept-card"><div class="concept-icon">🔀</div><h4>A PR is a review request</h4><p>Before merging into main, teammates review. No surprises in production data.</p><span class="code-pill">git push → open PR</span></div>
             <div class="concept-card accent"><div class="concept-icon">💡</div><h4>The mental model</h4><p>Branch → change → commit → PR → merge.<br>Every dbt Cloud project uses this exact flow.</p></div>
@@ -263,7 +263,7 @@
         <div class="slide-subtitle">Watch, then you'll try it yourself.</div>
         <div class="slide-body">
           <div class="terminal">
-            <div class="term-bar"><div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div><span class="term-title">bash — data-project</span></div>
+            <div class="term-bar"><div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div><span class="term-title">bash - data-project</span></div>
             <div class="term-body">
               <div class="tl"><span class="tco"># Step 1: create a new branch</span></div>
               <div class="tl"><span class="tp">$</span> <span class="tc">git checkout -b</span> <span class="tbr">fix/revenue-null-values</span></div>
@@ -294,10 +294,10 @@
         <div class="slide-body">
           <div class="al-scenario"><strong>Scenario:</strong> You've been asked to add a new column to a SQL model. You don't want to touch main yet. Create a branch, make a fake change, and commit it.</div>
           <div class="al-steps">
-            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 1</strong> — Create a branch named <code>feature/add-customer-column</code></span></div>
-            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 2</strong> — Open any .sql file and add a comment line</span></div>
-            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 3</strong> — Stage with <code>git add</code> and commit with a meaningful message</span></div>
-            <div class="al-step"><span style="color:#ffbd2e">⭐</span><span><strong>Bonus</strong> — Run <code>git log --oneline</code> to see your commit history</span></div>
+            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 1</strong> - Create a branch named <code>feature/add-customer-column</code></span></div>
+            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 2</strong> - Open any .sql file and add a comment line</span></div>
+            <div class="al-step"><span style="color:var(--orange)">✓</span><span><strong>Step 3</strong> - Stage with <code>git add</code> and commit with a meaningful message</span></div>
+            <div class="al-step"><span style="color:#ffbd2e">⭐</span><span><strong>Bonus</strong> - Run <code>git log --oneline</code> to see your commit history</span></div>
           </div>
         </div>
       </div>
@@ -309,7 +309,7 @@
       <div class="slide-inner">
         <div class="slide-label">Check for understanding</div>
         <div class="slide-title">Quick check</div>
-        <div class="slide-subtitle">Pick the best answer — no pressure.</div>
+        <div class="slide-subtitle">Pick the best answer - no pressure.</div>
         <div class="slide-body">
           <div class="cfu-q">Your teammate asks you to review their SQL change before it goes to production. Which Git workflow handles this?</div>
           <div class="cfu-opts">
@@ -318,7 +318,7 @@
             <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">C</div>Email the .sql file and ask them to copy-paste it manually</div>
             <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">D</div>Save a new file named revenue_v2_FINAL.sql</div>
           </div>
-          <div class="cfu-reveal" id="cfu-reveal">✓ <strong>B is correct.</strong> A pull request is Git's built-in code review workflow — teammates comment on specific lines, approve, and merge when happy. All tracked in the project history forever.</div>
+          <div class="cfu-reveal" id="cfu-reveal">✓ <strong>B is correct.</strong> A pull request is Git's built-in code review workflow - teammates comment on specific lines, approve, and merge when happy. All tracked in the project history forever.</div>
         </div>
       </div>
     </div>
@@ -334,10 +334,10 @@
           <div class="sc"><span class="sc-icon">✓</span>Commit changes with meaningful messages that explain the why</div>
           <div class="sc"><span class="sc-icon">✓</span>Open a pull request so teammates can review before merging</div>
         </div>
-        <div class="dbt-bridge"><strong>The dbt connection:</strong> Every dbt Cloud project is a Git repo. When you create a branch in dbt Cloud and edit a model, that's exactly the workflow you practised today — just with a UI on top. You're already thinking like a dbt developer.</div>
+        <div class="dbt-bridge"><strong>The dbt connection:</strong> Every dbt Cloud project is a Git repo. When you create a branch in dbt Cloud and edit a model, that's exactly the workflow you practised today - just with a UI on top. You're already thinking like a dbt developer.</div>
         <div class="res-grid">
-          <div class="res-card"><h4>📖 Pro Git Book</h4><p>git-scm.com/book — free, comprehensive</p></div>
-          <div class="res-card"><h4>⚡ GitHub Skills</h4><p>skills.github.com — hands-on courses</p></div>
+          <div class="res-card"><h4>📖 Pro Git Book</h4><p>git-scm.com/book - free, comprehensive</p></div>
+          <div class="res-card"><h4>⚡ GitHub Skills</h4><p>skills.github.com - hands-on courses</p></div>
         </div>
       </div>
     </div>
@@ -367,76 +367,76 @@
 
 <script>
 const notes = [
-  // Slide 1 — Title
-  `<span class="timing">0:00 – 0:20</span><br>
-  <strong>Say:</strong> "Welcome everyone — I'm [name], and over the next 15 minutes we're going to cover something that every data professional needs but most haven't been properly taught: Git."<br><br>
-  <span class="action">Do:</span> Let the slide breathe. Smile. Don't rush into the content immediately — give people 10 seconds to settle.<br><br>
+  // Slide 1 - Title
+  `<span class="timing">0:00 - 0:20</span><br>
+  <strong>Say:</strong> "Welcome everyone - I'm [name], and over the next 15 minutes we're going to cover something that every data professional needs but most haven't been properly taught: Git."<br><br>
+  <span class="action">Do:</span> Let the slide breathe. Smile. Don't rush into the content immediately - give people 10 seconds to settle.<br><br>
   <span class="watch">Watch out for:</span> Nerves making you rush. Pause after introducing yourself.`,
 
-  // Slide 2 — Objectives
-  `<span class="timing">0:20 – 1:05</span><br>
+  // Slide 2 - Objectives
+  `<span class="timing">0:20 - 1:05</span><br>
   <strong>Say:</strong> "By the end of today, you'll be able to do three concrete things." Read each objective slowly.<br><br>
   "Number one: explain what a branch is. Number two: actually create one in a terminal. Number three: connect this directly to how dbt Cloud works."<br><br>
   <span class="action">Do:</span> Point to each number as you say it. Make eye contact after each one.<br><br>
   <span class="watch">Watch out for:</span> Reading verbatim off the slide. Know these three points cold.`,
 
-  // Slide 3 — Agenda
-  `<span class="timing">1:05 – 1:35</span><br>
+  // Slide 3 - Agenda
+  `<span class="timing">1:05 - 1:35</span><br>
   <strong>Say:</strong> "Here's how we'll spend the time. We start with a quick hook, cover the core concept, do a live demo in the terminal, you'll try it yourself, then we'll do a quick check and wrap up with the dbt connection."<br><br>
-  <span class="action">Do:</span> Run through the agenda quickly — don't read every line. Just signal the shape of the session.<br><br>
+  <span class="action">Do:</span> Run through the agenda quickly - don't read every line. Just signal the shape of the session.<br><br>
   <strong>Key phrase:</strong> "The hands-on part starts at minute 5. That's the most important bit."`,
 
-  // Slide 4 — Hook
-  `<span class="timing">1:35 – 3:05</span><br>
-  <strong>Say:</strong> "Before we get into Git — I have a question." Pause. "Has anyone here ever had a file on their desktop called something like final_final_v3_REAL.sql?"<br><br>
+  // Slide 4 - Hook
+  `<span class="timing">1:35 - 3:05</span><br>
+  <strong>Say:</strong> "Before we get into Git - I have a question." Pause. "Has anyone here ever had a file on their desktop called something like final_final_v3_REAL.sql?"<br><br>
   <span class="action">Do:</span> Wait for the laugh or the nod. Let it land. Then point to the chips on screen one by one.<br><br>
   "Every one of these is someone trying to do version control manually. It doesn't work. It breaks things. And it's completely unnecessary once you know Git."<br><br>
-  <span class="watch">Watch out for:</span> Moving on too quickly. This moment of recognition is important — let people sit in it for a second.`,
+  <span class="watch">Watch out for:</span> Moving on too quickly. This moment of recognition is important - let people sit in it for a second.`,
 
-  // Slide 5 — Concepts
-  `<span class="timing">3:05 – 5:35</span><br>
+  // Slide 5 - Concepts
+  `<span class="timing">3:05 - 5:35</span><br>
   <strong>Say:</strong> "Git has a reputation for being complicated. It isn't. There are two ideas you need to understand today."<br><br>
   <strong>Branch:</strong> "Think of it like duplicating a spreadsheet tab. You work on the copy. The original stays clean until you're ready."<br><br>
   <strong>Commit:</strong> "Every time you save a meaningful change, Git takes a snapshot. Like a photo. You can always go back to any earlier photo."<br><br>
   <strong>PR:</strong> "Before your branch merges into main, your teammate reviews it. No surprises in production."<br><br>
-  <strong>Mental model card:</strong> "Branch → change → commit → PR → merge. That's the whole thing. And it's exactly how dbt Cloud works — which we'll come back to."<br><br>
-  <span class="watch">Watch out for:</span> Going too deep on any one card. Keep moving — the demo will make it concrete.`,
+  <strong>Mental model card:</strong> "Branch → change → commit → PR → merge. That's the whole thing. And it's exactly how dbt Cloud works - which we'll come back to."<br><br>
+  <span class="watch">Watch out for:</span> Going too deep on any one card. Keep moving - the demo will make it concrete.`,
 
-  // Slide 6 — Demo
-  `<span class="timing">5:35 – 8:35</span><br>
-  <strong>Say:</strong> "Now let's do this for real. I'm going to run these commands in my terminal — watch what happens."<br><br>
+  // Slide 6 - Demo
+  `<span class="timing">5:35 - 8:35</span><br>
+  <strong>Say:</strong> "Now let's do this for real. I'm going to run these commands in my terminal - watch what happens."<br><br>
   <span class="action">Do:</span> Switch to your actual terminal. Run each command live. Narrate as you go:<br><br>
-  "git checkout -b — this creates the branch AND switches to it in one step."<br>
-  "git add — I'm staging the file, telling Git I want to include this change."<br>
-  "git commit -m — this is the snapshot. Notice the message is meaningful — future me will thank present me."<br>
-  "git push — now it's on GitHub. From here I'd open a pull request."<br><br>
+  "git checkout -b - this creates the branch AND switches to it in one step."<br>
+  "git add - I'm staging the file, telling Git I want to include this change."<br>
+  "git commit -m - this is the snapshot. Notice the message is meaningful - future me will thank present me."<br>
+  "git push - now it's on GitHub. From here I'd open a pull request."<br><br>
   <span class="action">Do:</span> Show the GitHub PR screen briefly if time allows.<br><br>
-  <span class="watch">Watch out for:</span> Terminal errors. Have a fallback screenshot ready. If something breaks, say "good — this is real life" and use the screenshot.`,
+  <span class="watch">Watch out for:</span> Terminal errors. Have a fallback screenshot ready. If something breaks, say "good - this is real life" and use the screenshot.`,
 
-  // Slide 7 — Practice
-  `<span class="timing">8:35 – 10:35</span><br>
+  // Slide 7 - Practice
+  `<span class="timing">8:35 - 10:35</span><br>
   <strong>Say:</strong> "Your turn. I want you to try these steps yourself. You've got 2 minutes."<br><br>
   <span class="action">Do:</span> Read the scenario out loud. Then go quiet and let people work. Walk around if in person. Watch screens if remote.<br><br>
   "Step 1: create the branch. Step 2: make any small change. Step 3: commit it."<br><br>
-  After 90 seconds: "If you've finished, try the bonus — run git log --oneline to see your commit history."<br><br>
-  <span class="watch">Watch out for:</span> Jumping in too quickly to help. Give people time to struggle a little — that's where learning happens. Help only if someone is completely stuck.`,
+  After 90 seconds: "If you've finished, try the bonus - run git log --oneline to see your commit history."<br><br>
+  <span class="watch">Watch out for:</span> Jumping in too quickly to help. Give people time to struggle a little - that's where learning happens. Help only if someone is completely stuck.`,
 
-  // Slide 8 — CFU
-  `<span class="timing">10:35 – 12:05</span><br>
-  <strong>Say:</strong> "Quick check — this is about the pull request workflow. Have a think before you answer."<br><br>
+  // Slide 8 - CFU
+  `<span class="timing">10:35 - 12:05</span><br>
+  <strong>Say:</strong> "Quick check - this is about the pull request workflow. Have a think before you answer."<br><br>
   <span class="action">Do:</span> Read the question out loud. Give 15 seconds of silence. Then ask for a show of hands or have them call out the letter.<br><br>
-  If B: "Exactly right — the PR is Git's built-in review mechanism."<br>
-  If wrong answer: "Good attempt — let's look at why B is the right answer..." Then reveal and explain.<br><br>
-  <span class="watch">Watch out for:</span> Embarrassing anyone who gets it wrong. Keep it light — "these are designed to be tricky."<br><br>
-  <strong>Also mention:</strong> "By the way — I've sent you a link to a live quiz version of this. If you want to try the full 4-question version, it's on the course page."`,
+  If B: "Exactly right - the PR is Git's built-in review mechanism."<br>
+  If wrong answer: "Good attempt - let's look at why B is the right answer..." Then reveal and explain.<br><br>
+  <span class="watch">Watch out for:</span> Embarrassing anyone who gets it wrong. Keep it light - "these are designed to be tricky."<br><br>
+  <strong>Also mention:</strong> "By the way - I've sent you a link to a live quiz version of this. If you want to try the full 4-question version, it's on the course page."`,
 
-  // Slide 9 — Summary
-  `<span class="timing">12:05 – 15:00</span><br>
+  // Slide 9 - Summary
+  `<span class="timing">12:05 - 15:00</span><br>
   <strong>Say:</strong> "Let's land the plane. Three things you can now do." Read each check point.<br><br>
-  <strong>The dbt bridge — say this clearly:</strong> "Every dbt Cloud project is a Git repo. When you click 'create branch' in dbt Cloud and start editing a model — that's exactly what we just did in the terminal. The UI just handles it for you. You're already thinking like a dbt developer."<br><br>
-  <strong>Resources:</strong> "Pro Git book is free online — it's the best reference. GitHub Skills has interactive courses if you want to go deeper."<br><br>
-  <span class="action">Do:</span> End with: "Any questions? And if you have a moment, there's a feedback form on the course page — it takes 2 minutes and genuinely helps me improve."<br><br>
-  <span class="watch">Watch out for:</span> Rushing the dbt bridge. That connection is the whole point — slow down and let it land.`
+  <strong>The dbt bridge - say this clearly:</strong> "Every dbt Cloud project is a Git repo. When you click 'create branch' in dbt Cloud and start editing a model - that's exactly what we just did in the terminal. The UI just handles it for you. You're already thinking like a dbt developer."<br><br>
+  <strong>Resources:</strong> "Pro Git book is free online - it's the best reference. GitHub Skills has interactive courses if you want to go deeper."<br><br>
+  <span class="action">Do:</span> End with: "Any questions? And if you have a moment, there's a feedback form on the course page - it takes 2 minutes and genuinely helps me improve."<br><br>
+  <span class="watch">Watch out for:</span> Rushing the dbt bridge. That connection is the whole point - slow down and let it land.`
 ];
 
 let cur = 0;
