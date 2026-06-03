@@ -34,7 +34,7 @@
   }
   html { font-size: 16px; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-
+ 
   /* NAV */
   nav {
     display: flex; align-items: center; justify-content: space-between;
@@ -48,7 +48,7 @@
   .nav-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
   .nav-links a:hover { color: var(--text); }
   .nav-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--orange); color: white; font-family: 'DM Mono', monospace; }
-
+ 
   /* HERO */
   .hero { padding: 72px 40px 56px; max-width: 900px; margin: 0 auto; }
   .hero-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-family: 'DM Mono', monospace; color: var(--orange); border: 0.5px solid rgba(255,105,74,0.3); border-radius: 20px; padding: 5px 12px; margin-bottom: 20px; }
@@ -60,20 +60,20 @@
   .btn-primary:hover { opacity: 0.88; }
   .btn-secondary { background: transparent; color: var(--text); border: 0.5px solid var(--border-strong); padding: 11px 22px; border-radius: var(--radius); font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; transition: background 0.15s; }
   .btn-secondary:hover { background: var(--bg-surface); }
-
+ 
   /* STAT ROW */
   .stats { display: flex; gap: 0; border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); max-width: 900px; margin: 0 auto; }
   .stat { flex: 1; padding: 20px 40px; border-right: 0.5px solid var(--border); }
   .stat:last-child { border-right: none; }
   .stat-num { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); }
   .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
+ 
   /* SLIDES SECTION */
   .section { max-width: 900px; margin: 0 auto; padding: 56px 40px; }
   .section-label { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1.5px; color: var(--orange); text-transform: uppercase; margin-bottom: 10px; }
   .section h2 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 8px; }
   .section-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 32px; font-weight: 300; }
-
+ 
   /* DECK */
   .deck-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--bg); }
   .deck-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 0.5px solid var(--border); background: var(--bg-surface); }
@@ -84,14 +84,14 @@
   .dot-row { display: flex; gap: 5px; }
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); cursor: pointer; border: none; padding: 0; transition: background 0.2s; }
   .dot.active { background: var(--orange); }
-
+ 
   .slide { display: none; min-height: 400px; }
   .slide.active { display: flex; flex-direction: column; }
   .slide-accent-bar { height: 4px; background: var(--orange); flex-shrink: 0; }
   .slide-accent-bar.teal { background: var(--green); }
   .slide-accent-bar.blue { background: var(--blue); }
   .slide-inner { flex: 1; padding: 36px 44px 32px; display: flex; flex-direction: column; }
-
+ 
   /* TITLE SLIDE */
   .title-slide .slide-inner { background: var(--navy); }
   .title-slide .slide-label { color: var(--orange); }
@@ -101,18 +101,18 @@
   .avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,105,74,0.15); border: 1px solid rgba(255,105,74,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--orange); flex-shrink: 0; }
   .presenter-name { font-size: 14px; color: #c8cdd8; font-weight: 400; }
   .presenter-meta { font-size: 12px; color: #5a6070; }
-
+ 
   .slide-label { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1.5px; color: var(--orange); text-transform: uppercase; margin-bottom: 12px; }
   .slide-title { font-family: 'DM Serif Display', serif; font-size: 30px; line-height: 1.15; margin-bottom: 8px; color: var(--text); }
   .slide-subtitle { font-size: 15px; color: var(--text-muted); font-weight: 300; margin-bottom: 24px; line-height: 1.5; }
   .dbt-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,105,74,0.1); border: 0.5px solid rgba(255,105,74,0.3); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--orange); font-family: 'DM Mono', monospace; align-self: flex-start; margin-bottom: 20px; }
-
+ 
   /* OBJ */
   .obj-list { display: flex; flex-direction: column; gap: 10px; }
   .obj-item { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg-surface); }
   .obj-num { width: 25px; height: 25px; border-radius: 50%; background: var(--orange); color: white; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .obj-text { font-size: 14px; line-height: 1.5; }
-
+ 
   /* AGENDA */
   .agenda-grid { display: grid; grid-template-columns: 70px 1fr 80px; border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .agenda-hdr { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1px; color: var(--text-muted); padding: 10px 14px; background: var(--bg-surface); border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
@@ -125,14 +125,14 @@
   .tag-c { background: rgba(24,95,165,0.15); color: #0C447C; }
   .tag-a { background: rgba(255,105,74,0.15); color: #993C1D; }
   .tag-k { background: rgba(186,117,23,0.15); color: #854F0B; }
-
+ 
   /* HOOK */
   .hook-box { border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 22px 26px; margin-bottom: 18px; background: var(--bg-surface); }
   .hook-quote { font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1.4; font-style: italic; }
   .hook-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
   .chip-bad { font-size: 12px; padding: 4px 11px; border-radius: 20px; border: 0.5px solid rgba(226,75,74,0.3); color: #A32D2D; background: #FCEBEB; font-family: 'DM Mono', monospace; }
   .hook-cta { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
-
+ 
   /* CONCEPTS */
   .concept-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .concept-card { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--bg-surface); }
@@ -141,7 +141,7 @@
   .concept-card h4 { font-size: 14px; font-weight: 500; margin-bottom: 5px; }
   .concept-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
   .code-pill { display: inline-block; background: var(--navy); color: #7fdbca; font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 8px; border-radius: 4px; margin-top: 7px; }
-
+ 
   /* TERMINAL */
   .terminal { background: var(--navy); border-radius: var(--radius); overflow: hidden; flex: 1; }
   .term-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--navy-mid); border-bottom: 0.5px solid var(--navy-border); }
@@ -151,14 +151,14 @@
   .term-body { padding: 16px 18px; }
   .tl { font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.9; }
   .tp { color: #1D9E75; } .tc { color: #f0f0f0; } .tco { color: #444d5a; } .to { color: #8892a0; } .th { color: var(--orange); } .tbr { color: #7fdbca; }
-
+ 
   /* ACTIVE LEARNING */
   .al-scenario { background: var(--bg-surface); border: 0.5px solid var(--border); border-left: 3px solid var(--orange); border-radius: 0 var(--radius) var(--radius) 0; padding: 14px 18px; margin-bottom: 16px; font-size: 14px; line-height: 1.6; }
   .al-steps { display: flex; flex-direction: column; gap: 8px; }
   .al-step { display: flex; align-items: center; gap: 11px; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--text-muted); background: var(--bg); }
   .al-step .icon { color: var(--orange); font-size: 16px; }
   code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--bg-surface); border: 0.5px solid var(--border); padding: 2px 6px; border-radius: 4px; }
-
+ 
   /* CFU */
   .cfu-q { font-family: 'DM Serif Display', serif; font-size: 19px; line-height: 1.4; margin-bottom: 20px; }
   .cfu-opts { display: flex; flex-direction: column; gap: 9px; }
@@ -170,7 +170,7 @@
   .cfu-opt.correct .cfu-letter { border-color: #1D9E75; background: #1D9E75; color: white; }
   .cfu-opt.wrong .cfu-letter { border-color: #E24B4A; background: #E24B4A; color: white; }
   .cfu-reveal { font-size: 13px; color: var(--text-muted); margin-top: 12px; display: none; line-height: 1.5; padding: 12px 14px; border-radius: var(--radius); background: var(--bg-surface); border: 0.5px solid var(--border); }
-
+ 
   /* SUMMARY */
   .closing-inner { background: var(--navy); flex: 1; padding: 36px 44px 32px; display: flex; flex-direction: column; }
   .summary-checks { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; }
@@ -183,7 +183,7 @@
   .res-card .icon { font-size: 17px; color: var(--orange); margin-bottom: 7px; display: block; }
   .res-card h4 { font-size: 13px; font-weight: 500; color: #c8cdd8; margin-bottom: 3px; }
   .res-card p { font-size: 12px; color: #5a6070; }
-
+ 
   /* LINKS SECTION */
   .links-section { border-top: 0.5px solid var(--border); }
   .links-inner { max-width: 900px; margin: 0 auto; padding: 48px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
@@ -193,16 +193,16 @@
   .link-card h3 { font-size: 15px; font-weight: 500; margin-bottom: 5px; }
   .link-card p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
   .link-card .arrow { font-size: 12px; color: var(--orange); margin-top: 10px; display: block; }
-
+ 
   /* FOOTER */
   footer { border-top: 0.5px solid var(--border); padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
   footer p { font-size: 12px; color: var(--text-light); font-family: 'DM Mono', monospace; }
-
+ 
   svg.icon { width: 16px; height: 16px; display: inline-block; vertical-align: -2px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>
-
+ 
 <nav>
   <span class="nav-logo">git-training.session</span>
   <div class="nav-links">
@@ -215,7 +215,7 @@
   </div>
   <span class="nav-badge">Live</span>
 </nav>
-
+ 
 <section class="hero">
   <div class="hero-tag">
     <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/></svg>
@@ -234,19 +234,19 @@
     </a>
   </div>
 </section>
-
+ 
 <div class="stats">
   <div class="stat"><div class="stat-num">15</div><div class="stat-label">minute session</div></div>
   <div class="stat"><div class="stat-num">3</div><div class="stat-label">learning objectives</div></div>
   <div class="stat"><div class="stat-num">1</div><div class="stat-label">live demo</div></div>
   <div class="stat"><div class="stat-num">4</div><div class="stat-label">quiz questions</div></div>
 </div>
-
+ 
 <section class="section">
   <div class="section-label">Presentation</div>
   <h2>Session slides</h2>
   <p class="section-sub">Use arrow keys or the buttons below to navigate. Press F for fullscreen.</p>
-
+ 
   <div class="deck-wrap">
     <div class="deck-nav">
       <div style="display:flex;gap:8px">
@@ -256,7 +256,7 @@
       <div class="dot-row" id="dots"></div>
       <span class="deck-counter" id="counter">1 / 9</span>
     </div>
-
+ 
     <!-- SLIDE 1 -->
     <div class="slide title-slide active" id="s1">
       <div style="height:4px;background:var(--orange);flex-shrink:0"></div>
@@ -265,13 +265,13 @@
         <div class="slide-title">Git for Data Teams</div>
         <div class="slide-subtitle">Branches, commits, and pull requests -<br>the version control workflow every data professional needs</div>
         <div class="presenter-row">
-          <div class="avatar">YN</div>
-          <div><div class="presenter-name">Your Name</div><div class="presenter-meta">Technical Instructor · dbt Labs</div></div>
+          <div class="avatar">GS</div>
+          <div><div class="presenter-name">Garrett Stack</div><div class="presenter-meta">Senior Technical Instructor · dbt Labs</div></div>
           <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:#3a3f4a">Session 1 of 1 · 15 min</div>
         </div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 2 -->
     <div class="slide" id="s2">
       <div class="slide-accent-bar"></div>
@@ -286,7 +286,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 3 -->
     <div class="slide" id="s3">
       <div class="slide-accent-bar"></div>
@@ -305,7 +305,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 4 -->
     <div class="slide" id="s4">
       <div class="slide-accent-bar"></div>
@@ -325,7 +325,7 @@
         <div class="hook-cta">We've all been there. This is the problem Git solves - not just for software engineers, but for <strong>every data team</strong> that touches SQL, Python, or dbt models.<br><br>Today we'll fix this. For good.</div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 5 -->
     <div class="slide" id="s5">
       <div class="slide-accent-bar blue"></div>
@@ -360,7 +360,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 6 -->
     <div class="slide" id="s6">
       <div class="slide-accent-bar teal"></div>
@@ -391,7 +391,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 7 -->
     <div class="slide" id="s7">
       <div class="slide-accent-bar"></div>
@@ -408,7 +408,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 8 -->
     <div class="slide" id="s8">
       <div class="slide-accent-bar"></div>
@@ -426,7 +426,7 @@
         <div class="cfu-reveal" id="cfu-reveal">✓ <strong>B is correct.</strong> A pull request is Git's built-in code review workflow - teammates comment on specific lines, approve, and merge when happy. All tracked forever in the project history.</div>
       </div>
     </div>
-
+ 
     <!-- SLIDE 9 -->
     <div class="slide" id="s9">
       <div style="height:4px;background:var(--orange);flex-shrink:0"></div>
@@ -447,7 +447,7 @@
     </div>
   </div>
 </section>
-
+ 
 <div class="links-section">
   <div class="links-inner">
     <a href="analytics.html" class="link-card">
@@ -488,12 +488,12 @@
     </a>
   </div>
 </div>
-
+ 
 <footer>
   <p>git-training · dbt Labs Technical Instructor Demo</p>
   <p>Privacy-first · all data stays on your device</p>
 </footer>
-
+ 
 <script>
   let cur = 0;
   const slides = document.querySelectorAll('.slide');
@@ -536,7 +536,7 @@
     slideStart = Date.now();
   }
   window.addEventListener('beforeunload', () => trackSlideTime(cur));
-
+ 
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
