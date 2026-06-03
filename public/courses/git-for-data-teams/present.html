@@ -1,6 +1,3 @@
-
-raw
-Present · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,9 +16,9 @@ Present · HTML
     --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
     --radius: 10px; --radius-lg: 14px;
   }
- 
+
   html, body { width: 100%; height: 100%; overflow: hidden; background: #111; }
- 
+
   /* TOOLBAR */
   .toolbar {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -38,11 +35,11 @@ Present · HTML
   .tb-counter { font-size: 12px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.4); padding: 0 8px; }
   .tb-sep { width: 0.5px; height: 18px; background: rgba(255,255,255,0.15); }
   .tb-key { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; }
- 
+
   /* SLIDE VIEWPORT */
   .viewport { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
   .slide-scaler { position: relative; }
- 
+
   /* ALL SLIDES */
   .slide { display: none; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; background: var(--bg); flex-direction: column; }
   .slide.active { display: flex; }
@@ -50,12 +47,12 @@ Present · HTML
   .accent-bar.teal { background: var(--green); }
   .accent-bar.blue { background: var(--blue); }
   .slide-inner { flex: 1; padding: 48px 56px 40px; display: flex; flex-direction: column; overflow: hidden; }
- 
+
   .slide-label { font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 1.5px; color: var(--orange); text-transform: uppercase; margin-bottom: 14px; }
   .slide-title { font-family: 'DM Serif Display', serif; font-size: 38px; line-height: 1.1; margin-bottom: 10px; color: var(--text); }
   .slide-subtitle { font-size: 17px; color: var(--text-muted); font-weight: 300; margin-bottom: 30px; line-height: 1.5; }
   .slide-body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; }
- 
+
   /* TITLE SLIDE */
   .title-slide .slide-inner { background: var(--navy); justify-content: center; }
   .title-slide .slide-label { color: var(--orange); }
@@ -66,13 +63,13 @@ Present · HTML
   .avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,105,74,0.15); border: 1px solid rgba(255,105,74,0.35); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: var(--orange); flex-shrink: 0; }
   .presenter-name { font-size: 15px; color: #c8cdd8; }
   .presenter-meta { font-size: 13px; color: #5a6070; }
- 
+
   /* OBJ */
   .obj-list { display: flex; flex-direction: column; gap: 14px; }
   .obj-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px 20px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg-surface); }
   .obj-num { width: 30px; height: 30px; border-radius: 50%; background: var(--orange); color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .obj-text { font-size: 17px; line-height: 1.5; }
- 
+
   /* AGENDA */
   .agenda-grid { display: grid; grid-template-columns: 80px 1fr 90px; border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .ah { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1px; color: var(--text-muted); padding: 11px 16px; background: var(--bg-surface); border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
@@ -85,14 +82,14 @@ Present · HTML
   .tag-c { background: rgba(24,95,165,0.15); color: #0C447C; }
   .tag-a { background: rgba(255,105,74,0.15); color: #993C1D; }
   .tag-k { background: rgba(186,117,23,0.15); color: #854F0B; }
- 
+
   /* HOOK */
   .hook-box { border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 22px; background: var(--bg-surface); }
   .hook-quote { font-family: 'DM Serif Display', serif; font-size: 26px; line-height: 1.4; font-style: italic; }
   .hook-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
   .chip-bad { font-size: 13px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid rgba(226,75,74,0.3); color: #A32D2D; background: #FCEBEB; font-family: 'DM Mono', monospace; }
   .hook-cta { font-size: 16px; color: var(--text-muted); line-height: 1.6; }
- 
+
   /* CONCEPTS */
   .concept-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
   .concept-card { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; background: var(--bg-surface); display: flex; flex-direction: column; }
@@ -101,7 +98,7 @@ Present · HTML
   .concept-card h4 { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
   .concept-card p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
   .code-pill { display: inline-block; background: var(--navy); color: #7fdbca; font-family: 'DM Mono', monospace; font-size: 12px; padding: 4px 10px; border-radius: 4px; margin-top: 10px; }
- 
+
   /* TERMINAL */
   .terminal { background: var(--navy); border-radius: var(--radius); overflow: hidden; flex: 1; }
   .term-bar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; background: var(--navy-mid); border-bottom: 0.5px solid var(--navy-border); }
@@ -111,13 +108,13 @@ Present · HTML
   .term-body { padding: 20px 24px; }
   .tl { font-family: 'DM Mono', monospace; font-size: 15px; line-height: 2.1; }
   .tp { color: #1D9E75; } .tc { color: #f0f0f0; } .tco { color: #444d5a; } .to { color: #8892a0; } .th { color: var(--orange); } .tbr { color: #7fdbca; }
- 
+
   /* ACTIVE LEARNING */
   .al-scenario { background: var(--bg-surface); border: 0.5px solid var(--border); border-left: 4px solid var(--orange); border-radius: 0 var(--radius) var(--radius) 0; padding: 18px 22px; margin-bottom: 20px; font-size: 16px; line-height: 1.6; }
   .al-steps { display: flex; flex-direction: column; gap: 12px; }
   .al-step { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 15px; color: var(--text-muted); background: var(--bg); }
   code { font-family: 'DM Mono', monospace; font-size: 13px; background: var(--bg-surface); border: 0.5px solid var(--border); padding: 2px 7px; border-radius: 4px; }
- 
+
   /* CFU */
   .cfu-q { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.4; margin-bottom: 24px; }
   .cfu-opts { display: flex; flex-direction: column; gap: 12px; }
@@ -129,7 +126,7 @@ Present · HTML
   .cfu-opt.correct .cfu-letter { border-color: #1D9E75; background: #1D9E75; color: white; }
   .cfu-opt.wrong .cfu-letter { border-color: #E24B4A; background: #E24B4A; color: white; }
   .cfu-reveal { font-size: 14px; color: var(--text-muted); margin-top: 16px; display: none; line-height: 1.5; padding: 14px 16px; border-radius: var(--radius); background: var(--bg-surface); border: 0.5px solid var(--border); }
- 
+
   /* SUMMARY */
   .closing-inner { background: var(--navy); flex: 1; padding: 48px 56px 40px; display: flex; flex-direction: column; overflow: hidden; }
   .summary-checks { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
@@ -141,7 +138,7 @@ Present · HTML
   .res-card { padding: 16px 18px; border: 0.5px solid var(--navy-border); border-radius: var(--radius); }
   .res-card h4 { font-size: 14px; font-weight: 500; color: #c8cdd8; margin-bottom: 4px; }
   .res-card p { font-size: 13px; color: #5a6070; }
- 
+
   /* NOTES PANEL */
   .notes-panel {
     position: fixed; bottom: 0; left: 0; right: 0;
@@ -160,10 +157,10 @@ Present · HTML
 </style>
 </head>
 <body>
- 
+
 <div class="viewport" id="viewport">
   <div class="slide-scaler" id="scaler">
- 
+
     <!-- SLIDE 1: Title -->
     <div class="slide title-slide active" id="s1">
       <div style="height:5px;background:var(--orange);flex-shrink:0"></div>
@@ -178,7 +175,7 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 2: Objectives -->
     <div class="slide" id="s2">
       <div class="accent-bar"></div>
@@ -195,7 +192,7 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 3: Agenda -->
     <div class="slide" id="s3">
       <div class="accent-bar"></div>
@@ -216,7 +213,7 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 4: Hook -->
     <div class="slide" id="s4">
       <div class="accent-bar"></div>
@@ -238,14 +235,13 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 5: Concepts -->
     <div class="slide" id="s5">
       <div class="accent-bar blue"></div>
       <div class="slide-inner">
         <div class="slide-label">Core concept</div>
         <div class="slide-title">Branches &amp; commits, explained</div>
-        <div class="slide-subtitle">Two ideas. That's it.</div>
         <div class="slide-body">
           <div class="concept-cols">
             <div class="concept-card"><div class="concept-icon">⎇</div><h4>A branch is your test shots pile</h4><p>Experiment freely without touching the official album. Main stays unchanged until you're ready to merge.</p><span class="code-pill">git checkout -b my-fix</span></div>
@@ -256,7 +252,7 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 6: Demo -->
     <div class="slide" id="s6">
       <div class="accent-bar teal"></div>
@@ -286,7 +282,7 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 7: Practice -->
     <div class="slide" id="s7">
       <div class="accent-bar"></div>
@@ -305,7 +301,7 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 8: CFU -->
     <div class="slide" id="s8">
       <div class="accent-bar"></div>
@@ -325,7 +321,7 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
     <!-- SLIDE 9: Summary -->
     <div class="slide" id="s9">
       <div style="height:5px;background:var(--orange);flex-shrink:0"></div>
@@ -344,10 +340,10 @@ Present · HTML
         </div>
       </div>
     </div>
- 
+
   </div>
 </div>
- 
+
 <!-- TOOLBAR -->
 <div class="toolbar" id="toolbar">
   <button class="tb-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
@@ -364,13 +360,13 @@ Present · HTML
   <span class="tb-key">N</span>
   <span class="tb-key">F</span>
 </div>
- 
+
 <!-- NOTES PANEL -->
 <div class="notes-panel" id="notes-panel">
   <div class="notes-label">Speaker notes</div>
   <div class="notes-content" id="notes-content"></div>
 </div>
- 
+
 <script>
 const notes = [
   // Slide 1 - Title
@@ -378,27 +374,27 @@ const notes = [
   <strong>Say:</strong> "Welcome everyone - I'm [name], and over the next 15 minutes we're going to cover something that every data professional needs but most haven't been properly taught: Git."<br><br>
   <span class="action">Do:</span> Let the slide breathe. Smile. Don't rush into the content immediately - give people 10 seconds to settle.<br><br>
   <span class="watch">Watch out for:</span> Nerves making you rush. Pause after introducing yourself.`,
- 
+
   // Slide 2 - Objectives
   `<span class="timing">0:20 - 1:05</span><br>
   <strong>Say:</strong> "By the end of today, you'll be able to do three concrete things." Read each objective slowly.<br><br>
   "Number one: explain what a branch is. Number two: actually create one in a terminal. Number three: connect this directly to how dbt Cloud works."<br><br>
   <span class="action">Do:</span> Point to each number as you say it. Make eye contact after each one.<br><br>
   <span class="watch">Watch out for:</span> Reading verbatim off the slide. Know these three points cold.`,
- 
+
   // Slide 3 - Agenda
   `<span class="timing">1:05 - 1:35</span><br>
   <strong>Say:</strong> "Here's how we'll spend the time. We start with a quick hook, cover the core concept, do a live demo in the terminal, you'll try it yourself, then we'll do a quick check and wrap up with the dbt connection."<br><br>
   <span class="action">Do:</span> Run through the agenda quickly - don't read every line. Just signal the shape of the session.<br><br>
   <strong>Key phrase:</strong> "The hands-on part starts at minute 5. That's the most important bit."`,
- 
+
   // Slide 4 - Hook
   `<span class="timing">1:35 - 3:05</span><br>
   <strong>Say:</strong> "Before we get into Git - I have a question." Pause. "Has anyone here ever had a file on their desktop called something like final_final_v3_REAL.sql?"<br><br>
   <span class="action">Do:</span> Wait for the laugh or the nod. Let it land. Then point to the chips on screen one by one.<br><br>
   "Every one of these is someone trying to do version control manually. It doesn't work. It breaks things. And it's completely unnecessary once you know Git."<br><br>
   <span class="watch">Watch out for:</span> Moving on too quickly. This moment of recognition is important - let people sit in it for a second.`,
- 
+
   // Slide 5 - Concepts
   `<span class="timing">3:05 - 5:35</span><br>
   <strong>Say:</strong> "Git has a reputation for being complicated. It isn't. Think of your data project as a photo album."<br><br>
@@ -408,7 +404,7 @@ const notes = [
   <strong>Mental model card:</strong> "Test shots - photograph - show the family - add to the album. That's the whole workflow. And it's exactly how dbt Cloud works - we'll come back to that."<br><br>
   <span class="watch">Watch out for:</span> Don't rush through the cards. The photo album analogy needs a moment to land. Don't go back to spreadsheet tabs or other analogies - stay in the photo album world.<br><br>
   <span class="action">Cue to move on:</span> "Now let me show you this running live in a terminal."`,
- 
+
   // Slide 6 - Demo
   `<span class="timing">5:35 - 8:35</span><br>
   <strong>Say:</strong> "Now let's do this for real. I'm going to run these commands in my terminal - watch what happens."<br><br>
@@ -419,7 +415,7 @@ const notes = [
   "git push - now it's on GitHub. From here I'd open a pull request."<br><br>
   <span class="action">Do:</span> Show the GitHub PR screen briefly if time allows.<br><br>
   <span class="watch">Watch out for:</span> Terminal errors. Have a fallback screenshot ready. If something breaks, say "good - this is real life" and use the screenshot.`,
- 
+
   // Slide 7 - Practice
   `<span class="timing">8:35 - 10:35</span><br>
   <strong>Say:</strong> "Your turn. I want you to try these steps yourself. You've got 2 minutes."<br><br>
@@ -427,7 +423,7 @@ const notes = [
   "Step 1: create the branch. Step 2: make any small change. Step 3: commit it."<br><br>
   After 90 seconds: "If you've finished, try the bonus - run git log --oneline to see your commit history."<br><br>
   <span class="watch">Watch out for:</span> Jumping in too quickly to help. Give people time to struggle a little - that's where learning happens. Help only if someone is completely stuck.`,
- 
+
   // Slide 8 - CFU
   `<span class="timing">10:35 - 12:05</span><br>
   <strong>Say:</strong> "Quick check - this is about the pull request workflow. Have a think before you answer."<br><br>
@@ -436,7 +432,7 @@ const notes = [
   If wrong answer: "Good attempt - let's look at why B is the right answer..." Then reveal and explain.<br><br>
   <span class="watch">Watch out for:</span> Embarrassing anyone who gets it wrong. Keep it light - "these are designed to be tricky."<br><br>
   <strong>Also mention:</strong> "By the way - I've sent you a link to a live quiz version of this. If you want to try the full 4-question version, it's on the course page."`,
- 
+
   // Slide 9 - Summary
   `<span class="timing">12:05 - 15:00</span><br>
   <strong>Say:</strong> "Let's land the plane. Three things you can now do." Read each check point.<br><br>
@@ -445,12 +441,12 @@ const notes = [
   <span class="action">Do:</span> End with: "Any questions? And if you have a moment, there's a feedback form on the course page - it takes 2 minutes and genuinely helps me improve."<br><br>
   <span class="watch">Watch out for:</span> Rushing the dbt bridge. That connection is the whole point - slow down and let it land.`
 ];
- 
+
 let cur = 0;
 const total = 9;
 let notesVisible = false;
 let toolbarTimer;
- 
+
 function goTo(i) {
   document.getElementById('s' + (cur+1)).classList.remove('active');
   cur = i;
@@ -460,26 +456,26 @@ function goTo(i) {
   document.getElementById('next-btn').disabled = cur === total-1;
   document.getElementById('notes-content').innerHTML = notes[cur];
 }
- 
+
 function changeSlide(d) { goTo(Math.max(0, Math.min(total-1, cur+d))); }
- 
+
 function toggleNotes() {
   notesVisible = !notesVisible;
   document.getElementById('notes-panel').classList.toggle('visible', notesVisible);
 }
- 
+
 function toggleFullscreen() {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen();
   else document.exitFullscreen();
 }
- 
+
 function cfuClick(el, correct) {
   document.querySelectorAll('.cfu-opt').forEach(o => { o.classList.remove('correct','wrong'); o.onclick = null; });
   el.classList.add(correct ? 'correct' : 'wrong');
   if (!correct) document.querySelectorAll('.cfu-opt')[1].classList.add('correct');
   document.getElementById('cfu-reveal').style.display = 'block';
 }
- 
+
 // Scale slides to fill viewport
 function scaleSlides() {
   const vw = window.innerWidth, vh = window.innerHeight;
@@ -492,14 +488,14 @@ function scaleSlides() {
   scaler.style.height = h + 'px';
   document.querySelectorAll('.slide').forEach(s => { s.style.width = w + 'px'; s.style.height = h + 'px'; });
 }
- 
+
 // Auto-hide toolbar
 function showToolbar() {
   document.getElementById('toolbar').classList.remove('hidden');
   clearTimeout(toolbarTimer);
   toolbarTimer = setTimeout(() => document.getElementById('toolbar').classList.add('hidden'), 3000);
 }
- 
+
 document.addEventListener('mousemove', showToolbar);
 document.addEventListener('keydown', e => {
   showToolbar();
@@ -508,7 +504,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'n' || e.key === 'N') toggleNotes();
   if (e.key === 'f' || e.key === 'F') toggleFullscreen();
 });
- 
+
 window.addEventListener('resize', scaleSlides);
 scaleSlides();
 goTo(0);
