@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Results · dbt Fundamentals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF694A; --navy: #0d1117; --green: #1D9E75;
+    --text: #1a1a1a; --text-muted: #6b7280;
+    --bg: #ffffff; --bg-surface: #f9f9f8;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
+    --radius: 10px; --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15); }
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); }
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .live-dot { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: 'DM Mono', monospace; color: var(--green); }
+  .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 36px 32px 60px; }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+  .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; }
+  .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+  .btn-reset { background: none; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 7px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--text-muted); transition: background 0.12s; }
+  .btn-reset:hover { background: var(--bg-surface); color: var(--text); }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card { background: var(--bg-surface); border-radius: var(--radius); padding: 16px; }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-val { font-family: 'DM Serif Display', serif; font-size: 28px; }
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* QUESTION CARDS */
+  .q-grid { display: flex; flex-direction: column; gap: 20px; }
+  .q-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--bg); }
+  .q-card-header { padding: 18px 22px 14px; border-bottom: 0.5px solid var(--border); background: var(--bg-surface); }
+  .q-num-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1px; margin-bottom: 6px; }
+  .q-text { font-size: 15px; font-weight: 500; line-height: 1.4; }
+  .q-card-body { padding: 18px 22px; }
+
+  /* BARS */
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .bar-label { font-size: 13px; display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .bar-letter { width: 22px; height: 22px; border-radius: 50%; border: 0.5px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: 'DM Mono', monospace; flex-shrink: 0; color: var(--text-muted); }
+  .bar-letter.correct-ans { background: var(--green); border-color: var(--green); color: white; }
+  .bar-text { font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .bar-wrap { flex: 1; height: 28px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; min-width: 80px; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; background: var(--orange); }
+  .bar-fill.correct-fill { background: var(--green); }
+  .bar-count { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--text-muted); min-width: 28px; text-align: right; flex-shrink: 0; }
+  .bar-pct { font-size: 12px; color: var(--text-light); min-width: 38px; text-align: right; flex-shrink: 0; }
+
+  .q-footer { padding: 10px 22px 14px; display: flex; align-items: center; gap: 14px; }
+  .q-total { font-size: 12px; color: var(--text-muted); }
+  .accuracy-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; }
+  .accuracy-badge.good { background: rgba(29,158,117,0.12); color: #0F6E56; }
+  .accuracy-badge.mid { background: rgba(186,117,23,0.12); color: #854F0B; }
+  .accuracy-badge.low { background: rgba(226,75,74,0.12); color: #A32D2D; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .empty-state .big { font-size: 42px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; margin-bottom: 6px; }
+  .empty-state small { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--text-light); }
+
+  .last-update { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-light); }
+
+  /* SESSION MODAL */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal { background: var(--bg); border-radius: var(--radius-lg); border: 0.5px solid var(--border-strong); padding: 32px; max-width: 440px; width: 100%; }
+  .modal h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
+  .modal p { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+  .modal-field { margin-bottom: 16px; }
+  .modal-field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 7px; }
+  .modal-field input { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
+  .modal-field input:focus { border-color: var(--orange); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .btn-start { flex: 1; padding: 11px; background: var(--orange); color: white; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+  .btn-start:hover { opacity: 0.88; }
+  .btn-skip { padding: 11px 18px; background: none; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--text-muted); transition: background 0.12s; }
+  .btn-skip:hover { background: var(--bg-surface); }
+
+  /* SESSION BADGE */
+  .session-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; background: rgba(255,105,74,0.08); border: 0.5px solid rgba(255,105,74,0.25); font-size: 12px; font-family: 'DM Mono', monospace; color: var(--orange); cursor: pointer; margin-bottom: 20px; }
+  .session-badge:hover { background: rgba(255,105,74,0.14); }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">📊 results dashboard</span>
+  <div class="nav-right">
+    <span class="live-dot"><span class="pulse"></span> live</span>
+    <a href="index.html" class="nav-back">← Back to session</a>
+  </div>
+</nav>
+
+<!-- SESSION MODAL -->
+<div class="modal-backdrop" id="modal" style="display:none">
+  <div class="modal">
+    <h2>New session</h2>
+    <p>Tag this session so it appears clearly in your analytics. Learners won't see this - it's instructor-only.</p>
+    <div class="modal-field">
+      <label>Cohort / company name</label>
+      <input type="text" id="cohort-input" placeholder="e.g. dbt Labs interview" />
+    </div>
+    <div class="modal-field">
+      <label>Location or format</label>
+      <input type="text" id="location-input" placeholder="e.g. Remote · Zoom" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-start" onclick="startSession()">Start session →</button>
+      <button class="btn-skip" onclick="closeModal()">Skip</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div id="session-badge-wrap"></div>
+  <div class="page-header">
+    <div>
+      <h1>Quiz results</h1>
+      <p>Updating every 3 seconds &nbsp;·&nbsp; <span class="last-update" id="last-update">Waiting for responses…</span></p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-reset" onclick="showModal()">+ New session</button>
+      <button class="btn-reset" onclick="resetData()">Reset results</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-label">Responses</div><div class="stat-val" id="s-responses">0</div><div class="stat-sub">learners</div></div>
+    <div class="stat-card"><div class="stat-label">Avg score</div><div class="stat-val" id="s-avg">-</div><div class="stat-sub">out of 4</div></div>
+    <div class="stat-card"><div class="stat-label">Overall accuracy</div><div class="stat-val" id="s-acc">-</div><div class="stat-sub">correct answers</div></div>
+    <div class="stat-card"><div class="stat-label">Perfect scores</div><div class="stat-val" id="s-perfect">0</div><div class="stat-sub">4/4 correct</div></div>
+  </div>
+
+  <div id="charts" class="q-grid"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'dbt_fund_quiz_results';
+const SUPABASE_URL = 'https://skpyeipqipplsuzjofje.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcHllaXBxaXBwbHN1empvZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTU2MDAsImV4cCI6MjA5NTYzMTYwMH0.pzMoxPTauK0wlnedup17efCurVoGwMNbikTMZg-qN6Q';
+
+function showModal() { document.getElementById('modal').style.display = 'flex'; document.getElementById('cohort-input').focus(); }
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+function startSession() {
+  const cohort = document.getElementById('cohort-input').value.trim() || 'Unnamed session';
+  const location = document.getElementById('location-input').value.trim() || '';
+  const newId = 's_' + Date.now();
+  localStorage.setItem('session_id', newId);
+  localStorage.setItem('session_cohort', cohort);
+  localStorage.setItem('session_location', location);
+  localStorage.removeItem('learner_id');
+  closeModal();
+  renderSessionBadge();
+  render();
+}
+
+function renderSessionBadge() {
+  const cohort = localStorage.getItem('session_cohort');
+  const location = localStorage.getItem('session_location');
+  const sid = localStorage.getItem('session_id');
+  const wrap = document.getElementById('session-badge-wrap');
+  if (cohort && sid) {
+    const date = new Date().toLocaleDateString('en-IE', { day:'numeric', month:'short', year:'numeric' });
+    wrap.innerHTML = `<div class="session-badge" onclick="showModal()" title="Click to start a new session">
+      🎓 ${cohort}${location ? ' · ' + location : ''} · ${date} <span style="opacity:0.5;margin-left:4px">change</span>
+    </div>`;
+  } else {
+    wrap.innerHTML = `<div class="session-badge" onclick="showModal()">+ Start a new session</div>`;
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Show modal automatically if no session set
+window.addEventListener('load', () => {
+  renderSessionBadge();
+  if (!localStorage.getItem('session_id')) showModal();
+});
+const COURSE = 'dbt-fundamentals';
+
+async function sbSelect(table, params) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.ok ? await res.json() : [];
+  } catch(e) { return []; }
+}
+
+const questions = [
+  {
+    q: "What is the main purpose of a Git branch?",
+    opts: ["To permanently delete old versions","To work on changes safely without affecting main","To automatically deploy to production","To share files over email"],
+    correct: 1
+  },
+  {
+    q: "Which command creates a new branch AND switches to it?",
+    opts: ["git branch new-branch","git merge new-branch","git checkout -b new-branch","git push new-branch"],
+    correct: 2
+  },
+  {
+    q: "What is a pull request (PR) used for?",
+    opts: ["Downloading files from the internet","Asking teammates to review your branch before merging","Deleting a branch after it's merged","Reverting a broken commit"],
+    correct: 1
+  },
+  {
+    q: "In dbt Cloud, when you edit a model on a branch, what happens in Git?",
+    opts: ["dbt emails changes to the team","dbt saves a backup locally","dbt commits changes to the branch","dbt pushes directly to main"],
+    correct: 2
+  }
+];
+
+function getLocalData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"responses":[]}'); } catch(e) { return { responses: [] }; }
+}
+
+async function resetData() {
+  if (confirm('Reset all quiz results? This cannot be undone.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    await render();
+  }
+}
+
+async function render() {
+  document.getElementById('last-update').textContent = 'Loading…';
+
+  const rows = await sbSelect('quiz_answers', `course=eq.${COURSE}&order=created_at.desc`);
+
+  const learners = [...new Set(rows.map(r => r.learner_id))];
+  const n = learners.length;
+
+  document.getElementById('s-responses').textContent = n;
+
+  if (n === 0) {
+    document.getElementById('s-avg').textContent = '-';
+    document.getElementById('s-acc').textContent = '-';
+    document.getElementById('s-perfect').textContent = '0';
+    document.getElementById('charts').innerHTML = `<div class="empty-state"><div class="big">📋</div><p>No responses yet</p><small>Ask learners to open quiz.html on their device</small></div>`;
+    document.getElementById('last-update').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    return;
+  }
+
+  const totalCorrect = rows.filter(r => r.is_correct).length;
+  const overallAcc = rows.length ? Math.round((totalCorrect / rows.length) * 100) : 0;
+
+  const scoresByLearner = {};
+  rows.forEach(r => {
+    if (!scoresByLearner[r.learner_id]) scoresByLearner[r.learner_id] = 0;
+    if (r.is_correct) scoresByLearner[r.learner_id]++;
+  });
+  const scores = Object.values(scoresByLearner);
+  const avgScore = scores.length ? (scores.reduce((a,b)=>a+b,0) / scores.length) : 0;
+  const perfect = scores.filter(s => s === 4).length;
+
+  document.getElementById('s-avg').textContent = avgScore.toFixed(1);
+  document.getElementById('s-acc').textContent = overallAcc + '%';
+  document.getElementById('s-perfect').textContent = perfect;
+
+  const chartsEl = document.getElementById('charts');
+  chartsEl.innerHTML = '';
+
+  questions.forEach((q, qi) => {
+    const counts = new Array(q.opts.length).fill(0);
+    const qRows = rows.filter(r => r.question_index === qi);
+    qRows.forEach(r => { if (r.chosen >= 0 && r.chosen < counts.length) counts[r.chosen]++; });
+    const total = counts.reduce((a,b) => a+b, 0);
+    const correctCount = counts[q.correct];
+    const accuracy = total ? Math.round((correctCount / total) * 100) : 0;
+    const maxCount = Math.max(...counts, 1);
+
+    const card = document.createElement('div');
+    card.className = 'q-card';
+
+    let barsHtml = '';
+    const letters = ['A','B','C','D'];
+    q.opts.forEach((opt, oi) => {
+      const cnt = counts[oi];
+      const pct = Math.round((cnt / Math.max(maxCount,1)) * 100);
+      const isCorrect = oi === q.correct;
+      barsHtml += `
+        <div class="bar-row">
+          <div class="bar-label" style="width:200px;min-width:200px">
+            <div class="bar-letter ${isCorrect ? 'correct-ans' : ''}">${letters[oi]}</div>
+            <span class="bar-text" title="${opt}">${opt}</span>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-fill ${isCorrect ? 'correct-fill' : ''}" style="width:${pct}%"></div>
+          </div>
+          <div class="bar-count">${cnt}</div>
+          <div class="bar-pct">${total ? Math.round((cnt/total)*100) : 0}%</div>
+        </div>`;
+    });
+
+    const accClass = accuracy >= 70 ? 'good' : accuracy >= 40 ? 'mid' : 'low';
+    card.innerHTML = `
+      <div class="q-card-header">
+        <div class="q-num-tag">Q${qi+1} of ${questions.length}</div>
+        <div class="q-text">${q.q}</div>
+      </div>
+      <div class="q-card-body">${barsHtml}</div>
+      <div class="q-footer">
+        <span class="q-total">${total} response${total !== 1 ? 's' : ''}</span>
+        <span class="accuracy-badge ${accClass}">${accuracy}% correct</span>
+      </div>`;
+    chartsEl.appendChild(card);
+  });
+
+  document.getElementById('last-update').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+render();
+setInterval(render, 3000);
+</script>
+</body>
+</html>

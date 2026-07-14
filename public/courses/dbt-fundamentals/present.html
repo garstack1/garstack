@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dbt Fundamentals · Present</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dbt: #FF694A; --navy: #0d1117; --navy-mid: #161b22; --navy-border: #2a2f3a;
+    --green: #1D9E75; --blue: #185FA5;
+    --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+    --bg: #ffffff; --bg-surface: #f9f9f8;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
+    --radius: 10px; --radius-lg: 14px;
+  }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #111; }
+  .toolbar {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(13,17,23,0.92); border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 40px; padding: 8px 16px;
+    z-index: 100; backdrop-filter: blur(12px);
+    transition: opacity 0.3s;
+  }
+  .toolbar.hidden { opacity: 0; pointer-events: none; }
+  .tb-btn { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 6px 10px; border-radius: 20px; font-size: 13px; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 5px; transition: background 0.12s, color 0.12s; text-decoration: none; }
+  .tb-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+  .tb-btn:disabled { opacity: 0.3; cursor: default; }
+  .tb-counter { font-size: 12px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.4); padding: 0 8px; }
+  .tb-sep { width: 0.5px; height: 18px; background: rgba(255,255,255,0.15); }
+  .tb-key { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; }
+  .viewport { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .slide-scaler { position: relative; }
+  .slide { display: none; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; background: var(--bg); flex-direction: column; }
+  .slide.active { display: flex; }
+  .accent-bar { height: 5px; flex-shrink: 0; background: var(--dbt); }
+  .accent-bar.green { background: var(--green); }
+  .accent-bar.blue { background: var(--blue); }
+  .slide-inner { flex: 1; padding: 48px 56px 40px; display: flex; flex-direction: column; overflow: hidden; }
+  .slide-label { font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 1.5px; color: var(--dbt); text-transform: uppercase; margin-bottom: 14px; }
+  .slide-title { font-family: 'DM Serif Display', serif; font-size: 38px; line-height: 1.1; margin-bottom: 10px; color: var(--text); }
+  .slide-subtitle { font-size: 17px; color: var(--text-muted); font-weight: 300; margin-bottom: 30px; line-height: 1.5; }
+  .slide-body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; }
+  /* Title slide */
+  .title-slide .slide-inner { background: var(--navy); justify-content: center; }
+  .title-slide .slide-label { color: var(--dbt); }
+  .title-slide .slide-title { color: #f8f8f8; font-size: 46px; }
+  .title-slide .slide-subtitle { color: #8a8f9a; margin-bottom: 40px; }
+  .dbt-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,105,74,0.12); border: 0.5px solid rgba(255,105,74,0.3); border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--dbt); font-family: 'DM Mono', monospace; align-self: flex-start; margin-bottom: 22px; }
+  .presenter-row { display: flex; align-items: center; gap: 16px; border-top: 0.5px solid var(--navy-border); padding-top: 24px; margin-top: 10px; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,105,74,0.15); border: 1px solid rgba(255,105,74,0.35); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: var(--dbt); flex-shrink: 0; }
+  .presenter-name { font-size: 15px; color: #c8cdd8; }
+  .presenter-meta { font-size: 13px; color: #5a6070; }
+  /* Objectives */
+  .obj-list { display: flex; flex-direction: column; gap: 14px; }
+  .obj-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px 20px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg-surface); }
+  .obj-num { width: 30px; height: 30px; border-radius: 50%; background: var(--dbt); color: white; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .obj-text { font-size: 17px; line-height: 1.5; }
+  /* Agenda */
+  .agenda-grid { display: grid; grid-template-columns: 80px 1fr 90px; border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .ah { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1px; color: var(--text-muted); padding: 11px 16px; background: var(--bg-surface); border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
+  .ac { font-size: 14px; padding: 12px 16px; border-bottom: 0.5px solid var(--border); color: var(--text); display: flex; align-items: center; }
+  .ac.time { color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 13px; }
+  .ac.hl { background: rgba(255,105,74,0.04); font-weight: 500; }
+  .ac:nth-last-child(-n+3) { border-bottom: none; }
+  .tag { display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+  .tag-d { background: rgba(29,158,117,0.15); color: #0F6E56; }
+  .tag-c { background: rgba(24,95,165,0.15); color: #0C447C; }
+  .tag-a { background: rgba(255,105,74,0.15); color: #993C1D; }
+  .tag-k { background: rgba(186,117,23,0.15); color: #854F0B; }
+  /* Hook */
+  .hook-box { border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 22px; background: var(--bg-surface); }
+  .hook-quote { font-family: 'DM Serif Display', serif; font-size: 24px; line-height: 1.4; font-style: italic; }
+  .hook-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .chip-bad { font-size: 13px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid rgba(226,75,74,0.3); color: #A32D2D; background: #FCEBEB; font-family: 'DM Mono', monospace; }
+  .hook-cta { font-size: 16px; color: var(--text-muted); line-height: 1.6; }
+  /* Concepts */
+  .concept-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
+  .concept-card { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; background: var(--bg-surface); display: flex; flex-direction: column; }
+  .concept-card.accent { border-color: rgba(255,105,74,0.25); background: rgba(255,105,74,0.04); }
+  .concept-icon { font-size: 22px; margin-bottom: 12px; }
+  .concept-card h4 { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
+  .concept-card p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+  .code-pill { display: inline-block; background: var(--navy); color: #7fdbca; font-family: 'DM Mono', monospace; font-size: 12px; padding: 4px 10px; border-radius: 4px; margin-top: 10px; }
+  /* Terminal */
+  .terminal { background: var(--navy); border-radius: var(--radius); overflow: hidden; flex: 1; }
+  .term-bar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; background: var(--navy-mid); border-bottom: 0.5px solid var(--navy-border); }
+  .td { width: 13px; height: 13px; border-radius: 50%; }
+  .td-r { background: #ff5f57; } .td-y { background: #ffbd2e; } .td-g { background: #28c840; }
+  .term-title { font-size: 13px; color: #555; font-family: 'DM Mono', monospace; margin-left: 8px; }
+  .term-body { padding: 20px 24px; }
+  .tl { font-family: 'DM Mono', monospace; font-size: 14px; line-height: 2.0; }
+  .tc { color: #f0f0f0; } .tco { color: #444d5a; } .to { color: #8892a0; }
+  .tk { color: #7fbbff; } .tf { color: #FF694A; } .tg { color: #1D9E75; } .tbr { color: #7fdbca; }
+  /* Practice */
+  .al-scenario { background: var(--bg-surface); border: 0.5px solid var(--border); border-left: 4px solid var(--dbt); border-radius: 0 var(--radius) var(--radius) 0; padding: 18px 22px; margin-bottom: 20px; font-size: 16px; line-height: 1.6; }
+  .al-steps { display: flex; flex-direction: column; gap: 12px; }
+  .al-step { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border: 0.5px solid var(--border); border-radius: var(--radius); font-size: 15px; color: var(--text-muted); background: var(--bg); }
+  code { font-family: 'DM Mono', monospace; font-size: 13px; background: var(--bg-surface); border: 0.5px solid var(--border); padding: 2px 7px; border-radius: 4px; }
+  /* CFU */
+  .cfu-q { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.4; margin-bottom: 24px; }
+  .cfu-opts { display: flex; flex-direction: column; gap: 12px; }
+  .cfu-opt { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 16px; cursor: pointer; background: var(--bg); color: var(--text); transition: background 0.12s; }
+  .cfu-opt:hover { background: var(--bg-surface); }
+  .cfu-opt.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .cfu-opt.wrong { border-color: #E24B4A; background: #FCEBEB; color: #501313; }
+  .cfu-letter { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 13px; font-family: 'DM Mono', monospace; flex-shrink: 0; color: var(--text-muted); }
+  .cfu-opt.correct .cfu-letter { border-color: #1D9E75; background: #1D9E75; color: white; }
+  .cfu-opt.wrong .cfu-letter { border-color: #E24B4A; background: #E24B4A; color: white; }
+  .cfu-reveal { font-size: 14px; color: var(--text-muted); margin-top: 16px; display: none; line-height: 1.5; padding: 14px 16px; border-radius: var(--radius); background: var(--bg-surface); border: 0.5px solid var(--border); }
+  /* Summary */
+  .closing-inner { background: var(--navy); flex: 1; padding: 48px 56px 40px; display: flex; flex-direction: column; overflow: hidden; }
+  .summary-checks { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .sc { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: var(--radius); border: 0.5px solid rgba(29,158,117,0.3); background: rgba(29,158,117,0.08); font-size: 16px; color: #9FE1CB; }
+  .sc-icon { color: var(--green); font-size: 20px; flex-shrink: 0; }
+  .git-bridge { padding: 16px 20px; border-radius: var(--radius); background: rgba(24,95,165,0.08); border: 0.5px solid rgba(24,95,165,0.25); font-size: 15px; line-height: 1.6; color: #8a8f9a; }
+  .git-bridge strong { color: #7fbbff; font-weight: 500; }
+  .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+  .res-card { padding: 16px 18px; border: 0.5px solid var(--navy-border); border-radius: var(--radius); }
+  .res-card h4 { font-size: 14px; font-weight: 500; color: #c8cdd8; margin-bottom: 4px; }
+  .res-card p { font-size: 13px; color: #5a6070; }
+  /* Notes panel */
+  .notes-panel { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13,17,23,0.96); border-top: 0.5px solid rgba(255,255,255,0.1); padding: 16px 32px; transform: translateY(100%); transition: transform 0.3s ease; z-index: 90; max-height: 35vh; overflow-y: auto; }
+  .notes-panel.visible { transform: translateY(0); }
+  .notes-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--dbt); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .notes-content { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+  .notes-content strong { color: white; }
+  .notes-content .timing { display: inline-block; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--dbt); background: rgba(255,105,74,0.12); padding: 2px 8px; border-radius: 10px; margin-right: 8px; }
+  .notes-content .action { display: inline-block; font-family: 'DM Mono', monospace; font-size: 12px; color: #7fdbca; background: rgba(29,158,117,0.12); padding: 2px 8px; border-radius: 10px; margin-right: 6px; }
+  .notes-content .watch { display: inline-block; font-family: 'DM Mono', monospace; font-size: 12px; color: #ffbd2e; background: rgba(255,189,46,0.12); padding: 2px 8px; border-radius: 10px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport">
+  <div class="slide-scaler" id="scaler">
+
+    <!-- SLIDE 1 -->
+    <div class="slide title-slide active" id="s1">
+      <div style="height:5px;background:var(--dbt);flex-shrink:0"></div>
+      <div class="slide-inner">
+        <div class="dbt-badge">🔁 technical training · dbt</div>
+        <div class="slide-title">dbt Fundamentals</div>
+        <div class="slide-subtitle">Models, refs and the DAG - how dbt turns your SQL into a reliable data pipeline</div>
+        <div class="presenter-row">
+          <div class="avatar">GS</div>
+          <div><div class="presenter-name">Garrett Stack</div><div class="presenter-meta">Senior Technical Instructor</div></div>
+          <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:12px;color:#3a3f4a">Session 3 of N · 15 min</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide" id="s2">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Learning objectives</div>
+        <div class="slide-title">By the end of this session...</div>
+        <div class="slide-subtitle">You will be able to confidently explain all three of these things.</div>
+        <div class="slide-body">
+          <div class="obj-list">
+            <div class="obj-item"><div class="obj-num">1</div><div class="obj-text"><strong>Explain</strong> what dbt is and what problem it solves for data teams</div></div>
+            <div class="obj-item"><div class="obj-num">2</div><div class="obj-text"><strong>Describe</strong> how models, sources, ref() and the DAG work together</div></div>
+            <div class="obj-item"><div class="obj-num">3</div><div class="obj-text"><strong>Connect</strong> dbt to the Git workflow and SQL skills you already have</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide" id="s3">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Agenda</div>
+        <div class="slide-title">What we are covering today</div>
+        <div class="slide-subtitle">15 minutes, four concepts, one live demo.</div>
+        <div class="slide-body">
+          <div class="agenda-grid">
+            <div class="ah">Time</div><div class="ah">Topic</div><div class="ah">Type</div>
+            <div class="ac time">0-2 min</div><div class="ac hl">Hook - the SQL chaos problem</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">2-5 min</div><div class="ac">What is dbt? Models, ref() and the DAG</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">5-10 min</div><div class="ac hl">Live demo - dbt Cloud IDE walkthrough</div><div class="ac"><span class="tag tag-d">demo</span></div>
+            <div class="ac time">10-12 min</div><div class="ac">Your turn - describe the DAG</div><div class="ac"><span class="tag tag-a">active</span></div>
+            <div class="ac time">12-14 min</div><div class="ac hl">Check for understanding</div><div class="ac"><span class="tag tag-k">check</span></div>
+            <div class="ac time">14-15 min</div><div class="ac">Next steps + Git connection</div><div class="ac"><span class="tag tag-c">wrap</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide" id="s4">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Hook · activation of prior knowledge</div>
+        <div class="slide-title">Sound familiar?</div>
+        <div class="slide-body">
+          <div class="hook-box">
+            <div class="hook-quote">"Has anyone ever had five analysts writing SQL in five different tools - and the finance team and data team producing completely different revenue numbers?"</div>
+            <div class="hook-chips">
+              <span class="chip-bad">revenue_v2_final.sql</span>
+              <span class="chip-bad">orders_cleaned_new.sql</span>
+              <span class="chip-bad">customers_REAL.sql</span>
+              <span class="chip-bad">join_maybe.sql</span>
+            </div>
+          </div>
+          <div class="hook-cta">Nobody knows which query is the source of truth. Nobody tested it. Nobody documented it. And when something breaks, nobody knows where to start.<br><br>dbt fixes this. Today you will understand exactly how.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide" id="s5">
+      <div class="accent-bar blue"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Core concept</div>
+        <div class="slide-title">What is dbt?</div>
+        <div class="slide-body">
+          <div class="concept-cols">
+            <div class="concept-card"><div class="concept-icon">📄</div><h4>A model is just a SELECT</h4><p>Every dbt model is a .sql file with a SELECT statement. dbt compiles it and builds a table or view in your warehouse automatically.</p><span class="code-pill">models/stg_orders.sql</span></div>
+            <div class="concept-card"><div class="concept-icon">🔗</div><h4>ref() is how models connect</h4><p>Instead of hardcoding table names, you use ref('model_name'). dbt figures out the right order to run everything automatically.</p><span class="code-pill">from {{ ref('stg_orders') }}</span></div>
+            <div class="concept-card"><div class="concept-icon">🗺️</div><h4>The DAG shows dependencies</h4><p>A visual map of how your models connect. Built automatically from your ref() calls. Shows you the order models will run.</p><span class="code-pill">dbt docs generate</span></div>
+            <div class="concept-card accent"><div class="concept-icon">▶️</div><h4>dbt run builds everything</h4><p>One command. dbt compiles all your SQL, checks the dependencies, and runs everything in the right order against your warehouse.</p><span class="code-pill">dbt run</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide" id="s6">
+      <div class="accent-bar green"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Live demo</div>
+        <div class="slide-title">dbt Cloud IDE walkthrough</div>
+        <div class="slide-subtitle">Watch, then you will describe what you saw.</div>
+        <div class="slide-body">
+          <div class="terminal">
+            <div class="term-bar"><div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div><span class="term-title">dbt Cloud IDE - jaffle_shop project</span></div>
+            <div class="term-body">
+              <div class="tl"><span class="tco">-- models/staging/stg_orders.sql</span></div>
+              <div class="tl"><span class="tk">select</span> <span class="tc">order_id, customer_id, order_total, order_date</span></div>
+              <div class="tl"><span class="tk">from</span> <span class="tf">{{ source('raw', 'orders') }}</span></div>
+              <div class="tl">&nbsp;</div>
+              <div class="tl"><span class="tco">-- models/marts/revenue_by_customer.sql</span></div>
+              <div class="tl"><span class="tk">select</span> <span class="tc">customer_id,</span></div>
+              <div class="tl">&nbsp;&nbsp;<span class="tk">sum</span><span class="tc">(order_total) as total_revenue,</span></div>
+              <div class="tl">&nbsp;&nbsp;<span class="tk">count</span><span class="tc">(order_id) as order_count</span></div>
+              <div class="tl"><span class="tk">from</span> <span class="tf">{{ ref('stg_orders') }}</span></div>
+              <div class="tl"><span class="tk">group by</span> <span class="tc">customer_id;</span></div>
+              <div class="tl">&nbsp;</div>
+              <div class="tl"><span class="tg">$ dbt run</span></div>
+              <div class="tl"><span class="tg">OK created view model staging.stg_orders</span></div>
+              <div class="tl"><span class="tg">OK created table model marts.revenue_by_customer</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide" id="s7">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Active learning · your turn</div>
+        <div class="slide-title">Describe what you saw</div>
+        <div class="slide-subtitle">No typing required. Just talk through the following.</div>
+        <div class="slide-body">
+          <div class="al-scenario"><strong>Question:</strong> Looking at the two models in the demo - stg_orders and revenue_by_customer - describe in your own words what each one does and why they run in that order.</div>
+          <div class="al-steps">
+            <div class="al-step"><span style="color:var(--dbt)">✓</span><span><strong>stg_orders</strong> - what does this model do? Where does its data come from?</span></div>
+            <div class="al-step"><span style="color:var(--dbt)">✓</span><span><strong>revenue_by_customer</strong> - what does <code>ref('stg_orders')</code> mean in plain English?</span></div>
+            <div class="al-step"><span style="color:var(--dbt)">✓</span><span><strong>The order</strong> - why does dbt run stg_orders before revenue_by_customer?</span></div>
+            <div class="al-step"><span style="color:#ffbd2e">⭐</span><span><strong>Bonus</strong> - what would the DAG look like if we added a third model built on revenue_by_customer?</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide" id="s8">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Check for understanding</div>
+        <div class="slide-title">Quick check</div>
+        <div class="slide-subtitle">Pick the best answer - no pressure.</div>
+        <div class="slide-body">
+          <div class="cfu-q">In a dbt model, you write <code>from {{ ref('stg_orders') }}</code> instead of <code>from raw.orders</code>. What is the main benefit?</div>
+          <div class="cfu-opts">
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">A</div>It makes the SQL run faster against the warehouse</div>
+            <div class="cfu-opt" onclick="cfuClick(this,true)"><div class="cfu-letter">B</div>dbt knows the dependency and automatically runs stg_orders first</div>
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">C</div>It prevents other analysts from editing the stg_orders model</div>
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">D</div>It connects the model directly to the source database</div>
+          </div>
+          <div class="cfu-reveal" id="cfu-reveal">✓ <strong>B is correct.</strong> ref() tells dbt that this model depends on stg_orders. dbt uses that to build the DAG and ensure stg_orders runs first. Without ref(), dbt cannot determine the order.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide" id="s9">
+      <div style="height:5px;background:var(--dbt);flex-shrink:0"></div>
+      <div class="closing-inner">
+        <div class="slide-label" style="color:var(--dbt)">Summary and next steps</div>
+        <div class="slide-title" style="color:#f8f8f8;font-size:32px;margin-bottom:20px">What you can do now</div>
+        <div class="summary-checks">
+          <div class="sc"><span class="sc-icon">✓</span>Explain what dbt is - a transformation tool that runs SQL in your warehouse</div>
+          <div class="sc"><span class="sc-icon">✓</span>Describe a model - a SELECT statement dbt builds into a table or view</div>
+          <div class="sc"><span class="sc-icon">✓</span>Use ref() to connect models and let dbt determine the run order</div>
+          <div class="sc"><span class="sc-icon">✓</span>Read the DAG to understand how your entire data pipeline flows</div>
+        </div>
+        <div class="git-bridge"><strong>The Git connection:</strong> Every dbt project is a Git repo. The branch you create in dbt Cloud is git checkout -b. Commit and Sync is git add, commit and push. The pull request is your code review before anything reaches production. If you did the Git for Data Teams session, you already understand how dbt Cloud works under the hood.</div>
+        <div class="res-grid">
+          <div class="res-card"><h4>dbt Learn</h4><p>courses.getdbt.com - free fundamentals course</p></div>
+          <div class="res-card"><h4>dbt Docs</h4><p>docs.getdbt.com - full reference documentation</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar" id="toolbar">
+  <button class="tb-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
+  <span class="tb-counter" id="counter">1 / 9</span>
+  <button class="tb-btn" id="next-btn" onclick="changeSlide(1)">Next →</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+  <div class="tb-sep"></div>
+  <a href="animation.html" target="_blank" class="tb-btn">🗺️ Animation</a>
+  <a href="commands.html" target="_blank" class="tb-btn">📋 Reference</a>
+  <div class="tb-sep"></div>
+  <span class="tb-key">← →</span>
+  <span class="tb-key">F</span>
+</div>
+
+<!-- NOTES PANEL -->
+<div class="notes-panel" id="notes-panel">
+  <div class="notes-label">Speaker notes</div>
+  <div class="notes-content" id="notes-content"></div>
+</div>
+
+<script>
+const notes = [
+  `<span class="timing">0:00 - 0:20</span><br><strong>Say:</strong> "Welcome everyone. Over the next 15 minutes we are going to cover what dbt is and why data teams use it - so that when you open dbt Cloud for the first time, nothing feels like a black box."<br><br><span class="action">Do:</span> Let the slide breathe. Smile. Give people 10 seconds to settle.<br><br><span class="watch">Watch out for:</span> Don't rush. The opening tone sets the whole session.`,
+
+  `<span class="timing">0:20 - 1:05</span><br><strong>Say:</strong> "Three things by the end of today. Explain what dbt is. Describe how models, ref() and the DAG connect. And connect all of this to the Git workflow and SQL you already know."<br><br><span class="action">Do:</span> Point to each number. Make eye contact after each one.<br><br><span class="watch">Watch out for:</span> Don't read verbatim. Know these three cold.`,
+
+  `<span class="timing">1:05 - 1:35</span><br><strong>Say:</strong> "Here is the shape of the session. Hook first - a problem you have probably seen. Four concepts. A live demo in dbt Cloud. You describe what you saw. Quick check. Then we close with the Git connection."<br><br><strong>Key phrase:</strong> "The demo starts at minute 5. That is where it clicks."`,
+
+  `<span class="timing">1:35 - 3:05</span><br><strong>Say:</strong> "Before we get into dbt - a question."\n\n[PAUSE]\n\n"Has anyone ever had five analysts writing SQL in five different tools - and the finance team and the data team producing completely different revenue numbers?"\n\n[WAIT for the nod. Don't fill the silence.]\n\n"Nobody knows which query is the source of truth. Nobody tested it. Nobody documented it. dbt fixes all of this. Today you will understand exactly how."<br><br><span class="watch">Watch out for:</span> Let the recognition moment breathe. Don't rush to the solution.`,
+
+  `<span class="timing">3:05 - 5:35</span><br><strong>Say:</strong> "dbt is built on four ideas."\n\n<strong>Model:</strong> "A dbt model is a .sql file with a SELECT statement. That is it. You write the logic. dbt handles the CREATE TABLE."\n\n<strong>ref():</strong> "Instead of hardcoding table names, you write ref('model_name'). dbt resolves the name and registers the dependency."\n\n<strong>DAG:</strong> "dbt builds a visual map of all your models and their connections from your ref() calls. You can see the entire pipeline at a glance."\n\n<strong>dbt run:</strong> "One command. dbt checks the DAG, determines the order, and runs everything against your warehouse."\n\n<span class="watch">Watch out for:</span> Don't go too deep on any one card. The demo will make it concrete.<br><br><span class="action">Next:</span> Open animation.html and walk through scenes 1-4 before switching to the live demo.`,
+
+  `<span class="timing">5:35 - 8:35</span><br><strong>Before this slide:</strong> Show animation.html scenes 1-4. Then say: "Let me show you this running in dbt Cloud."\n\n<strong>Switch to dbt Cloud IDE.</strong>\n\n<strong>Narrate each step:</strong>\n1. "This is stg_orders.sql - one SELECT, one .sql file, one model."\n2. "See source() here - this tells dbt where the raw data lives."\n3. "Now this is revenue_by_customer.sql - see ref('stg_orders')? That is the dependency."\n4. "Click the DAG tab - there is our pipeline visualised automatically."\n5. "Now I click dbt run - watch the order."\n6. "stg_orders builds first. Then revenue_by_customer. Green ticks."\n\n<span class="watch">Watch out for:</span> If dbt Cloud is slow, narrate what is happening while it runs. "This is compiling the Jinja SQL into plain SQL first, then running it against BigQuery."`,
+
+  `<span class="timing">8:35 - 10:35</span><br><strong>Say:</strong> "Your turn - but no typing required. I want you to describe in your own words what you just saw."\n\nRead the three questions out loud. Then give people 60 seconds to think or discuss.\n\nThen ask someone to answer each one. Guide if needed:\n- stg_orders: "It takes raw orders data from the source and selects the columns we need."\n- ref(): "It means this model depends on stg_orders and dbt should run that first."\n- The order: "Because revenue_by_customer references stg_orders - it cannot run before it exists."\n\n<span class="watch">Watch out for:</span> This is a verbal exercise not a terminal exercise. Keep it conversational.`,
+
+  `<span class="timing">10:35 - 12:05</span><br><strong>Say:</strong> "Quick check."\n\nRead the question out loud. Give 15 seconds of silence.\n\n"What is the answer? Anyone?"\n\nIF B: "Exactly. ref() registers the dependency. dbt knows stg_orders must run first because revenue_by_customer refs it."\n\nIF WRONG: "Good attempt - let us look at why B is correct..." Keep it warm.\n\n<span class="action">Also mention:</span> "I have a live quiz on the course page - four questions on your phone. I will share the link shortly."`,
+
+  `<span class="timing">12:05 - 15:00</span><br><strong>Say:</strong> "Let us land the plane. Four things you can now do:"\n\nRead each check point.\n\n<strong>The Git connection - say this clearly:</strong>\n"Every dbt project is a Git repo. The branch you create in dbt Cloud - that is git checkout -b. Commit and Sync - that is git add, commit and push. The pull request - that is your code review before anything reaches production. If you did the Git for Data Teams session, you already know how dbt Cloud works under the hood. These courses connect."\n\n[PAUSE - let that land]\n\n<strong>Close:</strong> "Any questions? And there is a feedback form on the course page - it takes 2 minutes and helps me improve."\n\n<span class="watch">Watch out for:</span> The Git connection is the payoff for learners who did course 1. Slow down and let it land.`
+];
+
+let cur = 0;
+const total = 9;
+let notesVisible = false;
+let toolbarTimer;
+
+function goTo(i) {
+  document.getElementById('s'+(cur+1)).classList.remove('active');
+  cur = i;
+  document.getElementById('s'+(cur+1)).classList.add('active');
+  document.getElementById('counter').textContent = (cur+1)+' / '+total;
+  document.getElementById('prev-btn').disabled = cur === 0;
+  document.getElementById('next-btn').disabled = cur === total-1;
+  document.getElementById('notes-content').innerHTML = notes[cur];
+}
+function changeSlide(d) { goTo(Math.max(0, Math.min(total-1, cur+d))); }
+function toggleNotes() { notesVisible = !notesVisible; document.getElementById('notes-panel').classList.toggle('visible', notesVisible); }
+function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+function cfuClick(el, correct) {
+  document.querySelectorAll('.cfu-opt').forEach(o => { o.classList.remove('correct','wrong'); o.onclick = null; });
+  el.classList.add(correct?'correct':'wrong');
+  if (!correct) document.querySelectorAll('.cfu-opt')[1].classList.add('correct');
+  document.getElementById('cfu-reveal').style.display = 'block';
+}
+function scaleSlides() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const aspect = 16/9;
+  let w, h;
+  if (vw/vh > aspect) { h = vh*0.95; w = h*aspect; } else { w = vw*0.95; h = w/aspect; }
+  const scaler = document.getElementById('scaler');
+  scaler.style.width = w+'px'; scaler.style.height = h+'px';
+  document.querySelectorAll('.slide').forEach(s => { s.style.width = w+'px'; s.style.height = h+'px'; });
+}
+function showToolbar() {
+  document.getElementById('toolbar').classList.remove('hidden');
+  clearTimeout(toolbarTimer);
+  toolbarTimer = setTimeout(() => document.getElementById('toolbar').classList.add('hidden'), 3000);
+}
+document.addEventListener('mousemove', showToolbar);
+document.addEventListener('keydown', e => {
+  showToolbar();
+  if (e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') { e.preventDefault(); changeSlide(1); }
+  if (e.key==='ArrowLeft'||e.key==='ArrowUp') { e.preventDefault(); changeSlide(-1); }
+  if (e.key==='n'||e.key==='N') toggleNotes();
+  if (e.key==='f'||e.key==='F') toggleFullscreen();
+});
+window.addEventListener('resize', scaleSlides);
+scaleSlides();
+goTo(0);
+showToolbar();
+</script>
+</body>
+</html>

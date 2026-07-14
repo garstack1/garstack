@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual Explainer · dbt Fundamentals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --dbt: #FF694A; --green: #1D9E75; --blue: #185FA5; --text: #1a1a1a; --text-muted: #6b7280; --bg: #ffffff; --bg-surface: #f9f9f8; --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16); --radius: 10px; --radius-lg: 14px; }
+  @media (prefers-color-scheme: dark) { :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); } }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--dbt); }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+  .page { max-width: 860px; margin: 0 auto; padding: 36px 32px 80px; }
+  .page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--dbt); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+  .stepper { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .step-btn { padding: 7px 14px; border-radius: 20px; border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text-muted); font-size: 12px; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .step-btn:hover { border-color: var(--dbt); color: var(--text); }
+  .step-btn.active { background: var(--dbt); border-color: var(--dbt); color: white; }
+  .step-num { width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+  .step-btn:not(.active) .step-num { background: var(--bg-surface); color: var(--text-muted); }
+  .canvas-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); overflow: hidden; margin-bottom: 20px; }
+  canvas { display: block; width: 100%; }
+  .explanation { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); padding: 20px 24px; margin-bottom: 20px; }
+  .exp-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--dbt); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .exp-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; }
+  .exp-body { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .exp-body strong { color: var(--text); font-weight: 500; }
+  .nav-btns { display: flex; gap: 10px; }
+  .nav-btn { padding: 10px 20px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.12s; }
+  .nav-btn:hover { background: var(--bg-surface); }
+  .nav-btn.primary { background: var(--dbt); border-color: var(--dbt); color: white; }
+  .nav-btn.primary:hover { opacity: 0.88; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">🔁 dbt fundamentals · visual explainer</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+<div class="page">
+  <div class="page-tag">Interactive animation</div>
+  <div class="page-title">How dbt works</div>
+  <div class="page-sub">Click through each scene or use arrow keys. Each scene builds on the last.</div>
+  <div class="stepper" id="stepper"></div>
+  <div class="canvas-wrap"><canvas id="dbt-canvas" height="280"></canvas></div>
+  <div class="explanation" id="explanation"></div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="prev-btn" onclick="prevScene()">← Previous</button>
+    <button class="nav-btn primary" id="next-btn" onclick="nextScene()">Next →</button>
+  </div>
+</div>
+<script>
+const W=796, H=280;
+const DBT='#FF694A', GREEN='#1D9E75', BLUE='#185FA5', NAVY='#0d1117';
+
+const scenes=[
+  {label:'The problem',title:'SQL chaos - no structure, no trust',body:'Five analysts, five tools, five different answers to the same question. Nobody knows which query is the source of truth. Nobody tested it. Nobody documented it. This is the problem dbt solves.',draw:drawScene0},
+  {label:'What is dbt',title:'dbt sits between your data and your warehouse',body:'dbt is a transformation tool. Raw data goes into your warehouse. dbt takes that raw data, runs your SQL models against it, and creates clean, tested, documented tables that your analysts can trust.',draw:drawScene1},
+  {label:'Models',title:'A model is just a SELECT statement',body:'Each dbt model is a .sql file containing a single SELECT statement. You write the logic. dbt handles the CREATE TABLE or CREATE VIEW. Every model lives in your models/ folder and is version controlled in Git.',draw:drawScene2},
+  {label:'ref()',title:'ref() connects models together',body:'Instead of hardcoding table names, you use ref(\'model_name\'). This tells dbt two things - what the table is called in the current environment, and that this model depends on the referenced one. dbt uses this to determine the run order.',draw:drawScene3},
+  {label:'The DAG',title:'The DAG shows your entire pipeline',body:'The Directed Acyclic Graph is built automatically from your ref() calls. It shows every model and every dependency. stg_orders must run before revenue_by_customer because revenue_by_customer refs it.',draw:drawScene4},
+  {label:'dbt run',title:'One command builds everything in order',body:'dbt run reads the DAG, determines the correct order, compiles your Jinja SQL into plain SQL, and runs every model against your warehouse. Green ticks mean your pipeline is built and ready.',draw:drawScene5},
+];
+
+let cur=0;
+const canvas=document.getElementById('dbt-canvas');
+const ctx=canvas.getContext('2d');
+
+function setup(){const dpr=window.devicePixelRatio||1;canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.scale(dpr,dpr);}
+function isDark(){return window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function C(){const d=isDark();return{bg:d?'#161b22':'#f9f9f8',text:d?'#f0f0f0':'#1a1a1a',muted:d?'#8a8f9a':'#6b7280',border:d?'#2a2f3a':'#e5e7eb',cell:d?'#0d1117':'#ffffff',surface:d?'#161b22':'#f9f9f8'};}
+function clear(){const c=C();ctx.fillStyle=c.bg;ctx.fillRect(0,0,W,H);}
+
+function box(x,y,w,h,fill,stroke,r=6){ctx.save();ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=0.5;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();ctx.stroke();ctx.restore();}
+function txt(text,x,y,size,color,align='center',font='DM Sans'){ctx.save();ctx.fillStyle=color;ctx.font=size+'px '+font+', sans-serif';ctx.textAlign=align;ctx.fillText(text,x,y);ctx.restore();}
+function mono(text,x,y,size,color,align='center'){txt(text,x,y,size,color,align,'DM Mono');}
+function arrow(x1,y1,x2,y2,color){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);const a=Math.atan2(y2-y1,x2-x1);ctx.moveTo(x2,y2);ctx.lineTo(x2-10*Math.cos(a-0.4),y2-10*Math.sin(a-0.4));ctx.moveTo(x2,y2);ctx.lineTo(x2-10*Math.cos(a+0.4),y2-10*Math.sin(a+0.4));ctx.stroke();ctx.restore();}
+function badge(text,x,y,color){ctx.save();ctx.font='500 11px DM Mono, monospace';const tw=ctx.measureText(text).width;const pw=tw+16,ph=22;ctx.fillStyle=color+'22';ctx.beginPath();ctx.roundRect(x-pw/2,y-ph/2,pw,ph,6);ctx.fill();ctx.strokeStyle=color+'60';ctx.lineWidth=0.5;ctx.stroke();ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(text,x,y+4);ctx.restore();}
+
+function drawScene0(){
+  clear();const c=C();
+  const tools=[['Excel','#1D6F42'],['Tableau','#E97627'],['Looker','#4285F4'],['Python','#3776AB'],['SQL','#CC2927']];
+  tools.forEach(([name,color],i)=>{
+    const x=60+i*140,y=80;
+    box(x,y,100,50,color+'22',color+'60');
+    txt(name,x+50,y+30,13,c.text);
+  });
+  txt('5 different tools, 5 different answers',W/2,178,14,c.muted);
+  box(250,200,300,40,'#E24B4A22','#E24B4A60');
+  txt('Revenue = $1.2M   Revenue = $1.4M   Revenue = $980K',W/2,225,11,c.muted,'center','DM Mono');
+  txt('Nobody knows which number is right.',W/2,258,13,'#E24B4A');
+}
+
+function drawScene1(){
+  clear();const c=C();
+  box(30,80,150,60,c.cell,c.border);txt('Raw Data',105,115,13,c.muted);txt('BigQuery',105,130,11,c.muted,'center','DM Mono');
+  box(323,60,150,100,DBT+'22',DBT+'60');txt('dbt',398,105,22,DBT,'center','DM Mono');txt('models/ tests/ docs/',398,125,10,c.muted,'center','DM Mono');
+  box(616,80,150,60,GREEN+'22',GREEN+'60');txt('Clean Tables',691,108,13,c.text);txt('tested + documented',691,124,10,c.muted);
+  arrow(180,110,323,110,c.border);arrow(473,110,616,110,c.border);
+  badge('your SQL',255,90,DBT);badge('dbt run',255,130,DBT);
+  txt('Raw data goes in. Clean, tested, documented tables come out.',W/2,230,13,c.muted);
+}
+
+function drawScene2(){
+  clear();const c=C();
+  box(30,40,340,200,c.cell,c.border);
+  txt('models/',60,68,11,DBT,'left','DM Mono');
+  box(50,78,300,40,c.bg+'22',c.border,4);
+  mono('staging/stg_orders.sql',200,103,11,c.text);
+  box(50,126,300,40,c.bg+'22',c.border,4);
+  mono('marts/revenue_by_customer.sql',200,151,11,c.text);
+  txt('Each file = one SELECT statement',200,200,12,c.muted);
+  box(400,40,366,200,NAVY,c.border);
+  mono('-- stg_orders.sql',430,72,11,'#444d5a','left');
+  mono('select',430,94,11,'#7fbbff','left');
+  mono('    order_id, customer_id,',430,114,11,'#f0f0f0','left');
+  mono('    order_total, order_date',430,134,11,'#f0f0f0','left');
+  mono('from {{ source(\'raw\',\'orders\') }}',430,154,11,DBT,'left');
+  txt('dbt handles CREATE TABLE for you',583,210,12,c.muted);
+}
+
+function drawScene3(){
+  clear();const c=C();
+  box(30,80,200,80,c.cell,c.border);
+  txt('stg_orders.sql',130,110,13,c.text);
+  mono('source(\'raw\',\'orders\')',130,130,10,DBT);
+  box(566,80,200,80,c.cell,c.border);
+  txt('revenue_by_customer.sql',666,110,13,c.text);
+  mono('ref(\'stg_orders\')',666,130,10,GREEN);
+  arrow(230,120,566,120,DBT);
+  badge('ref() creates this link',398,100,DBT);
+  badge('dbt knows the order',398,140,GREEN);
+  txt('ref() tells dbt: run stg_orders first, then revenue_by_customer.',W/2,220,13,c.muted);
+  txt('No hardcoded table names. Works in dev, staging and production automatically.',W/2,242,13,c.muted);
+}
+
+function drawScene4(){
+  clear();const c=C();
+  box(30,30,160,50,c.cell,c.border);txt('raw.orders',110,60,12,c.muted);
+  box(318,30,160,50,c.cell,c.border);txt('stg_orders',398,60,12,c.text);badge('model',398,82,DBT);
+  box(606,30,160,50,c.cell,c.border);txt('revenue_by_customer',686,55,11,c.text);badge('model',686,77,DBT);
+  box(162,110,160,50,GREEN+'22',GREEN+'60');txt('stg_customers',242,140,12,c.text);
+  box(450,110,160,50,GREEN+'22',GREEN+'60');txt('customer_ltv',530,140,12,c.text);
+  arrow(190,55,318,55,c.border);arrow(478,55,606,55,c.border);
+  arrow(110,80,242,110,c.border);arrow(398,80,530,110,c.border);
+  txt('The DAG - built automatically from ref() calls. dbt runs left to right.',W/2,210,13,c.muted);
+  txt('Add a new ref() and the DAG updates itself.',W/2,232,13,c.muted);
+}
+
+function drawScene5(){
+  clear();const c=C();
+  const steps=[
+    {x:30,label:'dbt run',sub:'you type this',color:DBT},
+    {x:200,label:'compile SQL',sub:'Jinja -> plain SQL',color:'#7fbbff'},
+    {x:370,label:'read DAG',sub:'find the order',color:'#7fbbff'},
+    {x:540,label:'run models',sub:'in correct order',color:GREEN},
+    {x:710,label:'green ticks',sub:'pipeline built',color:GREEN},
+  ];
+  steps.forEach((s,i)=>{
+    box(s.x,80,140,60,s.color+'18',s.color+'60');
+    txt(s.label,s.x+70,112,13,c.text);
+    mono(s.sub,s.x+70,130,10,c.muted);
+    if(i<steps.length-1) arrow(s.x+140,110,s.x+170,110,c.border);
+  });
+  box(30,190,736,50,GREEN+'10',GREEN+'40');
+  mono('OK created view dev.stg_orders',398,205,11,GREEN);
+  mono('OK created table dev.revenue_by_customer',398,223,11,GREEN);
+  txt('One command. Everything runs in the right order. Every time.',W/2,262,13,c.muted);
+}
+
+function renderScene(i){
+  scenes[i].draw();
+  document.getElementById('explanation').innerHTML='<div class="exp-label">Scene '+(i+1)+' of '+scenes.length+' - '+scenes[i].label+'</div><div class="exp-title">'+scenes[i].title+'</div><div class="exp-body">'+scenes[i].body+'</div>';
+  document.querySelectorAll('.step-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.getElementById('prev-btn').disabled=i===0;
+  document.getElementById('next-btn').disabled=i===scenes.length-1;
+  document.getElementById('next-btn').textContent=i===scenes.length-1?'Done':'Next →';
+}
+function nextScene(){if(cur<scenes.length-1){cur++;renderScene(cur);}}
+function prevScene(){if(cur>0){cur--;renderScene(cur);}}
+
+const el=document.getElementById('stepper');
+scenes.forEach((s,i)=>{
+  const btn=document.createElement('button');
+  btn.className='step-btn'+(i===0?' active':'');
+  btn.innerHTML='<span class="step-num">'+(i+1)+'</span>'+s.label;
+  btn.onclick=()=>{cur=i;renderScene(i);};
+  el.appendChild(btn);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')nextScene();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')prevScene();
+});
+window.addEventListener('resize',()=>{setup();renderScene(cur);});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>renderScene(cur));
+setup();renderScene(0);
+</script>
+</body>
+</html>

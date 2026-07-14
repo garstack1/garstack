@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept Reference · dbt Fundamentals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --dbt: #FF694A; --green: #1D9E75; --navy: #0d1117; --text: #1a1a1a; --text-muted: #6b7280; --bg: #ffffff; --bg-surface: #f9f9f8; --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16); --radius: 10px; --radius-lg: 14px; }
+  @media (prefers-color-scheme: dark) { :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); } }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--dbt); }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+  .page { max-width: 760px; margin: 0 auto; padding: 36px 32px 80px; }
+  .page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--dbt); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+  .session-banner { background: rgba(255,105,74,0.06); border: 0.5px solid rgba(255,105,74,0.25); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .concept-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; margin-bottom: 12px; cursor: pointer; border-left: 3px solid var(--dbt); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; transition: border-color 0.12s; }
+  .concept-card.open { border-color: rgba(255,105,74,0.4); }
+  .card-head { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+  .card-name { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--dbt); min-width: 160px; }
+  .card-plain { flex: 1; font-size: 13px; color: var(--text-muted); }
+  .card-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(255,105,74,0.1); color: var(--dbt); font-family: 'DM Mono', monospace; border: 0.5px solid rgba(255,105,74,0.25); }
+  .card-chevron { font-size: 13px; color: var(--text-muted); margin-left: auto; flex-shrink: 0; transition: transform 0.15s; }
+  .concept-card.open .card-chevron { transform: rotate(180deg); }
+  .card-body { display: none; padding: 0 16px 16px; border-top: 0.5px solid var(--border); }
+  .concept-card.open .card-body { display: block; }
+  .card-detail { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-top: 12px; margin-bottom: 12px; }
+  .card-detail strong { color: var(--text); font-weight: 500; }
+  .card-code { background: var(--navy); border-radius: var(--radius); padding: 13px 16px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.9; overflow-x: auto; margin-bottom: 10px; }
+  .tk { color: #7fbbff; } .tf { color: #FF694A; } .tc { color: #f0f0f0; } .tco { color: #444d5a; } .tg { color: #1D9E75; }
+  .use-cases { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .use-case { font-size: 11px; padding: 3px 9px; border-radius: 10px; background: var(--bg-surface); border: 0.5px solid var(--border-strong); color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  .section-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); margin-top: 28px; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">📋 concept reference · dbt Fundamentals</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+<div class="page">
+  <div class="page-tag">Quick reference</div>
+  <div class="page-title">dbt concepts, plain English</div>
+  <div class="page-sub">Keep this open during the session. Click any concept to see a full explanation and example.</div>
+  <div class="session-banner">
+    <span>⭐</span>
+    <span><strong style="color:var(--dbt)">Today's session covers four core concepts.</strong> All four are highlighted below with an orange left border. Click any card to expand.</span>
+  </div>
+  <div class="section-label">Session concepts - covered today</div>
+  <div id="card-list"></div>
+</div>
+<script>
+const concepts = [
+  { name: 'Model', plain: 'A SQL SELECT statement that dbt builds into a table or view', detail: 'A dbt model is a .sql file in your models/ folder containing a single SELECT statement. You write the logic, dbt handles the DDL - the CREATE TABLE or CREATE VIEW part. By default dbt creates a view. You can configure it as a table, incremental model, or ephemeral model depending on your needs.', code: [['tco','-- models/staging/stg_orders.sql'],['tk','select'],['tc','    order_id,'],['tc','    customer_id,'],['tc','    order_total,'],['tc','    order_date'],['tk','from '],['tf','{{ source(\'raw\', \'orders\') }}']], uses: ['Data transformation','Staging layer','Marts layer','Reusable logic'] },
+  { name: 'ref()', plain: 'How dbt models depend on and reference each other', detail: 'ref() is a Jinja function that does two things. First it resolves the correct table name for the environment you are running in - dev, staging or production. Second it registers a dependency so dbt knows to run the referenced model first. Always use ref() instead of hardcoding table names.', code: [['tco','-- models/marts/revenue_by_customer.sql'],['tk','select'],['tc','    customer_id,'],['tk','    sum'],['tc','(order_total) as total_revenue,'],['tk','    count'],['tc','(order_id) as order_count'],['tk','from '],['tf','{{ ref(\'stg_orders\') }}'],['tk','group by '],['tc','customer_id']], uses: ['Model dependencies','Environment resolution','DAG construction','Lineage tracking'] },
+  { name: 'DAG', plain: 'The visual map of how your models connect', detail: 'The Directed Acyclic Graph shows every model in your project and the dependencies between them. dbt builds it automatically from your ref() and source() calls. You can view it in dbt Cloud by clicking the DAG icon or running dbt docs generate and dbt docs serve. Use it to understand your data pipeline at a glance and debug lineage issues.', code: [['tco','-- Run to generate and view the DAG'],['tg','$ dbt docs generate'],['tc','Running with dbt=1.7.0'],['tg','$ dbt docs serve'],['tc','Serving docs at http://localhost:8080']], uses: ['Pipeline visualisation','Dependency tracking','Impact analysis','Documentation'] },
+  { name: 'dbt run', plain: 'The command that builds all your models in order', detail: 'dbt run compiles your Jinja SQL into plain SQL, checks the DAG to determine the correct execution order, and runs each model against your warehouse. Models with no dependencies run first. Use dbt run --select model_name to run a single model, or dbt run --select +model_name to run it and all its upstream dependencies.', code: [['tg','$ dbt run'],['tc','Running with dbt=1.7.0'],['tg','OK created view model dev.stg_orders'],['tg','OK created table model dev.revenue_by_customer'],['tc',''],['tco','-- Run a single model'],['tg','$ dbt run --select stg_orders'],['tco','-- Run model and all its parents'],['tg','$ dbt run --select +revenue_by_customer']], uses: ['Build all models','Run single model','Run upstream models','Deploy pipeline'] },
+];
+
+const colorMap = { tk:'#7fbbff', tf:'#FF694A', tc:'#f0f0f0', tco:'#444d5a', tg:'#1D9E75' };
+let openId = null;
+
+function makeCard(c, i) {
+  const id = 'card-'+i;
+  const codeHtml = c.code.map(([cls,txt]) => '<span style="color:'+colorMap[cls]+'">'+txt+'</span>').join('');
+  const usesHtml = c.uses.map(u => '<span class="use-case">'+u+'</span>').join('');
+  return '<div class="concept-card" id="'+id+'" onclick="toggle(\''+id+'\')"><div class="card-head"><span class="card-name">'+c.name+'</span><span class="card-badge">today</span><span class="card-plain">'+c.plain+'</span><span class="card-chevron">&#8964;</span></div><div class="card-body"><div class="card-detail">'+c.detail+'</div><div class="card-code">'+codeHtml+'</div><div class="use-cases">'+usesHtml+'</div></div></div>';
+}
+
+function toggle(id) {
+  const el = document.getElementById(id);
+  if (openId && openId !== id) { const prev = document.getElementById(openId); if (prev) prev.classList.remove('open'); }
+  el.classList.toggle('open');
+  openId = el.classList.contains('open') ? id : null;
+}
+
+document.getElementById('card-list').innerHTML = concepts.map((c,i) => makeCard(c,i)).join('');
+</script>
+</body>
+</html>
