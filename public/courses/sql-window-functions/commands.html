@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Function Reference · SQL Window Functions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --blue: #185FA5; --orange: #FF694A; --green: #1D9E75; --navy: #0d1117; --text: #1a1a1a; --text-muted: #6b7280; --bg: #ffffff; --bg-surface: #f9f9f8; --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16); --radius: 10px; --radius-lg: 14px; }
+  @media (prefers-color-scheme: dark) { :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); } }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue); }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+  .page { max-width: 760px; margin: 0 auto; padding: 36px 32px 80px; }
+  .page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--blue); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+  .session-banner { background: rgba(24,95,165,0.06); border: 0.5px solid rgba(24,95,165,0.25); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .fn-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; margin-bottom: 12px; cursor: pointer; transition: border-color 0.12s; border-left: 3px solid var(--blue); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+  .fn-card:hover { border-color: var(--blue); }
+  .fn-card.open { border-color: rgba(24,95,165,0.35); }
+  .fn-head { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+  .fn-name { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--blue); min-width: 180px; }
+  .fn-plain { flex: 1; font-size: 13px; color: var(--text-muted); }
+  .fn-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(24,95,165,0.1); color: var(--blue); font-family: 'DM Mono', monospace; border: 0.5px solid rgba(24,95,165,0.25); }
+  .fn-chevron { font-size: 13px; color: var(--text-muted); margin-left: auto; flex-shrink: 0; transition: transform 0.15s; }
+  .fn-card.open .fn-chevron { transform: rotate(180deg); }
+  .fn-body { display: none; padding: 0 16px 16px; border-top: 0.5px solid var(--border); }
+  .fn-card.open .fn-body { display: block; }
+  .fn-detail { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-top: 12px; margin-bottom: 12px; }
+  .fn-detail strong { color: var(--text); font-weight: 500; }
+  .fn-syntax { background: var(--navy); border-radius: var(--radius); padding: 13px 16px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.9; overflow-x: auto; margin-bottom: 10px; }
+  .tk { color: #7fbbff; } .tf { color: #FF694A; } .tc { color: #f0f0f0; } .tco { color: #444d5a; } .tstr { color: #1D9E75; }
+  .use-cases { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .use-case { font-size: 11px; padding: 3px 9px; border-radius: 10px; background: var(--bg-surface); border: 0.5px solid var(--border-strong); color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  .section-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); margin-top: 28px; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">📋 function reference · SQL Window Functions</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+<div class="page">
+  <div class="page-tag">Quick reference</div>
+  <div class="page-title">Window functions, plain English</div>
+  <div class="page-sub">Keep this open during the session. Click any function to see syntax and examples.</div>
+  <div class="session-banner">
+    <span>⭐</span>
+    <span><strong style="color:var(--blue)">Today's session covers four functions.</strong> All four are highlighted below. Click any card to expand the full syntax and a worked example.</span>
+  </div>
+  <div class="section-label">Session functions - used today</div>
+  <div id="fn-list"></div>
+  <div class="section-label">The anatomy of a window function</div>
+  <div style="background:var(--navy);border-radius:var(--radius);padding:16px 18px;font-family:'DM Mono',monospace;font-size:12px;line-height:2.2;overflow-x:auto">
+    <div><span class="tf">FUNCTION_NAME</span><span class="tc">(expression)</span></div>
+    <div><span class="tk">OVER</span><span class="tc"> (</span></div>
+    <div><span class="tco">&nbsp;&nbsp;-- optional: divide into groups</span></div>
+    <div><span class="tk">&nbsp;&nbsp;PARTITION BY</span><span class="tc"> column_name</span></div>
+    <div><span class="tco">&nbsp;&nbsp;-- optional: define order within group</span></div>
+    <div><span class="tk">&nbsp;&nbsp;ORDER BY</span><span class="tc"> column_name </span><span class="tk">ASC</span><span class="tc">|</span><span class="tk">DESC</span></div>
+    <div><span class="tco">&nbsp;&nbsp;-- optional: define the frame of rows</span></div>
+    <div><span class="tk">&nbsp;&nbsp;ROWS BETWEEN</span><span class="tc"> ... </span><span class="tk">AND</span><span class="tc"> ...</span></div>
+    <div><span class="tc">)</span></div>
+  </div>
+</div>
+<script>
+const fns = [
+  { name: 'ROW_NUMBER()', plain: 'Assign a unique number to each row', detail: 'Gives every row a unique sequential number within its partition, ordered by the ORDER BY clause. Even if two rows are identical, they get different numbers. Use it to deduplicate data or find the first/last record per group.', syntax: [['tco','-- Get the most recent order per customer'],['tk','SELECT '],['tc','customer_id, order_date, order_total,'],['tf','ROW_NUMBER()'],['tk',' OVER ('],['tk','PARTITION BY '],['tc','customer_id'],['tk',' ORDER BY '],['tc','order_date '],['tk','DESC'],['tc',') AS row_num'],['tk','FROM '],['tc','orders;'],['tco','-- Then wrap it to get only row_num = 1']], uses: ['Deduplication','Latest record per group','Pagination'] },
+  { name: 'RANK()', plain: 'Rank rows with gaps for ties', detail: 'Ranks rows within a partition. If two rows tie, they get the same rank and the next rank is skipped. So ranks might go 1, 2, 2, 4. Use it for league tables where tied positions should be equal.', syntax: [['tco','-- Rank salespeople by revenue within each region'],['tk','SELECT '],['tc','salesperson, region, revenue,'],['tf','RANK()'],['tk',' OVER ('],['tk','PARTITION BY '],['tc','region'],['tk',' ORDER BY '],['tc','revenue '],['tk','DESC'],['tc',') AS rank'],['tk','FROM '],['tc','sales;']], uses: ['League tables','Top N per group','Tied positions'] },
+  { name: 'LAG()', plain: 'Look at the value from a previous row', detail: 'Returns the value from a row a specified number of positions before the current row. LAG(revenue, 1) gets the previous row\'s revenue. Use it for period over period comparisons without a self-join.', syntax: [['tco','-- Compare this month revenue to last month'],['tk','SELECT '],['tc','month, revenue,'],['tf','LAG'],['tc','(revenue, 1)'],['tk',' OVER ('],['tk','ORDER BY '],['tc','month'],['tc',') AS prev_month,'],['tc','revenue - '],['tf','LAG'],['tc','(revenue, 1)'],['tk',' OVER ('],['tk','ORDER BY '],['tc','month) AS change'],['tk','FROM '],['tc','monthly_revenue;']], uses: ['Month over month','Year over year','Period comparisons'] },
+  { name: 'SUM() OVER()', plain: 'Calculate a running total without collapsing rows', detail: 'Calculates a cumulative sum across rows ordered by the ORDER BY clause. Unlike GROUP BY SUM, every row keeps its own data plus gets a running total column. The ROWS UNBOUNDED PRECEDING frame means "all rows up to and including this one".', syntax: [['tco','-- Running total of revenue by date'],['tk','SELECT '],['tc','order_date, order_total,'],['tf','SUM'],['tc','(order_total)'],['tk',' OVER ('],['tk','ORDER BY '],['tc','order_date'],['tk',' ROWS BETWEEN UNBOUNDED PRECEDING'],['tk',' AND CURRENT ROW'],['tc',') AS running_total'],['tk','FROM '],['tc','orders;']], uses: ['Running totals','Cumulative revenue','Moving averages'] },
+];
+
+const colorMap = { tk:'#7fbbff', tf:'#FF694A', tc:'#f0f0f0', tco:'#444d5a', tstr:'#1D9E75' };
+let openId = null;
+
+function makeCard(fn, i) {
+  const id = 'fn-'+i;
+  const syntaxHtml = fn.syntax.map(([cls,txt]) => '<span style="color:'+colorMap[cls]+'">'+txt+'</span>').join('');
+  const usesHtml = fn.uses.map(u => '<span class="use-case">'+u+'</span>').join('');
+  return '<div class="fn-card" id="'+id+'" onclick="toggle(\''+id+'\')"><div class="fn-head"><span class="fn-name">'+fn.name+'</span><span class="fn-badge">today</span><span class="fn-plain">'+fn.plain+'</span><span class="fn-chevron">&#8964;</span></div><div class="fn-body"><div class="fn-detail">'+fn.detail+'</div><div class="fn-syntax">'+syntaxHtml+'</div><div class="use-cases">'+usesHtml+'</div></div></div>';
+}
+
+function toggle(id) {
+  const el = document.getElementById(id);
+  if (openId && openId !== id) { const prev = document.getElementById(openId); if (prev) prev.classList.remove('open'); }
+  el.classList.toggle('open');
+  openId = el.classList.contains('open') ? id : null;
+}
+
+document.getElementById('fn-list').innerHTML = fns.map((f,i) => makeCard(f,i)).join('');
+</script>
+</body>
+</html>

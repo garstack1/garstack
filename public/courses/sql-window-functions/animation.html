@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual Explainer · SQL Window Functions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --blue: #185FA5; --orange: #FF694A; --green: #1D9E75; --text: #1a1a1a; --text-muted: #6b7280; --bg: #ffffff; --bg-surface: #f9f9f8; --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16); --radius: 10px; --radius-lg: 14px; }
+  @media (prefers-color-scheme: dark) { :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); } }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue); }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+  .page { max-width: 860px; margin: 0 auto; padding: 36px 32px 80px; }
+  .page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--blue); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+  .stepper { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .step-btn { padding: 7px 14px; border-radius: 20px; border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text-muted); font-size: 12px; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .step-btn:hover { border-color: var(--blue); color: var(--text); }
+  .step-btn.active { background: var(--blue); border-color: var(--blue); color: white; }
+  .step-num { width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+  .step-btn:not(.active) .step-num { background: var(--bg-surface); color: var(--text-muted); }
+  .canvas-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); overflow: hidden; margin-bottom: 20px; }
+  canvas { display: block; width: 100%; }
+  .explanation { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); padding: 20px 24px; margin-bottom: 20px; }
+  .exp-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--blue); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .exp-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; }
+  .exp-body { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .exp-body strong { color: var(--text); font-weight: 500; }
+  .nav-btns { display: flex; gap: 10px; }
+  .nav-btn { padding: 10px 20px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.12s; }
+  .nav-btn:hover { background: var(--bg-surface); }
+  .nav-btn.primary { background: var(--blue); border-color: var(--blue); color: white; }
+  .nav-btn.primary:hover { opacity: 0.88; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">🪟 window functions · visual explainer</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+<div class="page">
+  <div class="page-tag">Interactive animation</div>
+  <div class="page-title">How window functions work</div>
+  <div class="page-sub">Click through each scene or use arrow keys. Each scene builds on the last.</div>
+  <div class="stepper" id="stepper"></div>
+  <div class="canvas-wrap"><canvas id="wf-canvas" height="280"></canvas></div>
+  <div class="explanation" id="explanation"></div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="prev-btn" onclick="prevScene()">← Previous</button>
+    <button class="nav-btn primary" id="next-btn" onclick="nextScene()">Next →</button>
+  </div>
+</div>
+<script>
+const W = 796, H = 280;
+const BLUE = '#185FA5', GREEN = '#1D9E75', ORANGE = '#FF694A';
+
+const scenes = [
+  { label: 'The problem', title: 'Ranking with GROUP BY - the painful way', body: 'To rank salespeople by revenue per region with plain SQL, you need nested subqueries. The code is hard to read, hard to maintain, and easy to get wrong. There has to be a better way.', draw: drawScene0 },
+  { label: 'OVER clause', title: 'The OVER clause - defining the window', body: 'A window function uses the <strong>OVER</strong> clause to define which rows to operate on. Without PARTITION BY it operates on all rows. Think of it as "perform this calculation over this window of data."', draw: drawScene1 },
+  { label: 'PARTITION BY', title: 'PARTITION BY - dividing into groups', body: '<strong>PARTITION BY</strong> divides the rows into groups - like GROUP BY - but without collapsing them. The window function runs separately within each partition. Every row keeps its own data.', draw: drawScene2 },
+  { label: 'ROW_NUMBER', title: 'ROW_NUMBER - unique numbers per partition', body: '<strong>ROW_NUMBER()</strong> assigns a unique sequential number to each row within its partition, ordered by the ORDER BY clause. Even tied rows get different numbers. Perfect for deduplication.', draw: drawScene3 },
+  { label: 'RANK', title: 'RANK - tied rows share the same rank', body: '<strong>RANK()</strong> assigns the same rank to tied rows, then skips numbers. So 1, 2, 2, 4. Use it when tied positions should be equal - like a sports league table.', draw: drawScene4 },
+  { label: 'LAG', title: 'LAG - looking back at the previous row', body: '<strong>LAG(column, 1)</strong> returns the value from the previous row. Ordered by month, it gives you last month\'s revenue on every row - perfect for period over period comparisons with no self-join needed.', draw: drawScene5 },
+];
+
+let cur = 0;
+const canvas = document.getElementById('wf-canvas');
+const ctx = canvas.getContext('2d');
+
+function setup() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+}
+
+function isDark() { return window.matchMedia('(prefers-color-scheme: dark)').matches; }
+function C() {
+  const d = isDark();
+  return { bg: d?'#161b22':'#f9f9f8', text: d?'#f0f0f0':'#1a1a1a', muted: d?'#8a8f9a':'#6b7280', border: d?'#2a2f3a':'#e5e7eb', cell: d?'#0d1117':'#ffffff', header: d?'#161b22':'#f3f3f1' };
+}
+
+function clear() { const c = C(); ctx.fillStyle = c.bg; ctx.fillRect(0,0,W,H); }
+
+function drawTable(x, y, headers, rows, highlight_col, highlight_rows, extra_col) {
+  const c = C();
+  const colW = extra_col ? [120, 100, 100, 110] : [140, 110, 110];
+  const rowH = 32, headerH = 30;
+  const cols = extra_col ? [...headers, extra_col.header] : headers;
+
+  // header
+  let cx = x;
+  cols.forEach((h, i) => {
+    ctx.fillStyle = c.header;
+    ctx.fillRect(cx, y, colW[i], headerH);
+    ctx.strokeStyle = c.border; ctx.lineWidth = 0.5;
+    ctx.strokeRect(cx, y, colW[i], headerH);
+    ctx.fillStyle = c.muted; ctx.font = '500 11px DM Mono, monospace'; ctx.textAlign = 'center';
+    ctx.fillText(h.toUpperCase(), cx + colW[i]/2, y + 19);
+    cx += colW[i];
+  });
+
+  // rows
+  rows.forEach((row, ri) => {
+    cx = x;
+    const isHighlighted = highlight_rows && highlight_rows.includes(ri);
+    row.forEach((cell, ci) => {
+      const bg = isHighlighted && ci === highlight_col ? ORANGE + '22' : c.cell;
+      ctx.fillStyle = bg;
+      ctx.fillRect(cx, y + headerH + ri * rowH, colW[ci], rowH);
+      ctx.strokeStyle = c.border; ctx.lineWidth = 0.5;
+      ctx.strokeRect(cx, y + headerH + ri * rowH, colW[ci], rowH);
+      const color = isHighlighted && ci === highlight_col ? ORANGE : c.text;
+      ctx.fillStyle = color; ctx.font = '12px DM Mono, monospace'; ctx.textAlign = 'center';
+      ctx.fillText(String(cell), cx + colW[ci]/2, y + headerH + ri * rowH + 20);
+      cx += colW[ci];
+    });
+    // extra col
+    if (extra_col) {
+      const val = extra_col.values[ri];
+      const bg = val !== null ? GREEN + '22' : c.cell;
+      ctx.fillStyle = bg;
+      ctx.fillRect(cx, y + headerH + ri * rowH, colW[3], rowH);
+      ctx.strokeStyle = c.border; ctx.lineWidth = 0.5;
+      ctx.strokeRect(cx, y + headerH + ri * rowH, colW[3], rowH);
+      ctx.fillStyle = val !== null ? GREEN : c.muted;
+      ctx.font = '500 12px DM Mono, monospace'; ctx.textAlign = 'center';
+      ctx.fillText(val !== null ? String(val) : '-', cx + colW[3]/2, y + headerH + ri * rowH + 20);
+    }
+  });
+}
+
+function label(text, x, y, color) {
+  ctx.fillStyle = color || C().muted;
+  ctx.font = '12px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, y);
+}
+
+function badge(text, x, y, color, bg) {
+  ctx.save();
+  ctx.font = '500 11px DM Mono, monospace';
+  const tw = ctx.measureText(text).width;
+  const pw = tw + 16, ph = 22;
+  ctx.fillStyle = bg || color + '22';
+  ctx.beginPath(); ctx.roundRect(x - pw/2, y - ph/2, pw, ph, 6); ctx.fill();
+  ctx.fillStyle = color; ctx.textAlign = 'center';
+  ctx.fillText(text, x, y + 4);
+  ctx.restore();
+}
+
+function drawScene0() {
+  clear();
+  const c = C();
+  ctx.fillStyle = c.text; ctx.font = '500 13px DM Mono, monospace'; ctx.textAlign = 'left';
+  const lines = [
+    ['tco', '-- Rank salespeople per region without window functions'],
+    ['tk', 'SELECT '], ['tc', '* FROM ('],
+    ['tk', '  SELECT '], ['tc', '*, '],
+    ['tc', '    (SELECT COUNT(*) FROM sales s2'],
+    ['tc', '     WHERE s2.region = s1.region'],
+    ['tc', '     AND s2.revenue >= s1.revenue) AS rank'],
+    ['tk', '  FROM '], ['tc', 'sales s1'],
+    ['tc', ') ranked'],
+    ['tk', 'WHERE '], ['tc', 'rank <= 3;'],
+  ];
+  const colorMap = { tco:'#444d5a', tk:'#7fbbff', tc: c.text };
+  let y = 30;
+  let lineY = y;
+  let lineX = 30;
+  lines.forEach(([cls, txt]) => {
+    if (cls === 'tco') { lineX = 30; }
+    ctx.fillStyle = colorMap[cls];
+    ctx.font = '12px DM Mono, monospace';
+    ctx.fillText(txt, lineX, lineY);
+    lineX += ctx.measureText(txt).width;
+    if (cls === 'tco' || txt.endsWith('(') || txt.endsWith(',') || txt.endsWith(')') || txt.endsWith(';')) { lineY += 20; lineX = 30; }
+  });
+  ctx.fillStyle = '#E24B4A'; ctx.font = '500 13px DM Sans, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('There is a better way.', W/2, 258);
+}
+
+function drawScene1() {
+  clear();
+  const c = C();
+  const rows = [['North','Alice',9200],['North','Bob',7800],['South','Carol',8500],['South','Dave',6200]];
+  drawTable(30, 30, ['region','salesperson','revenue'], rows, null, null, null);
+  badge('RANK() OVER (...)', W/2 + 50, 140, BLUE);
+  ctx.fillStyle = c.muted; ctx.font = '13px DM Sans, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('The OVER clause tells the database: perform this calculation across this window of rows.', W/2, 258);
+}
+
+function drawScene2() {
+  clear();
+  const c = C();
+  const rows = [['North','Alice',9200],['North','Bob',7800],['South','Carol',8500],['South','Dave',6200]];
+  drawTable(30, 30, ['region','salesperson','revenue'], rows, 0, [0,1], null);
+  drawTable(420, 30, ['region','salesperson','revenue'], rows, 0, [2,3], null);
+  badge('PARTITION BY region', 225, 246, ORANGE);
+  badge('PARTITION BY region', 614, 246, GREEN);
+  ctx.fillStyle = c.muted; ctx.font = '13px DM Sans, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('PARTITION BY region divides into two groups. Window function runs separately in each.', W/2, 272);
+}
+
+function drawScene3() {
+  clear();
+  const c = C();
+  const rows = [['North','Alice',9200],['North','Bob',7800],['South','Carol',8500],['South','Dave',6200]];
+  drawTable(30, 30, ['region','salesperson','revenue'], rows, null, null, { header: 'row_num', values: [1, 2, 1, 2] });
+  badge('ROW_NUMBER() OVER (PARTITION BY region ORDER BY revenue DESC)', W/2 + 80, 140, BLUE);
+  ctx.fillStyle = c.muted; ctx.font = '13px DM Sans, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('Row 1 in each partition = highest revenue. Filter WHERE row_num = 1 to get the top per region.', W/2, 258);
+}
+
+function drawScene4() {
+  clear();
+  const c = C();
+  const rows = [['North','Alice',9200],['North','Bob',7800],['North','Carol',7800],['North','Dave',5100]];
+  drawTable(60, 30, ['region','salesperson','revenue'], rows, null, null, { header: 'rank', values: [1, 2, 2, 4] });
+  badge('RANK() OVER (PARTITION BY region ORDER BY revenue DESC)', W/2 + 60, 180, GREEN);
+  ctx.fillStyle = c.muted; ctx.font = '13px DM Sans, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('Bob and Carol tie at rank 2. Dave skips to rank 4. Use RANK when tied positions should be equal.', W/2, 258);
+}
+
+function drawScene5() {
+  clear();
+  const c = C();
+  const rows = [['Jan',8200],['Feb',9100],['Mar',7800],['Apr',10200]];
+  drawTable(80, 30, ['month','revenue'], rows, null, null, { header: 'prev_month', values: [null, 8200, 9100, 7800] });
+  badge('LAG(revenue, 1) OVER (ORDER BY month)', W/2 + 80, 180, ORANGE);
+  ctx.fillStyle = c.muted; ctx.font = '13px DM Sans, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('LAG looks back one row. Feb gets Jan\'s revenue. Subtract to get the month over month change.', W/2, 258);
+}
+
+function renderScene(i) {
+  scenes[i].draw();
+  document.getElementById('explanation').innerHTML = '<div class="exp-label">Scene '+(i+1)+' of '+scenes.length+' - '+scenes[i].label+'</div><div class="exp-title">'+scenes[i].title+'</div><div class="exp-body">'+scenes[i].body+'</div>';
+  document.querySelectorAll('.step-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  document.getElementById('prev-btn').disabled = i === 0;
+  document.getElementById('next-btn').disabled = i === scenes.length-1;
+  document.getElementById('next-btn').textContent = i === scenes.length-1 ? 'Done' : 'Next →';
+}
+
+function nextScene() { if (cur < scenes.length-1) { cur++; renderScene(cur); } }
+function prevScene() { if (cur > 0) { cur--; renderScene(cur); } }
+
+const el = document.getElementById('stepper');
+scenes.forEach((s,i) => {
+  const btn = document.createElement('button');
+  btn.className = 'step-btn'+(i===0?' active':'');
+  btn.innerHTML = '<span class="step-num">'+(i+1)+'</span>'+s.label;
+  btn.onclick = () => { cur=i; renderScene(i); };
+  el.appendChild(btn);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') nextScene();
+  if (e.key==='ArrowLeft'||e.key==='ArrowUp') prevScene();
+});
+window.addEventListener('resize', () => { setup(); renderScene(cur); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => renderScene(cur));
+setup();
+renderScene(0);
+</script>
+</body>
+</html>
