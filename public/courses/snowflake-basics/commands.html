@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept Reference · Snowflake Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--snow:#29B5E8;--navy:#0d1117;--text:#1a1a1a;--text-muted:#6b7280;--bg:#ffffff;--bg-surface:#f9f9f8;--border:rgba(0,0,0,0.09);--border-strong:rgba(0,0,0,0.16);--radius:10px;--radius-lg:14px;}
+  @media(prefers-color-scheme:dark){:root{--text:#f0f0f0;--text-muted:#8a8f9a;--bg:#0d1117;--bg-surface:#161b22;--border:rgba(255,255,255,0.07);--border-strong:rgba(255,255,255,0.14);}}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:52px;border-bottom:0.5px solid var(--border);}
+  .nav-logo{font-family:'DM Mono',monospace;font-size:13px;color:var(--snow);}
+  .nav-back{font-size:13px;color:var(--text-muted);text-decoration:none;}
+  .nav-back:hover{color:var(--text);}
+  .page{max-width:760px;margin:0 auto;padding:36px 32px 80px;}
+  .page-tag{font-size:11px;font-family:'DM Mono',monospace;color:var(--snow);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .page-title{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:6px;}
+  .page-sub{font-size:14px;color:var(--text-muted);margin-bottom:32px;}
+  .banner{background:rgba(41,181,232,0.06);border:0.5px solid rgba(41,181,232,0.25);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:28px;display:flex;align-items:flex-start;gap:12px;font-size:13px;color:var(--text-muted);line-height:1.6;}
+  .card{border:0.5px solid var(--border);border-radius:0 var(--radius-lg) var(--radius-lg) 0;background:var(--bg);overflow:hidden;margin-bottom:12px;cursor:pointer;border-left:3px solid var(--snow);transition:border-color 0.12s;}
+  .card.open{border-color:rgba(41,181,232,0.4);}
+  .card-head{display:flex;align-items:center;gap:12px;padding:13px 16px;}
+  .card-name{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--snow);min-width:200px;}
+  .card-plain{flex:1;font-size:13px;color:var(--text-muted);}
+  .card-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(41,181,232,0.1);color:var(--snow);font-family:'DM Mono',monospace;border:0.5px solid rgba(41,181,232,0.25);}
+  .card-chevron{font-size:13px;color:var(--text-muted);margin-left:auto;flex-shrink:0;transition:transform 0.15s;}
+  .card.open .card-chevron{transform:rotate(180deg);}
+  .card-body{display:none;padding:0 16px 16px;border-top:0.5px solid var(--border);}
+  .card.open .card-body{display:block;}
+  .card-detail{font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:12px;margin-bottom:12px;}
+  .card-detail strong{color:var(--text);font-weight:500;}
+  .card-code{background:var(--navy);border-radius:var(--radius);padding:13px 16px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.9;overflow-x:auto;margin-bottom:10px;}
+  .tk{color:#7fbbff;}.tf{color:#29B5E8;}.tc{color:#f0f0f0;}.tco{color:#444d5a;}.tg{color:#1D9E75;}
+  .uses{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .use{font-size:11px;padding:3px 9px;border-radius:10px;background:var(--bg-surface);border:0.5px solid var(--border-strong);color:var(--text-muted);font-family:'DM Mono',monospace;}
+  .section-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:0.5px solid var(--border);margin-top:28px;}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">📋 concept reference · Snowflake Basics</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+<div class="page">
+  <div class="page-tag">Quick reference</div>
+  <div class="page-title">Snowflake concepts, plain English</div>
+  <div class="page-sub">Keep this open during the session. Click any concept to expand.</div>
+  <div class="banner">
+    <span>⭐</span>
+    <span><strong style="color:var(--snow)">Today covers four core concepts.</strong> All four are highlighted with a blue left border. Click any card to see the full explanation and SQL examples.</span>
+  </div>
+  <div class="section-label">Session concepts - covered today</div>
+  <div id="card-list"></div>
+</div>
+<script>
+const concepts=[
+  {name:'Virtual Warehouse',plain:'The compute engine that runs your queries',detail:'A virtual warehouse is a cluster of compute resources in Snowflake. It is completely separate from storage. You can have multiple warehouses of different sizes running simultaneously, each querying the same data. <strong>XS</strong> is the smallest and cheapest. <strong>6XL</strong> is the largest. Start it before querying, suspend when done. You pay only while it is running.',code:[['tco','-- Start a warehouse'],['tk','ALTER WAREHOUSE '],['tf','COMPUTE_WH '],['tk','RESUME;'],['tco',''],['tco','-- Scale it up for a big job'],['tk','ALTER WAREHOUSE '],['tf','COMPUTE_WH '],['tk','SET'],['tc','WAREHOUSE_SIZE = '],['tf','\'LARGE\';'],['tco',''],['tco','-- Scale back down when done'],['tk','ALTER WAREHOUSE '],['tf','COMPUTE_WH '],['tk','SET'],['tc','WAREHOUSE_SIZE = '],['tf','\'XSMALL\';']],uses:['Query execution','Cost control','Concurrency','Scaling']},
+  {name:'Database and Schema',plain:'How data is organised in three layers',detail:'Snowflake organises data in a three-tier hierarchy. A <strong>database</strong> is the top-level container - usually one per project or environment. <strong>Schemas</strong> live inside databases and group related tables. <strong>Tables and views</strong> live inside schemas. You reference any object using dot notation: database.schema.table.',code:[['tco','-- Create the structure'],['tk','CREATE DATABASE '],['tf','ANALYTICS_DB;'],['tk','CREATE SCHEMA '],['tf','ANALYTICS_DB.SALES_SCHEMA;'],['tco',''],['tco','-- Query using full path'],['tk','SELECT '],['tc','* FROM '],['tf','ANALYTICS_DB.SALES_SCHEMA.orders'],['tk','LIMIT '],['tc','10;'],['tco',''],['tco','-- Or set context and use short form'],['tk','USE '],['tf','ANALYTICS_DB.SALES_SCHEMA;'],['tk','SELECT '],['tc','* FROM '],['tf','orders'],['tk','LIMIT '],['tc','10;']],uses:['Data organisation','Access control','Environment separation','Multi-team structure']},
+  {name:'Snowsight Worksheet',plain:'The browser-based SQL editor built into Snowflake',detail:'Snowsight is the modern Snowflake web UI. Worksheets let you write and run SQL queries directly in the browser - no client software needed. You can save worksheets, share them with teammates, and see query history. The worksheet shows your active warehouse, database and schema context in the toolbar.',code:[['tco','-- Set your context in the worksheet toolbar:'],['tco','-- Warehouse: COMPUTE_WH'],['tco','-- Database:  ANALYTICS_DB'],['tco','-- Schema:    SALES_SCHEMA'],['tco',''],['tco','-- Then write SQL as normal'],['tk','SELECT'],['tc','    customer_id,'],['tk','    SUM'],['tc','(order_total) as total_revenue'],['tk','FROM '],['tf','orders'],['tk','GROUP BY '],['tc','customer_id'],['tk','ORDER BY '],['tc','total_revenue '],['tk','DESC'],['tk','LIMIT '],['tc','10;']],uses:['Ad hoc queries','Data exploration','Sharing queries','Query history']},
+  {name:'Compute vs Storage',plain:'The key architectural separation that makes Snowflake different',detail:'This is the most important concept in Snowflake. In traditional databases, storage and compute are on the same server. In Snowflake they are completely separate. <strong>Storage</strong> is in cloud object storage (S3 / Azure Blob / GCS) and scales automatically. <strong>Compute</strong> is the virtual warehouse and scales on demand. Multiple warehouses can read from the same storage simultaneously with no performance impact.',code:[['tco','-- Traditional: one server does everything'],['tco','-- More data = slower queries = bigger server'],['tco',''],['tco','-- Snowflake: storage and compute are separate'],['tco','-- More data = storage scales automatically'],['tco','-- Slow queries = add a bigger warehouse'],['tco',''],['tco','-- Multiple warehouses, same storage:'],['tf','ANALYTICS_WH '],['tc','--queries--> '],['tf','STORAGE'],['tf','DATA_SCIENCE_WH '],['tc','--queries--> '],['tf','STORAGE'],['tf','REPORTING_WH '],['tc','--queries--> '],['tf','STORAGE']],uses:['Cost efficiency','Scalability','Concurrency','Architecture']},
+];
+
+const colorMap={tk:'#7fbbff',tf:'#29B5E8',tc:'#f0f0f0',tco:'#444d5a',tg:'#1D9E75'};
+let openId=null;
+
+function makeCard(c,i){
+  const id='card-'+i;
+  const codeHtml=c.code.map(([cls,txt])=>'<span style="color:'+colorMap[cls]+'">'+txt+'</span>').join('');
+  const usesHtml=c.uses.map(u=>'<span class="use">'+u+'</span>').join('');
+  return '<div class="card" id="'+id+'" onclick="toggle(\''+id+'\')"><div class="card-head"><span class="card-name">'+c.name+'</span><span class="card-badge">today</span><span class="card-plain">'+c.plain+'</span><span class="card-chevron">&#8964;</span></div><div class="card-body"><div class="card-detail">'+c.detail+'</div><div class="card-code">'+codeHtml+'</div><div class="uses">'+usesHtml+'</div></div></div>';
+}
+
+function toggle(id){
+  const el=document.getElementById(id);
+  if(openId&&openId!==id){const prev=document.getElementById(openId);if(prev)prev.classList.remove('open');}
+  el.classList.toggle('open');
+  openId=el.classList.contains('open')?id:null;
+}
+
+document.getElementById('card-list').innerHTML=concepts.map((c,i)=>makeCard(c,i)).join('');
+</script>
+</body>
+</html>

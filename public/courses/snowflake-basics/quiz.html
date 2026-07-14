@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Quiz - Snowflake Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --snow: #29B5E8; --green: #1D9E75; --text: #1a1a1a; --text-muted: #6b7280; --bg: #ffffff; --bg-surface: #f9f9f8; --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18); --radius: 12px; }
+  @media (prefers-color-scheme: dark) { :root { --text: #f0f0f0; --text-muted: #8a8f9a; --bg: #0d1117; --bg-surface: #161b22; --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.15); } }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 52px; border-bottom: 0.5px solid var(--border); }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--snow); }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+  .container { max-width: 560px; margin: 0 auto; padding: 40px 24px 80px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 32px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--snow); border-radius: 2px; transition: width 0.4s ease; }
+  .q-num { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--snow); letter-spacing: 1px; margin-bottom: 10px; }
+  .q-text { font-family: 'DM Serif Display', serif; font-size: 22px; line-height: 1.35; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .opt { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border: 1.5px solid var(--border-strong); border-radius: var(--radius); cursor: pointer; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.4; transition: border-color 0.15s; text-align: left; width: 100%; font-family: 'DM Sans', sans-serif; }
+  .opt:hover { border-color: var(--snow); background: var(--bg-surface); }
+  .opt.correct { border-color: var(--green); background: rgba(29,158,117,0.08); }
+  .opt.wrong { border-color: #E24B4A; background: rgba(226,75,74,0.06); }
+  .opt.disabled { cursor: default; pointer-events: none; }
+  .opt-letter { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 13px; font-family: 'DM Mono', monospace; flex-shrink: 0; color: var(--text-muted); }
+  .opt.correct .opt-letter { border-color: var(--green); background: var(--green); color: white; }
+  .opt.wrong .opt-letter { border-color: #E24B4A; background: #E24B4A; color: white; }
+  .feedback-box { display: none; padding: 14px 16px; border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
+  .feedback-box.correct { background: rgba(29,158,117,0.1); border: 0.5px solid rgba(29,158,117,0.3); color: #085041; }
+  .feedback-box.wrong { background: rgba(226,75,74,0.08); border: 0.5px solid rgba(226,75,74,0.2); color: #501313; }
+  @media (prefers-color-scheme: dark) { .feedback-box.correct { color: #9FE1CB; } .feedback-box.wrong { color: #F7C1C1; } }
+  .btn-next { width: 100%; padding: 14px; background: var(--snow); color: white; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; display: none; transition: opacity 0.15s; }
+  .btn-next:hover { opacity: 0.88; }
+  .done-screen { display: none; text-align: center; padding: 40px 20px; }
+  .score-ring { width: 100px; height: 100px; margin: 0 auto 24px; position: relative; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring circle { fill: none; stroke-width: 8; }
+  .score-ring .track { stroke: var(--border); }
+  .score-ring .fill { stroke: var(--snow); stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+  .score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'DM Serif Display', serif; font-size: 24px; }
+  .done-title { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 10px; }
+  .done-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+  .done-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .done-link { padding: 10px 20px; border-radius: var(--radius); font-size: 14px; text-decoration: none; }
+  .done-link.primary { background: var(--snow); color: white; }
+  .done-link.secondary { border: 0.5px solid var(--border-strong); color: var(--text); }
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">⚡ live quiz · Snowflake Basics</span>
+  <a href="index.html" class="nav-back">← Back to session</a>
+</nav>
+<div class="container" id="quiz-container">
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:25%"></div></div>
+  <div id="q-area"></div>
+  <div class="feedback-box" id="feedback"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQ()">Next question →</button>
+</div>
+<div class="container done-screen" id="done-screen">
+  <div class="score-ring">
+    <svg width="100" height="100" viewBox="0 0 100 100">
+      <circle class="track" cx="50" cy="50" r="42"/>
+      <circle class="fill" id="score-arc" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/>
+    </svg>
+    <div class="score-num" id="score-num">0/4</div>
+  </div>
+  <div class="done-title" id="done-title">Nice work!</div>
+  <div class="done-sub" id="done-sub">Your answers have been recorded.</div>
+  <div class="done-links">
+    <a href="feedback.html" class="done-link primary">Leave feedback →</a>
+    <a href="index.html" class="done-link secondary">Back to slides</a>
+  </div>
+</div>
+<script>
+const SUPABASE_URL='https://skpyeipqipplsuzjofje.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcHllaXBxaXBwbHN1empvZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTU2MDAsImV4cCI6MjA5NTYzMTYwMH0.pzMoxPTauK0wlnedup17efCurVoGwMNbikTMZg-qN6Q';
+const COURSE='snowflake-basics';
+
+function getLearnerId(){let id=localStorage.getItem('learner_id');if(!id){id='l_'+Math.random().toString(36).substr(2,9);localStorage.setItem('learner_id',id);}return id;}
+function getSessionId(){let id=localStorage.getItem('session_id');if(!id){id='s_'+Date.now();localStorage.setItem('session_id',id);}return id;}
+async function sbInsert(table,data){try{const res=await fetch(SUPABASE_URL+'/rest/v1/'+table,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(data)});return res.ok;}catch(e){return false;}}
+
+const questions=[
+  {q:'What is a Snowflake virtual warehouse?',opts:['A physical server room where your data is stored','The compute engine that runs your queries - scalable and pay-per-second','A database that contains your schemas and tables','The browser interface where you write SQL queries'],correct:1,explain:'A virtual warehouse is the compute layer in Snowflake. It is what actually executes your SQL queries. You can start it, suspend it, and resize it independently of your data. You only pay while it is running.'},
+  {q:'What is the key architectural difference between Snowflake and a traditional database?',opts:['Snowflake only works with cloud data, not on-premise data','Snowflake separates compute from storage so they scale independently','Snowflake does not support standard SQL syntax','Snowflake can only be accessed through the browser'],correct:1,explain:'This is the core Snowflake innovation. In traditional databases, storage and compute are coupled together on the same server. In Snowflake, they are completely separate. You can scale compute up for a big query without changing your storage, and vice versa. Multiple warehouses can also query the same data simultaneously.'},
+  {q:'You have a Snowflake database called ANALYTICS_DB with a schema called SALES. How do you reference the orders table fully?',opts:['SALES.ANALYTICS_DB.orders','ANALYTICS_DB/SALES/orders','ANALYTICS_DB.SALES.orders','orders@ANALYTICS_DB.SALES'],correct:2,explain:'Snowflake uses three-part dot notation: database.schema.table. So ANALYTICS_DB.SALES.orders is correct. This is the same pattern used in most SQL databases and makes it clear exactly where the data lives in the hierarchy.'},
+  {q:'Where does Snowflake sit in the modern data stack?',opts:['It replaces dbt as the transformation tool','It is a BI tool for building dashboards and reports','It is the central warehouse - ingestion tools load data into it, dbt transforms it inside it, BI tools query it','It is a Git repository for storing SQL model files'],correct:2,explain:'Snowflake is the warehouse at the centre of the stack. Ingestion tools like Fivetran load raw data into it. dbt runs transformation models inside it. BI tools like Looker query it to build dashboards. Everything connects to Snowflake but Snowflake itself focuses purely on storing and querying data efficiently.'}
+];
+
+let current=0,score=0,answered=false;
+
+function renderQ(){
+  const q=questions[current];
+  answered=false;
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('progress').style.width=((current/questions.length)*100)+'%';
+  const letters=['A','B','C','D'];
+  let html='<div class="q-num">Question '+(current+1)+' of '+questions.length+'</div><div class="q-text">'+q.q+'</div><div class="options">';
+  q.opts.forEach((opt,i)=>{html+='<button class="opt" onclick="answer('+i+')" id="opt-'+i+'"><div class="opt-letter">'+letters[i]+'</div>'+opt+'</button>';});
+  html+='</div>';
+  document.getElementById('q-area').innerHTML=html;
+}
+
+function answer(idx){
+  if(answered)return;
+  answered=true;
+  const q=questions[current];
+  const isCorrect=idx===q.correct;
+  if(isCorrect)score++;
+  for(let i=0;i<q.opts.length;i++){const el=document.getElementById('opt-'+i);el.classList.add('disabled');if(i===q.correct)el.classList.add('correct');else if(i===idx)el.classList.add('wrong');}
+  const fb=document.getElementById('feedback');
+  fb.className='feedback-box '+(isCorrect?'correct':'wrong');
+  fb.innerHTML=(isCorrect?'✓ Correct! ':'✗ Not quite. ')+q.explain;
+  fb.style.display='block';
+  const btn=document.getElementById('btn-next');
+  btn.style.display='block';
+  btn.textContent=current<questions.length-1?'Next question →':'See my results →';
+  sbInsert('quiz_answers',{session_id:getSessionId(),course:COURSE,learner_id:getLearnerId(),question_index:current,question:q.q,chosen:idx,correct:q.correct,is_correct:isCorrect,cohort:localStorage.getItem('session_cohort')||'',location:localStorage.getItem('session_location')||''});
+}
+
+function nextQ(){current++;if(current>=questions.length)showDone();else renderQ();}
+
+function showDone(){
+  document.getElementById('quiz-container').style.display='none';
+  document.getElementById('done-screen').style.display='block';
+  document.getElementById('score-num').textContent=score+'/'+questions.length;
+  setTimeout(()=>{document.getElementById('score-arc').style.strokeDashoffset=264*(1-(score/questions.length));},100);
+  const titles=['Keep practising!','Good effort!','Nice work!','Excellent!','Perfect score!'];
+  const subs=['Review the slides and try again.','Check the concepts and try once more.','Good grasp of Snowflake basics.','Great understanding of Snowflake.','Brilliant - you know Snowflake Basics well.'];
+  document.getElementById('done-title').textContent=titles[score]||'Done!';
+  document.getElementById('done-sub').textContent=(subs[score]||'Your answers have been recorded.')+' Please leave feedback when you are ready.';
+}
+renderQ();
+</script>
+</body>
+</html>

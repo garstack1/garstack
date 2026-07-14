@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics · Snowflake Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF694A; --navy: #0d1117; --green: #1D9E75; --blue: #185FA5;
+    --text: #1a1a1a; --text-muted: #6b7280; --text-light: #9ca3af;
+    --bg: #ffffff; --bg-surface: #f9f9f8; --bg-dark: #f3f3f1;
+    --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.16);
+    --radius: 10px; --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #f0f0f0; --text-muted: #8a8f9a; --text-light: #4a5060; --bg: #0d1117; --bg-surface: #161b22; --bg-dark: #0a0e14; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14); }
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .nav-back:hover { color: var(--text); }
+  .btn-sm { background: none; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 6px 14px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--text-muted); transition: background 0.12s; }
+  .btn-sm:hover { background: var(--bg-surface); color: var(--text); }
+  .btn-sm.danger:hover { border-color: #E24B4A; color: #A32D2D; background: #FCEBEB; }
+  .updated { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-light); }
+
+  .page { max-width: 1000px; margin: 0 auto; padding: 36px 32px 80px; }
+
+  .page-header { margin-bottom: 32px; }
+  .page-tag { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--orange); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text-muted); }
+
+  /* METRIC CARDS */
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .metric { background: var(--bg-surface); border-radius: var(--radius); padding: 16px 18px; }
+  .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .metric-val { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1; }
+  .metric-val.orange { color: var(--orange); }
+  .metric-val.green { color: var(--green); }
+  .metric-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+  /* SECTION */
+  .section { margin-bottom: 36px; }
+  .section-title { font-size: 13px; font-weight: 500; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 0.5px solid var(--border); }
+
+  /* CARDS */
+  .card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; }
+  .card-header { padding: 16px 20px; border-bottom: 0.5px solid var(--border); background: var(--bg-surface); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 14px; font-weight: 500; }
+  .card-meta { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  .card-body { padding: 20px; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* SLIDE TIME BARS */
+  .slide-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .slide-bar-label { font-size: 13px; color: var(--text-muted); min-width: 64px; font-family: 'DM Mono', monospace; }
+  .slide-bar-wrap { flex: 1; height: 22px; background: var(--bg-surface); border-radius: 4px; overflow: hidden; border: 0.5px solid var(--border); }
+  .slide-bar-fill { height: 100%; border-radius: 4px; background: var(--orange); transition: width 0.5s ease; }
+  .slide-bar-val { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text-muted); min-width: 36px; text-align: right; }
+
+  /* QUIZ BARS */
+  .qbar-row { margin-bottom: 16px; }
+  .qbar-q { font-size: 13px; font-weight: 500; margin-bottom: 8px; line-height: 1.4; }
+  .qbar-opts { display: flex; flex-direction: column; gap: 6px; }
+  .qbar-opt { display: flex; align-items: center; gap: 10px; }
+  .qbar-letter { width: 20px; height: 20px; border-radius: 50%; border: 0.5px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: 'DM Mono', monospace; flex-shrink: 0; color: var(--text-muted); }
+  .qbar-letter.correct { background: var(--green); border-color: var(--green); color: white; }
+  .qbar-track { flex: 1; height: 18px; background: var(--bg-surface); border-radius: 3px; overflow: hidden; border: 0.5px solid var(--border); }
+  .qbar-fill { height: 100%; border-radius: 3px; background: var(--orange); transition: width 0.5s ease; }
+  .qbar-fill.correct { background: var(--green); }
+  .qbar-count { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text-muted); min-width: 24px; text-align: right; }
+  .qbar-acc { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-family: 'DM Mono', monospace; margin-left: 6px; }
+  .qbar-acc.good { background: rgba(29,158,117,0.12); color: #0F6E56; }
+  .qbar-acc.mid { background: rgba(186,117,23,0.12); color: #854F0B; }
+  .qbar-acc.low { background: rgba(226,75,74,0.12); color: #A32D2D; }
+
+  /* FEEDBACK */
+  .fb-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .fb-row:last-child { border-bottom: none; }
+  .fb-label { font-size: 13px; color: var(--text-muted); }
+  .fb-val { font-family: 'DM Serif Display', serif; font-size: 22px; }
+  .fb-val.good { color: var(--green); }
+  .fb-val.mid { color: var(--orange); }
+  .fb-val.low { color: #E24B4A; }
+
+  .chip-cloud { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip { font-size: 12px; padding: 5px 11px; border-radius: 20px; background: var(--bg-surface); border: 0.5px solid var(--border-strong); color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .chip-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-light); }
+
+  .comments-list { display: flex; flex-direction: column; gap: 10px; }
+  .comment { padding: 12px 14px; border-radius: var(--radius); background: var(--bg-surface); border: 0.5px solid var(--border); font-size: 14px; line-height: 1.5; color: var(--text); font-style: italic; }
+  .comment-time { font-size: 11px; color: var(--text-light); font-style: normal; font-family: 'DM Mono', monospace; margin-top: 6px; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty .big { font-size: 36px; margin-bottom: 10px; }
+  .empty p { font-size: 14px; margin-bottom: 4px; }
+  .empty small { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text-light); }
+
+  /* PRIVACY NOTE */
+  .privacy-note { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: var(--radius); background: rgba(29,158,117,0.06); border: 0.5px solid rgba(29,158,117,0.2); margin-bottom: 28px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .privacy-note strong { color: var(--green); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">📈 analytics dashboard</span>
+  <div class="nav-right">
+    <span class="updated" id="updated">-</span>
+    <button class="btn-sm" onclick="refresh()">Refresh</button>
+    <button class="btn-sm danger" onclick="resetAll()">Reset all data</button>
+    <a href="index.html" class="nav-back">← Back</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-tag">Instructor view · session analytics</div>
+    <div class="page-title">Session overview</div>
+    <div class="page-sub">Quiz and feedback data is stored in your Supabase database. Slide times are stored locally in this browser.</div>
+  </div>
+
+  <div class="privacy-note">
+    <span>🔒</span>
+    <span><strong>Privacy-first:</strong> This dashboard reads only from your browser's localStorage. No cookies, no external tracking, no personal data collected. Everything stays on this device.</span>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">Slide engagement</div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Time per slide</span>
+          <span class="card-meta" id="slide-total-time">-</span>
+        </div>
+        <div class="card-body" id="slide-bars"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Quiz performance</div>
+      <div class="card" id="quiz-card">
+        <div class="card-header">
+          <span class="card-title">Answers by question</span>
+          <span class="card-meta" id="quiz-respondents">-</span>
+        </div>
+        <div class="card-body" id="quiz-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">Feedback ratings</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Average scores</span></div>
+        <div class="card-body" id="fb-ratings"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Score distribution</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Quiz scores</span></div>
+        <div class="card-body">
+          <div style="position:relative;height:180px;">
+            <canvas id="score-chart" role="img" aria-label="Bar chart of quiz score distribution">Score distribution chart.</canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">What worked</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Most useful elements</span></div>
+        <div class="card-body" id="useful-chips"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">What to improve</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Suggested improvements</span></div>
+        <div class="card-body" id="improve-chips"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Open comments</div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Free text responses</span></div>
+      <div class="card-body" id="comments"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const QUIZ_KEY = 'git_quiz_results';
+const FEEDBACK_KEY = 'git_feedback_results';
+const SLIDE_KEY = 'snow_slide_times';
+const SUPABASE_URL = 'https://skpyeipqipplsuzjofje.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcHllaXBxaXBwbHN1empvZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTU2MDAsImV4cCI6MjA5NTYzMTYwMH0.pzMoxPTauK0wlnedup17efCurVoGwMNbikTMZg-qN6Q';
+const COURSE = 'snowflake-basics';
+
+async function sbSelect(table, params) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.ok ? await res.json() : [];
+  } catch(e) { return []; }
+}
+
+const slideNames = ['Title','Objectives','Agenda','Hook','Concepts','Demo','Practice','Quiz','Summary'];
+const questions = [
+  { q: "Purpose of a Git branch?", opts: ["Delete old versions","Work safely without affecting main","Auto-deploy to production","Share files by email"], correct: 1 },
+  { q: "Create + switch branch in one step?", opts: ["git branch","git merge","git checkout -b","git push"], correct: 2 },
+  { q: "What is a pull request for?", opts: ["Download files","Review before merging","Delete a branch","Revert a commit"], correct: 1 },
+  { q: "dbt Cloud edits a model on a branch - what happens in Git?", opts: ["Emails changes","Saves locally","Commits to branch","Pushes to main"], correct: 2 }
+];
+
+let scoreChartInstance = null;
+
+async function getQuizData() {
+  return await sbSelect('quiz_answers', `course=eq.${COURSE}&order=created_at.asc`);
+}
+async function getFeedbackData() {
+  return await sbSelect('feedback', `course=eq.${COURSE}&order=created_at.asc`);
+}
+function getSlideData() {
+  try { return JSON.parse(localStorage.getItem(SLIDE_KEY) || '{}'); } catch(e) { return {}; }
+}
+
+function fmtTime(secs) {
+  if (secs < 60) return secs + 's';
+  return Math.floor(secs/60) + 'm ' + (secs%60) + 's';
+}
+
+function valClass(val, goodThresh, midThresh) {
+  if (val >= goodThresh) return 'good';
+  if (val >= midThresh) return 'mid';
+  return 'low';
+}
+
+async function render() {
+  document.getElementById('updated').textContent = 'Loading…';
+  const qRows = await getQuizData();
+  const fbRows = await getFeedbackData();
+  const slideTimes = getSlideData();
+
+  const learners = [...new Set(qRows.map(r => r.learner_id))];
+  const n = learners.length;
+  const fn = fbRows.length;
+
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+  // METRICS
+  const scoresByLearner = {};
+  qRows.forEach(r => {
+    if (!scoresByLearner[r.learner_id]) scoresByLearner[r.learner_id] = 0;
+    if (r.is_correct) scoresByLearner[r.learner_id]++;
+  });
+  const scores = Object.values(scoresByLearner);
+  const avgScore = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : 0;
+  const perfect = scores.filter(s => s === 4).length;
+  const overallAcc = qRows.length ? Math.round((qRows.filter(r=>r.is_correct).length / qRows.length) * 100) : 0;
+  const avgStar = fn ? (fbRows.reduce((s,r) => s+(r.star||0),0)/fn) : 0;
+  const avgNps = fn ? Math.round(fbRows.reduce((s,r) => s+(r.nps!=null?r.nps:0),0)/fn) : 0;
+  const totalSlideTime = Object.values(slideTimes).reduce((a,b) => a+b, 0);
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Quiz responses</div><div class="metric-val orange">${n}</div><div class="metric-sub">learners</div></div>
+    <div class="metric"><div class="metric-label">Avg quiz score</div><div class="metric-val ${valClass(avgScore,3,2)}">${n ? avgScore.toFixed(1) : '-'}</div><div class="metric-sub">out of 4</div></div>
+    <div class="metric"><div class="metric-label">Overall accuracy</div><div class="metric-val ${valClass(overallAcc,70,40)}">${qRows.length ? overallAcc+'%' : '-'}</div><div class="metric-sub">correct answers</div></div>
+    <div class="metric"><div class="metric-label">Perfect scores</div><div class="metric-val green">${perfect}</div><div class="metric-sub">4/4 correct</div></div>
+    <div class="metric"><div class="metric-label">Feedback responses</div><div class="metric-val orange">${fn}</div><div class="metric-sub">learners</div></div>
+    <div class="metric"><div class="metric-label">Avg star rating</div><div class="metric-val ${valClass(avgStar,4,3)}">${fn ? avgStar.toFixed(1) : '-'}</div><div class="metric-sub">out of 5</div></div>
+    <div class="metric"><div class="metric-label">Avg NPS</div><div class="metric-val ${valClass(avgNps,8,6)}">${fn ? avgNps : '-'}</div><div class="metric-sub">out of 10</div></div>
+    <div class="metric"><div class="metric-label">Time on slides</div><div class="metric-val">${totalSlideTime ? fmtTime(totalSlideTime) : '-'}</div><div class="metric-sub">total</div></div>
+  `;
+
+  // SLIDE TIMES
+  const maxTime = Math.max(...Object.values(slideTimes), 1);
+  document.getElementById('slide-total-time').textContent = totalSlideTime ? fmtTime(totalSlideTime) + ' total' : 'No data yet';
+  if (Object.keys(slideTimes).length === 0) {
+    document.getElementById('slide-bars').innerHTML = `<div class="empty"><div class="big">⏱</div><p>No slide time data yet</p><small>Navigate through the deck to record time</small></div>`;
+  } else {
+    let html = '';
+    slideNames.forEach((name, i) => {
+      const t = slideTimes[i] || 0;
+      const pct = Math.round((t / maxTime) * 100);
+      html += `<div class="slide-bar-row">
+        <div class="slide-bar-label">S${i+1} ${name.substring(0,6)}</div>
+        <div class="slide-bar-wrap"><div class="slide-bar-fill" style="width:${pct}%"></div></div>
+        <div class="slide-bar-val">${fmtTime(t)}</div>
+      </div>`;
+    });
+    document.getElementById('slide-bars').innerHTML = html;
+  }
+
+  // QUIZ BARS
+  document.getElementById('quiz-respondents').textContent = n ? n + ' respondent' + (n!==1?'s':'') : 'No data yet';
+  if (n === 0) {
+    document.getElementById('quiz-bars').innerHTML = `<div class="empty"><div class="big">📋</div><p>No quiz responses yet</p><small>Ask learners to open quiz.html</small></div>`;
+  } else {
+    let html = '';
+    const letters = ['A','B','C','D'];
+    questions.forEach((q, qi) => {
+      const counts = new Array(q.opts.length).fill(0);
+      qRows.filter(r => r.question_index === qi).forEach(r => { if (r.chosen >= 0) counts[r.chosen]++; });
+      const total = counts.reduce((a,b)=>a+b,0);
+      const acc = total ? Math.round((counts[q.correct]/total)*100) : 0;
+      const maxC = Math.max(...counts, 1);
+      const accCls = acc >= 70 ? 'good' : acc >= 40 ? 'mid' : 'low';
+      html += `<div class="qbar-row" style="margin-bottom:18px">
+        <div class="qbar-q">${qi+1}. ${q.q} <span class="qbar-acc ${accCls}">${acc}% correct</span></div>
+        <div class="qbar-opts">`;
+      q.opts.forEach((opt, oi) => {
+        const pct = Math.round((counts[oi]/maxC)*100);
+        html += `<div class="qbar-opt">
+          <div class="qbar-letter ${oi===q.correct?'correct':''}">${letters[oi]}</div>
+          <div class="qbar-track"><div class="qbar-fill ${oi===q.correct?'correct':''}" style="width:${pct}%"></div></div>
+          <div class="qbar-count">${counts[oi]}</div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+    document.getElementById('quiz-bars').innerHTML = html;
+  }
+
+  // SCORE CHART
+  const scoreCounts = [0,0,0,0,0];
+  Object.values(scoresByLearner).forEach(s => { if (s >= 0 && s <= 4) scoreCounts[s]++; });
+  if (scoreChartInstance) scoreChartInstance.destroy();
+  if (n > 0) {
+    scoreChartInstance = new Chart(document.getElementById('score-chart'), {
+      type: 'bar',
+      data: {
+        labels: ['0/4','1/4','2/4','3/4','4/4'],
+        datasets: [{ label: 'Learners', data: scoreCounts, backgroundColor: ['#E24B4A','#EF9F27','#EF9F27','#1D9E75','#1D9E75'], borderRadius: 4, borderSkipped: false }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#888', font: { family: 'DM Mono', size: 12 } } },
+          y: { beginAtZero: true, ticks: { stepSize: 1, color: '#888', font: { family: 'DM Mono', size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+  } else {
+    document.getElementById('score-chart').parentElement.innerHTML = `<div class="empty"><div class="big">📊</div><p>No scores yet</p></div>`;
+  }
+
+  // FEEDBACK RATINGS
+  if (fn === 0) {
+    document.getElementById('fb-ratings').innerHTML = `<div class="empty"><div class="big">💬</div><p>No feedback yet</p><small>Ask learners to open feedback.html</small></div>`;
+  } else {
+    const avgClarity = Math.round(fbRows.reduce((s,r) => s+(r.clarity||0),0)/fn * 10) / 10;
+    const paceCount = {};
+    fbRows.forEach(r => { if (r.pace) paceCount[r.pace] = (paceCount[r.pace]||0)+1; });
+    const topPace = Object.entries(paceCount).sort((a,b)=>b[1]-a[1])[0];
+    document.getElementById('fb-ratings').innerHTML = `
+      <div class="fb-row"><span class="fb-label">⭐ Avg star rating</span><span class="fb-val ${valClass(avgStar,4,3)}">${avgStar.toFixed(1)} / 5</span></div>
+      <div class="fb-row"><span class="fb-label">🎯 Clarity score</span><span class="fb-val ${valClass(avgClarity,7,5)}">${avgClarity} / 10</span></div>
+      <div class="fb-row"><span class="fb-label">📡 Avg NPS</span><span class="fb-val ${valClass(avgNps,8,6)}">${avgNps} / 10</span></div>
+      <div class="fb-row"><span class="fb-label">⏱ Most common pace</span><span style="font-size:15px;font-weight:500">${topPace ? topPace[0] : '-'}</span></div>
+      <div class="fb-row"><span class="fb-label">📝 Responses</span><span style="font-size:15px;font-weight:500">${fn} learner${fn!==1?'s':''}</span></div>
+    `;
+  }
+
+  // USEFUL / IMPROVE CHIPS
+  function renderChips(containerId, key) {
+    const counts = {};
+    fbRows.forEach(r => { (r[key]||[]).forEach(v => { counts[v] = (counts[v]||0)+1; }); });
+    const el = document.getElementById(containerId);
+    if (Object.keys(counts).length === 0) {
+      el.innerHTML = `<div class="empty"><div class="big">-</div><p>No responses yet</p></div>`; return;
+    }
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    el.innerHTML = `<div class="chip-cloud">${sorted.map(([v,c]) => `<span class="chip">${v}<span class="chip-count">${c}</span></span>`).join('')}</div>`;
+  }
+  renderChips('useful-chips', 'useful');
+  renderChips('improve-chips', 'improve');
+
+  // COMMENTS
+  const comments = fbRows.filter(r => r.free_text && r.free_text.trim());
+  const commentsEl = document.getElementById('comments');
+  if (comments.length === 0) {
+    commentsEl.innerHTML = `<div class="empty"><div class="big">💭</div><p>No written comments yet</p></div>`;
+  } else {
+    commentsEl.innerHTML = `<div class="comments-list">${comments.map(r =>
+      `<div class="comment">"${r.free_text}"<div class="comment-time">${new Date(r.created_at).toLocaleTimeString()}</div></div>`
+    ).join('')}</div>`;
+  }
+}
+
+function refresh() { render(); }
+
+function resetAll() {
+  if (confirm('This clears local slide time data only - Supabase quiz and feedback data is kept. Continue?')) {
+    localStorage.removeItem(SLIDE_KEY);
+    render();
+  }
+}
+
+render();
+setInterval(render, 5000);
+</script>
+</body>
+</html>

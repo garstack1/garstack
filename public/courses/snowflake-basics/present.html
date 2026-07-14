@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snowflake Basics · Present</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--snow:#29B5E8;--navy:#0d1117;--navy-mid:#161b22;--navy-border:#2a2f3a;--green:#1D9E75;--orange:#FF694A;--text:#1a1a1a;--text-muted:#6b7280;--bg:#ffffff;--bg-surface:#f9f9f8;--border:rgba(0,0,0,0.1);--border-strong:rgba(0,0,0,0.18);--radius:10px;--radius-lg:14px;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#111;}
+  .toolbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(13,17,23,0.92);border:0.5px solid rgba(255,255,255,0.12);border-radius:40px;padding:8px 16px;z-index:100;backdrop-filter:blur(12px);transition:opacity 0.3s;}
+  .toolbar.hidden{opacity:0;pointer-events:none;}
+  .tb-btn{background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;padding:6px 10px;border-radius:20px;font-size:13px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;transition:background 0.12s,color 0.12s;text-decoration:none;}
+  .tb-btn:hover{background:rgba(255,255,255,0.1);color:white;}
+  .tb-btn:disabled{opacity:0.3;cursor:default;}
+  .tb-counter{font-size:12px;font-family:'DM Mono',monospace;color:rgba(255,255,255,0.4);padding:0 8px;}
+  .tb-sep{width:0.5px;height:18px;background:rgba(255,255,255,0.15);}
+  .tb-key{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-family:'DM Mono',monospace;}
+  .viewport{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+  .slide-scaler{position:relative;}
+  .slide{display:none;width:100%;height:100%;border-radius:8px;overflow:hidden;background:var(--bg);flex-direction:column;}
+  .slide.active{display:flex;}
+  .accent-bar{height:5px;flex-shrink:0;background:var(--snow);}
+  .accent-bar.green{background:var(--green);}
+  .accent-bar.orange{background:var(--orange);}
+  .slide-inner{flex:1;padding:48px 56px 40px;display:flex;flex-direction:column;overflow:hidden;}
+  .slide-label{font-size:12px;font-family:'DM Mono',monospace;letter-spacing:1.5px;color:var(--snow);text-transform:uppercase;margin-bottom:14px;}
+  .slide-title{font-family:'DM Serif Display',serif;font-size:38px;line-height:1.1;margin-bottom:10px;color:var(--text);}
+  .slide-subtitle{font-size:17px;color:var(--text-muted);font-weight:300;margin-bottom:30px;line-height:1.5;}
+  .slide-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .title-slide .slide-inner{background:var(--navy);justify-content:center;}
+  .title-slide .slide-title{color:#f8f8f8;font-size:46px;}
+  .title-slide .slide-subtitle{color:#8a8f9a;margin-bottom:40px;}
+  .snow-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(41,181,232,0.12);border:0.5px solid rgba(41,181,232,0.3);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--snow);font-family:'DM Mono',monospace;align-self:flex-start;margin-bottom:22px;}
+  .presenter-row{display:flex;align-items:center;gap:16px;border-top:0.5px solid var(--navy-border);padding-top:24px;margin-top:10px;}
+  .avatar{width:46px;height:46px;border-radius:50%;background:rgba(41,181,232,0.15);border:1px solid rgba(41,181,232,0.35);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--snow);flex-shrink:0;}
+  .presenter-name{font-size:15px;color:#c8cdd8;}
+  .presenter-meta{font-size:13px;color:#5a6070;}
+  .obj-list{display:flex;flex-direction:column;gap:14px;}
+  .obj-item{display:flex;align-items:flex-start;gap:16px;padding:16px 20px;border-radius:var(--radius);border:0.5px solid var(--border);background:var(--bg-surface);}
+  .obj-num{width:30px;height:30px;border-radius:50%;background:var(--snow);color:white;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .obj-text{font-size:17px;line-height:1.5;}
+  .agenda-grid{display:grid;grid-template-columns:80px 1fr 90px;border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .ah{font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px;color:var(--text-muted);padding:11px 16px;background:var(--bg-surface);border-bottom:0.5px solid var(--border);text-transform:uppercase;}
+  .ac{font-size:14px;padding:12px 16px;border-bottom:0.5px solid var(--border);color:var(--text);display:flex;align-items:center;}
+  .ac.time{color:var(--text-muted);font-family:'DM Mono',monospace;font-size:13px;}
+  .ac.hl{background:rgba(41,181,232,0.04);font-weight:500;}
+  .ac:nth-last-child(-n+3){border-bottom:none;}
+  .tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:10px;font-family:'DM Mono',monospace;}
+  .tag-d{background:rgba(29,158,117,0.15);color:#0F6E56;}
+  .tag-c{background:rgba(41,181,232,0.15);color:#1a8ab5;}
+  .tag-a{background:rgba(255,105,74,0.15);color:#993C1D;}
+  .tag-k{background:rgba(186,117,23,0.15);color:#854F0B;}
+  .hook-box{border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:28px 32px;margin-bottom:22px;background:var(--bg-surface);}
+  .hook-quote{font-family:'DM Serif Display',serif;font-size:26px;line-height:1.4;font-style:italic;}
+  .hook-chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  .chip-bad{font-size:13px;padding:5px 12px;border-radius:20px;border:0.5px solid rgba(226,75,74,0.3);color:#A32D2D;background:#FCEBEB;font-family:'DM Mono',monospace;}
+  .hook-cta{font-size:16px;color:var(--text-muted);line-height:1.6;}
+  .concept-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;}
+  .concept-card{border:0.5px solid var(--border);border-radius:var(--radius);padding:20px;background:var(--bg-surface);display:flex;flex-direction:column;}
+  .concept-card.accent{border-color:rgba(41,181,232,0.25);background:rgba(41,181,232,0.04);}
+  .concept-icon{font-size:22px;margin-bottom:12px;}
+  .concept-card h4{font-size:16px;font-weight:500;margin-bottom:8px;}
+  .concept-card p{font-size:14px;color:var(--text-muted);line-height:1.5;}
+  .code-pill{display:inline-block;background:var(--navy);color:#7fbbff;font-family:'DM Mono',monospace;font-size:12px;padding:4px 10px;border-radius:4px;margin-top:10px;}
+  .sf-mock{background:#1a1f2e;border-radius:var(--radius);overflow:hidden;flex:1;display:flex;}
+  .sf-sidebar{width:200px;background:#141824;border-right:0.5px solid #2a2f3a;padding:12px 0;flex-shrink:0;}
+  .sf-sidebar-item{padding:8px 16px;font-size:12px;font-family:'DM Mono',monospace;color:#5a6070;}
+  .sf-sidebar-item.active{background:rgba(41,181,232,0.12);color:var(--snow);}
+  .sf-sidebar-item.section{color:#3a3f4a;font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-top:8px;padding-top:8px;border-top:0.5px solid #2a2f3a;}
+  .sf-main{flex:1;display:flex;flex-direction:column;}
+  .sf-toolbar{background:#141824;border-bottom:0.5px solid #2a2f3a;padding:10px 16px;display:flex;gap:10px;align-items:center;}
+  .sf-btn{background:var(--snow);color:white;border:none;padding:5px 14px;border-radius:4px;font-size:12px;font-family:'DM Mono',monospace;}
+  .sf-btn.secondary{background:#2a2f3a;color:#8892a0;}
+  .sf-editor{flex:1;padding:16px 18px;font-family:'DM Mono',monospace;font-size:12px;line-height:2.0;}
+  .sf-results{background:#141824;border-top:0.5px solid #2a2f3a;padding:12px 16px;}
+  .sf-results-head{font-size:11px;color:#5a6070;font-family:'DM Mono',monospace;margin-bottom:8px;}
+  .sf-table{width:100%;border-collapse:collapse;font-size:11px;font-family:'DM Mono',monospace;}
+  .sf-table th{background:#2a2f3a;color:#8892a0;padding:5px 10px;text-align:left;font-weight:400;}
+  .sf-table td{padding:4px 10px;color:#f0f0f0;border-bottom:0.5px solid #2a2f3a;}
+  .stack-row{display:flex;align-items:center;gap:0;margin-bottom:16px;}
+  .stack-box{flex:1;text-align:center;padding:16px 8px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);margin:0 4px;}
+  .stack-box.highlight{border-color:rgba(41,181,232,0.4);background:rgba(41,181,232,0.06);}
+  .stack-box .s-icon{font-size:20px;margin-bottom:6px;}
+  .stack-box .s-name{font-size:13px;font-weight:500;}
+  .stack-box .s-role{font-size:11px;color:var(--text-muted);margin-top:3px;font-family:'DM Mono',monospace;}
+  .stack-arrow{font-size:16px;color:var(--text-light);margin:0 2px;}
+  .al-scenario{background:var(--bg-surface);border:0.5px solid var(--border);border-left:4px solid var(--snow);border-radius:0 var(--radius) var(--radius) 0;padding:18px 22px;margin-bottom:20px;font-size:16px;line-height:1.6;}
+  .al-steps{display:flex;flex-direction:column;gap:12px;}
+  .al-step{display:flex;align-items:center;gap:14px;padding:13px 16px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:15px;color:var(--text-muted);background:var(--bg);}
+  .cfu-q{font-family:'DM Serif Display',serif;font-size:22px;line-height:1.4;margin-bottom:24px;}
+  .cfu-opts{display:flex;flex-direction:column;gap:12px;}
+  .cfu-opt{display:flex;align-items:center;gap:14px;padding:16px 18px;border:0.5px solid var(--border-strong);border-radius:var(--radius);font-size:16px;cursor:pointer;background:var(--bg);color:var(--text);transition:background 0.12s;}
+  .cfu-opt:hover{background:var(--bg-surface);}
+  .cfu-opt.correct{border-color:#1D9E75;background:#E1F5EE;color:#085041;}
+  .cfu-opt.wrong{border-color:#E24B4A;background:#FCEBEB;color:#501313;}
+  .cfu-letter{width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:13px;font-family:'DM Mono',monospace;flex-shrink:0;color:var(--text-muted);}
+  .cfu-opt.correct .cfu-letter{border-color:#1D9E75;background:#1D9E75;color:white;}
+  .cfu-opt.wrong .cfu-letter{border-color:#E24B4A;background:#E24B4A;color:white;}
+  .cfu-reveal{font-size:14px;color:var(--text-muted);margin-top:16px;display:none;line-height:1.5;padding:14px 16px;border-radius:var(--radius);background:var(--bg-surface);border:0.5px solid var(--border);}
+  .closing-inner{background:var(--navy);flex:1;padding:48px 56px 40px;display:flex;flex-direction:column;overflow:hidden;}
+  .summary-checks{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+  .sc{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:var(--radius);border:0.5px solid rgba(41,181,232,0.3);background:rgba(41,181,232,0.08);font-size:16px;color:#a8e4f8;}
+  .sc-icon{color:var(--snow);font-size:20px;flex-shrink:0;}
+  .stack-bridge{padding:16px 20px;border-radius:var(--radius);background:rgba(255,105,74,0.08);border:0.5px solid rgba(255,105,74,0.25);font-size:15px;line-height:1.6;color:#8a8f9a;}
+  .stack-bridge strong{color:var(--orange);font-weight:500;}
+  .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
+  .res-card{padding:16px 18px;border:0.5px solid var(--navy-border);border-radius:var(--radius);}
+  .res-card h4{font-size:14px;font-weight:500;color:#c8cdd8;margin-bottom:4px;}
+  .res-card p{font-size:13px;color:#5a6070;}
+  .notes-panel{position:fixed;bottom:0;left:0;right:0;background:rgba(13,17,23,0.96);border-top:0.5px solid rgba(255,255,255,0.1);padding:16px 32px;transform:translateY(100%);transition:transform 0.3s ease;z-index:90;max-height:35vh;overflow-y:auto;}
+  .notes-panel.visible{transform:translateY(0);}
+  .notes-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--snow);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+  .notes-content{font-size:14px;color:rgba(255,255,255,0.75);line-height:1.7;}
+  .notes-content strong{color:white;}
+  .timing{display:inline-block;font-family:'DM Mono',monospace;font-size:12px;color:var(--snow);background:rgba(41,181,232,0.12);padding:2px 8px;border-radius:10px;margin-right:8px;}
+  .action{display:inline-block;font-family:'DM Mono',monospace;font-size:12px;color:#7fdbca;background:rgba(29,158,117,0.12);padding:2px 8px;border-radius:10px;margin-right:6px;}
+  .watch{display:inline-block;font-family:'DM Mono',monospace;font-size:12px;color:#ffbd2e;background:rgba(255,189,46,0.12);padding:2px 8px;border-radius:10px;margin-right:6px;}
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport">
+  <div class="slide-scaler" id="scaler">
+
+    <div class="slide title-slide active" id="s1">
+      <div style="height:5px;background:var(--snow);flex-shrink:0"></div>
+      <div class="slide-inner">
+        <div class="snow-badge">❄️ technical training · Snowflake</div>
+        <div class="slide-title">Snowflake Basics</div>
+        <div class="slide-subtitle">What it is, how it works, and where it fits - for SQL professionals new to cloud data warehousing</div>
+        <div class="presenter-row">
+          <div class="avatar">GS</div>
+          <div><div class="presenter-name">Garrett Stack</div><div class="presenter-meta">Senior Technical Instructor</div></div>
+          <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:12px;color:#3a3f4a">Session 4 of N · 15 min</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s2">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Learning objectives</div>
+        <div class="slide-title">By the end of this session...</div>
+        <div class="slide-subtitle">You will be able to confidently explain all three of these things.</div>
+        <div class="slide-body">
+          <div class="obj-list">
+            <div class="obj-item"><div class="obj-num">1</div><div class="obj-text"><strong>Explain</strong> what Snowflake is and what problem it solves compared to traditional databases</div></div>
+            <div class="obj-item"><div class="obj-num">2</div><div class="obj-text"><strong>Describe</strong> virtual warehouses, databases, schemas and worksheets in plain English</div></div>
+            <div class="obj-item"><div class="obj-num">3</div><div class="obj-text"><strong>Place</strong> Snowflake correctly in the modern data stack alongside dbt, Git and BI tools</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s3">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Agenda</div>
+        <div class="slide-title">What we are covering today</div>
+        <div class="slide-subtitle">15 minutes, four concepts, the modern data stack.</div>
+        <div class="slide-body">
+          <div class="agenda-grid">
+            <div class="ah">Time</div><div class="ah">Topic</div><div class="ah">Type</div>
+            <div class="ac time">0-2 min</div><div class="ac hl">Hook - the slow query problem</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">2-5 min</div><div class="ac">What is Snowflake? Four key concepts</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">5-8 min</div><div class="ac hl">UI walkthrough - worksheets and queries</div><div class="ac"><span class="tag tag-d">demo</span></div>
+            <div class="ac time">8-10 min</div><div class="ac">Where Snowflake fits the data stack</div><div class="ac"><span class="tag tag-c">concept</span></div>
+            <div class="ac time">10-12 min</div><div class="ac hl">Your turn + check for understanding</div><div class="ac"><span class="tag tag-a">active</span></div>
+            <div class="ac time">12-15 min</div><div class="ac">Summary + next steps</div><div class="ac"><span class="tag tag-c">wrap</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s4">
+      <div class="accent-bar orange"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Hook · activation of prior knowledge</div>
+        <div class="slide-title">Sound familiar?</div>
+        <div class="slide-body">
+          <div class="hook-box">
+            <div class="hook-quote">"Has anyone ever had a query that took 45 minutes to run - and had no idea why or how to make it faster?"</div>
+            <div class="hook-chips">
+              <span class="chip-bad">query running... 12 min</span>
+              <span class="chip-bad">query running... 28 min</span>
+              <span class="chip-bad">query running... 41 min</span>
+              <span class="chip-bad">connection timeout</span>
+            </div>
+          </div>
+          <div class="hook-cta">Traditional databases mix storage and compute on the same server. When queries get slow, your only option is to upgrade the entire server - expensive and slow to provision.<br><br>Snowflake separates them. Scale compute up for a big query. Scale back down when done. Pay per second.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s5">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Core concept</div>
+        <div class="slide-title">Four things to understand</div>
+        <div class="slide-body">
+          <div class="concept-cols">
+            <div class="concept-card"><div class="concept-icon">⚡</div><h4>Virtual Warehouse</h4><p>The compute engine that runs queries. Different sizes, pay per second. Start before querying, suspend when done.</p><span class="code-pill">XS / S / M / L / XL</span></div>
+            <div class="concept-card"><div class="concept-icon">🗄️</div><h4>Database and Schema</h4><p>Data organised in three layers. Database contains schemas. Schemas contain tables. Same structure you know from SQL.</p><span class="code-pill">database.schema.table</span></div>
+            <div class="concept-card"><div class="concept-icon">📝</div><h4>Worksheet</h4><p>The browser-based SQL editor. Write queries, run them, see results. No client software. Share with teammates.</p><span class="code-pill">Snowsight UI</span></div>
+            <div class="concept-card accent"><div class="concept-icon">🔀</div><h4>Separated compute and storage</h4><p>Storage holds data. Compute runs queries. They scale independently. Multiple teams can query the same data simultaneously.</p><span class="code-pill">scale up · pay per second</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s6">
+      <div class="accent-bar green"></div>
+      <div class="slide-inner">
+        <div class="slide-label">UI walkthrough</div>
+        <div class="slide-title">Snowflake in the browser</div>
+        <div class="slide-subtitle">The Snowsight UI - no client software required.</div>
+        <div class="slide-body">
+          <div class="sf-mock">
+            <div class="sf-sidebar">
+              <div class="sf-sidebar-item active">📝 Worksheets</div>
+              <div class="sf-sidebar-item">📊 Dashboards</div>
+              <div class="sf-sidebar-item">🗄️ Data</div>
+              <div class="sf-sidebar-item">⚡ Activity</div>
+              <div class="sf-sidebar-item section">Warehouse</div>
+              <div class="sf-sidebar-item active" style="color:#1D9E75">● COMPUTE_WH (XS)</div>
+              <div class="sf-sidebar-item section">Database</div>
+              <div class="sf-sidebar-item">ANALYTICS_DB</div>
+              <div class="sf-sidebar-item" style="padding-left:28px">SALES_SCHEMA</div>
+              <div class="sf-sidebar-item" style="padding-left:44px;color:#8892a0;font-size:11px">orders</div>
+              <div class="sf-sidebar-item" style="padding-left:44px;color:#8892a0;font-size:11px">customers</div>
+            </div>
+            <div class="sf-main">
+              <div class="sf-toolbar">
+                <div class="sf-btn">▶ Run</div>
+                <div class="sf-btn secondary">Format</div>
+                <div style="margin-left:auto;font-size:11px;color:#5a6070;font-family:'DM Mono',monospace">COMPUTE_WH · ANALYTICS_DB · SALES_SCHEMA</div>
+              </div>
+              <div class="sf-editor">
+                <span style="color:#444d5a">-- Top 5 customers by revenue</span><br>
+                <span style="color:#7fbbff">SELECT</span> <span style="color:#f0f0f0">customer_id,</span><br>
+                &nbsp;&nbsp;<span style="color:#7fbbff">SUM</span><span style="color:#f0f0f0">(order_total) as total_revenue</span><br>
+                <span style="color:#7fbbff">FROM</span> <span style="color:#29B5E8">orders</span><br>
+                <span style="color:#7fbbff">GROUP BY</span> <span style="color:#f0f0f0">customer_id</span><br>
+                <span style="color:#7fbbff">ORDER BY</span> <span style="color:#f0f0f0">total_revenue</span> <span style="color:#7fbbff">DESC</span><br>
+                <span style="color:#7fbbff">LIMIT</span> <span style="color:#f0f0f0">5;</span>
+              </div>
+              <div class="sf-results">
+                <div class="sf-results-head">Results · 5 rows · 0.3s · COMPUTE_WH (XS)</div>
+                <table class="sf-table">
+                  <tr><th>CUSTOMER_ID</th><th>TOTAL_REVENUE</th></tr>
+                  <tr><td>C_001</td><td>$48,920</td></tr>
+                  <tr><td>C_007</td><td>$41,200</td></tr>
+                  <tr><td>C_023</td><td>$38,750</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s7">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">The modern data stack</div>
+        <div class="slide-title">Where Snowflake fits</div>
+        <div class="slide-subtitle">Snowflake is the warehouse. Everything else connects to it.</div>
+        <div class="slide-body">
+          <div class="stack-row">
+            <div class="stack-box"><div class="s-icon">📥</div><div class="s-name">Ingestion</div><div class="s-role">Fivetran / Airbyte</div></div>
+            <div class="stack-arrow">→</div>
+            <div class="stack-box highlight"><div class="s-icon">❄️</div><div class="s-name">Snowflake</div><div class="s-role">storage + compute</div></div>
+            <div class="stack-arrow">→</div>
+            <div class="stack-box"><div class="s-icon">🔁</div><div class="s-name">Transform</div><div class="s-role">dbt</div></div>
+            <div class="stack-arrow">→</div>
+            <div class="stack-box"><div class="s-icon">📊</div><div class="s-name">Visualise</div><div class="s-role">Looker / Tableau</div></div>
+          </div>
+          <div style="padding:14px 18px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);font-size:15px;color:var(--text-muted);line-height:1.6;margin-bottom:12px">Raw data is loaded <strong>into</strong> Snowflake. dbt transforms it <strong>inside</strong> Snowflake. BI tools query Snowflake to build dashboards. Snowflake is the centre of gravity.</div>
+          <div style="padding:13px 17px;border:0.5px solid rgba(41,181,232,0.25);border-radius:var(--radius);background:rgba(41,181,232,0.05);font-size:14px;color:var(--text-muted)"><strong style="color:var(--snow)">Git connection:</strong> When dbt runs in CI/CD, it connects to Snowflake on merge. Your Git branch becomes a Snowflake schema. Code review protects your production data.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s8">
+      <div class="accent-bar"></div>
+      <div class="slide-inner">
+        <div class="slide-label">Check for understanding</div>
+        <div class="slide-title">Quick check</div>
+        <div class="slide-subtitle">Pick the best answer - no pressure.</div>
+        <div class="slide-body">
+          <div class="cfu-q">Your team runs a large monthly report that takes 20 minutes on your current warehouse size. What is the most cost-effective Snowflake approach?</div>
+          <div class="cfu-opts">
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">A</div>Upgrade to a permanently larger warehouse so all queries run faster</div>
+            <div class="cfu-opt" onclick="cfuClick(this,true)"><div class="cfu-letter">B</div>Scale up the warehouse for the monthly run, then scale back down</div>
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">C</div>Run the report across multiple smaller databases to split the load</div>
+            <div class="cfu-opt" onclick="cfuClick(this,false)"><div class="cfu-letter">D</div>Export the data to a local machine and run the query there</div>
+          </div>
+          <div class="cfu-reveal" id="cfu-reveal">✓ <strong>B is correct.</strong> Scale up for the heavy job, run it, scale back down. You only pay for the larger compute while it is running. Option A would mean paying for large compute 24/7 even when not needed - that is exactly the problem Snowflake was designed to solve.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" id="s9">
+      <div style="height:5px;background:var(--snow);flex-shrink:0"></div>
+      <div class="closing-inner">
+        <div class="slide-label" style="color:var(--snow)">Summary and next steps</div>
+        <div class="slide-title" style="color:#f8f8f8;font-size:32px;margin-bottom:20px">What you can do now</div>
+        <div class="summary-checks">
+          <div class="sc"><span class="sc-icon">✓</span>Explain what Snowflake is - a cloud warehouse that separates compute from storage</div>
+          <div class="sc"><span class="sc-icon">✓</span>Describe virtual warehouses - scalable compute you turn on and off and pay per second</div>
+          <div class="sc"><span class="sc-icon">✓</span>Navigate Snowsight - worksheets, databases, schemas and query results</div>
+          <div class="sc"><span class="sc-icon">✓</span>Place Snowflake in the modern data stack alongside dbt, Git and BI tools</div>
+        </div>
+        <div class="stack-bridge"><strong>The stack connection:</strong> Every tool in the modern data stack connects to Snowflake. dbt runs models inside it. Fivetran loads data into it. Looker queries it. Git version-controls the code that transforms it. Snowflake is not just a database - it is the centre of your entire data platform.</div>
+        <div class="res-grid">
+          <div class="res-card"><h4>Snowflake Docs</h4><p>docs.snowflake.com - full documentation</p></div>
+          <div class="res-card"><h4>Snowflake University</h4><p>training.snowflake.com - free courses</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <button class="tb-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
+  <span class="tb-counter" id="counter">1 / 9</span>
+  <button class="tb-btn" id="next-btn" onclick="changeSlide(1)">Next →</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+  <div class="tb-sep"></div>
+  <a href="animation.html" target="_blank" class="tb-btn">❄️ Animation</a>
+  <a href="commands.html" target="_blank" class="tb-btn">📋 Reference</a>
+  <div class="tb-sep"></div>
+  <span class="tb-key">← →</span>
+  <span class="tb-key">F</span>
+</div>
+
+<div class="notes-panel" id="notes-panel">
+  <div class="notes-label">Speaker notes</div>
+  <div class="notes-content" id="notes-content"></div>
+</div>
+
+<script>
+const notes=[
+  `<span class="timing">0:00 - 0:20</span><br><strong>Say:</strong> "Welcome everyone. In the next 15 minutes we are going to cover what Snowflake is, how it works, and where it sits in the modern data stack. By the end you will understand why so many data teams have moved to it."<br><br><span class="action">Do:</span> Let the slide settle. Smile. Don't rush.`,
+
+  `<span class="timing">0:20 - 1:05</span><br><strong>Say:</strong> "Three things by the end of today. Explain what Snowflake is. Describe the key concepts - warehouses, schemas and worksheets. And place Snowflake correctly in the modern data stack."<br><br><span class="watch">Watch out for:</span> Know these three cold. Don't read verbatim.`,
+
+  `<span class="timing">1:05 - 1:35</span><br><strong>Say:</strong> "Here is the shape of the session. Hook first, four concepts, a UI walkthrough, where it fits in the stack, a quick check, then summary."<br><br><strong>Key phrase:</strong> "The UI walkthrough starts at minute 5. That is where it becomes concrete."`,
+
+  `<span class="timing">1:35 - 3:05</span><br><strong>Say:</strong> "Before we get into Snowflake - a question."\n\n[PAUSE]\n\n"Has anyone ever had a query that took 45 minutes to run and had no idea why or how to make it faster?"\n\n[WAIT for the nod. Don't fill the silence.]\n\n"Traditional databases put storage and compute on the same server. When queries get slow, your only option is to upgrade the whole server. Expensive. Takes days. You pay for it 24/7 even when nobody is running queries.\n\nSnowflake separates them completely. That is the idea. Let me show you how."<br><br><span class="watch">Watch out for:</span> Let the recognition moment breathe before moving on.`,
+
+  `<span class="timing">3:05 - 5:35</span><br><strong>Say:</strong> "Four ideas. That is all you need today."\n\n<strong>Virtual Warehouse:</strong> "This is the compute - what actually runs your SQL. Different sizes from XS to 6XL. You start it before querying, suspend it when done. You pay per second while it is running. Not per month. Per second."\n\n<strong>Database and Schema:</strong> "Same structure you already know. Database at the top. Schemas inside. Tables and views inside schemas. You reference anything as database.schema.table."\n\n<strong>Worksheet:</strong> "This is just a browser-based SQL editor. You already know how to write SQL. The worksheet is just where you write it. No client software to install."\n\n<strong>Compute vs Storage:</strong> "This is the key one. Storage holds your data in the cloud permanently. Compute - the warehouse - runs your queries on demand. They are completely separate. You can scale compute up for a big job and back down when done. Multiple teams can have their own warehouse querying the same storage simultaneously."<br><br><span class="watch">Watch out for:</span> Don't go too deep on any one card. The animation reinforces it.`,
+
+  `<span class="timing">5:35 - 8:05</span><br><strong>Before this slide:</strong> Show animation.html scenes 1-3. Then say: "Let me show you the actual interface."\n\n<strong>Walk through the mock UI on screen:</strong>\n1. "On the left - the sidebar. Worksheets, databases, the active warehouse. Notice the warehouse shows green - it is running."\n2. "The top toolbar - your active warehouse, database and schema. This is your context for every query."\n3. "The editor - standard SQL. This query groups orders by customer and sums the total."\n4. "Hit Run - and at the bottom - results. Five rows, 0.3 seconds, on a tiny XS warehouse."\n\n<strong>Say:</strong> "This is the entire Snowflake workflow for an analyst. Open a worksheet, write SQL, run it, see results. Everything in the browser."<br><br><span class="watch">Watch out for:</span> You are presenting a mock UI not a live demo. That is fine - the concepts are what matter.`,
+
+  `<span class="timing">8:05 - 10:05</span><br><strong>Say:</strong> "Now let me show you where Snowflake sits in the bigger picture."\n\nPoint to each box in the stack:\n1. "Ingestion tools like Fivetran load raw data INTO Snowflake from your source systems."\n2. "Snowflake sits in the middle. This is where the data lives and where queries run."\n3. "dbt transforms the data INSIDE Snowflake - running SQL models against it."\n4. "BI tools like Looker query Snowflake to build dashboards."\n\n<strong>The Git connection:</strong> "When you run dbt in a CI/CD pipeline on merge, it connects to Snowflake and runs your models. Your Git branch becomes a Snowflake schema in your dev environment. Merge to main and it runs in production. Code review protects your production data."\n\n<span class="watch">Watch out for:</span> This slide connects all four courses on the platform. Take your time with it.`,
+
+  `<span class="timing">10:05 - 12:05</span><br><strong>Say:</strong> "Quick check - this is about the virtual warehouse and cost."\n\nRead the question. Give 15 seconds silence. Ask for an answer.\n\nIF B: "Exactly. Scale up, run the job, scale back down. Pay for XL only while it is running. That is the whole point of separating compute from storage."\n\nIF A: "Close - but if you upgrade permanently you pay for the larger warehouse 24/7. That is the old database model Snowflake was designed to replace."\n\n<span class="action">Also mention:</span> "Live quiz on the course page - four questions on your phone. I will share the link shortly."`,
+
+  `<span class="timing">12:05 - 15:00</span><br><strong>Say:</strong> "Let us land the plane. Four things you now understand:"\n\nRead each check point using the stack language:\n1. "What Snowflake is - compute separated from storage."\n2. "Virtual warehouses - pay per second, right-size for each job."\n3. "Snowsight - the browser-based UI, no software required."\n4. "Where it fits - the centre of the modern data stack."\n\n<strong>The stack connection - say this clearly:</strong>\n"Every tool we have covered on this platform connects to Snowflake. dbt runs models inside it. Git version-controls the code. Fivetran loads the data. Looker queries it. Snowflake is not just a database - it is the centre of gravity for your entire data platform."\n\n[PAUSE]\n\n<strong>Close:</strong> "Any questions? And there is a feedback form on the course page - two minutes, helps me improve."\n\n<span class="watch">Watch out for:</span> The stack connection is the payoff for learners who have done multiple courses. Slow down and let it land.`
+];
+
+let cur=0;
+const total=9;
+let notesVisible=false;
+let toolbarTimer;
+
+function goTo(i){
+  document.getElementById('s'+(cur+1)).classList.remove('active');
+  cur=i;
+  document.getElementById('s'+(cur+1)).classList.add('active');
+  document.getElementById('counter').textContent=(cur+1)+' / '+total;
+  document.getElementById('prev-btn').disabled=cur===0;
+  document.getElementById('next-btn').disabled=cur===total-1;
+  document.getElementById('notes-content').innerHTML=notes[cur];
+}
+function changeSlide(d){goTo(Math.max(0,Math.min(total-1,cur+d)));}
+function toggleNotes(){notesVisible=!notesVisible;document.getElementById('notes-panel').classList.toggle('visible',notesVisible);}
+function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+function cfuClick(el,correct){
+  document.querySelectorAll('.cfu-opt').forEach(o=>{o.classList.remove('correct','wrong');o.onclick=null;});
+  el.classList.add(correct?'correct':'wrong');
+  if(!correct)document.querySelectorAll('.cfu-opt')[1].classList.add('correct');
+  document.getElementById('cfu-reveal').style.display='block';
+}
+function scaleSlides(){
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const aspect=16/9;
+  let w,h;
+  if(vw/vh>aspect){h=vh*0.95;w=h*aspect;}else{w=vw*0.95;h=w/aspect;}
+  const scaler=document.getElementById('scaler');
+  scaler.style.width=w+'px';scaler.style.height=h+'px';
+  document.querySelectorAll('.slide').forEach(s=>{s.style.width=w+'px';s.style.height=h+'px';});
+}
+function showToolbar(){
+  document.getElementById('toolbar').classList.remove('hidden');
+  clearTimeout(toolbarTimer);
+  toolbarTimer=setTimeout(()=>document.getElementById('toolbar').classList.add('hidden'),3000);
+}
+document.addEventListener('mousemove',showToolbar);
+document.addEventListener('keydown',e=>{
+  showToolbar();
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();changeSlide(1);}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();changeSlide(-1);}
+  if(e.key==='n'||e.key==='N')toggleNotes();
+  if(e.key==='f'||e.key==='F')toggleFullscreen();
+});
+window.addEventListener('resize',scaleSlides);
+scaleSlides();
+goTo(0);
+showToolbar();
+</script>
+</body>
+</html>
