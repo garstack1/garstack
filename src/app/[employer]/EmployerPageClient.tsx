@@ -2,8 +2,10 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { trackEmployerVisit, trackCVDownload } from '@/lib/analytics'
 import posthog from 'posthog-js'
+import { urlFor } from '@/lib/sanity'
 import type { EmployerPage } from '@/lib/sanity'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -112,32 +114,45 @@ export default function EmployerPageClient({ page, employerSlug }: Props) {
           <div className="container-site">
             <p className="label-tag mb-12">Selected work for this application</p>
             <div className="grid md:grid-cols-2 gap-8">
-              {page.featuredProjects.map((project) => (
-                <div key={project._id} className="border border-ink-200 p-8 hover:border-signal transition-colors group">
-                  <p className="label-tag mb-4">{project.categories?.[0]}</p>
-                  <h3 className="text-display text-2xl text-ink-900 mb-4 group-hover:text-signal transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-ink-500 text-sm leading-relaxed mb-6">{project.summary}</p>
-                  {project.outcomes?.length > 0 && (
-                    <ul className="space-y-2">
-                      {project.outcomes.map((o, i) => (
-                        <li key={i} className="flex items-start gap-3 text-sm text-ink-600">
-                          <span className="text-signal mt-0.5">→</span>
-                          {o}
-                        </li>
-                      ))}
-                    </ul>
+              {page.featuredProjects.map((project) => {
+                const imageUrl = project.image ? urlFor(project.image).width(800).height(450).url() : null
+                return (
+                <div key={project._id} className="group border border-ink-200 hover:border-signal transition-colors flex flex-col h-full">
+                  {imageUrl && (
+                    <div className="relative w-full h-48 overflow-hidden bg-ink-100">
+                      <Image src={imageUrl} alt={project.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
+                    </div>
                   )}
-                  <div className="flex flex-wrap gap-2 mt-6">
-                    {project.tags?.map((tag) => (
-                      <span key={tag} className="font-mono text-xs bg-ink-100 text-ink-600 px-3 py-1">
-                        {tag}
-                      </span>
-                    ))}
+                  <div className="p-8 flex flex-col flex-1">
+                    <p className="label-tag mb-4">{project.categories?.[0]}</p>
+                    <h3 className="text-display text-2xl text-ink-900 mb-4 group-hover:text-signal transition-colors">{project.title}</h3>
+                    <p className="text-ink-500 text-sm leading-relaxed mb-6 flex-1">{project.summary}</p>
+                    {project.outcomes?.length > 0 && (
+                      <ul className="space-y-2 mb-6">
+                        {project.outcomes.map((o, i) => (
+                          <li key={i} className="flex items-start gap-3 text-sm text-ink-600">
+                            <span className="text-signal mt-0.5 shrink-0">→</span>
+                            {o}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {project.tags?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {project.tags.map((tag) => (
+                          <span key={tag} className="font-mono text-xs bg-ink-100 text-ink-600 px-3 py-1">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                    {project.link && (
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 font-mono text-xs text-signal tracking-widest uppercase hover:gap-4 transition-all mt-auto border border-signal px-4 py-2 hover:bg-signal hover:text-slate-site w-fit">
+                        View project →
+                      </a>
+                    )}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </section>
