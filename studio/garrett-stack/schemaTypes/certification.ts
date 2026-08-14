@@ -41,6 +41,13 @@ export default defineType({
       description: 'Upload the badge image if available',
     }),
     defineField({
+      name: 'hidden',
+      title: 'Hide from CV page',
+      type: 'boolean',
+      description: 'Toggle on to hide this certification from the public CV page',
+      initialValue: false,
+    }),
+    defineField({
       name: 'tier',
       title: 'Tier',
       type: 'string',
@@ -55,22 +62,17 @@ export default defineType({
     }),
     defineField({
       name: 'categories',
-      title: 'Relevant role categories',
+      title: 'Certification categories',
       type: 'array',
-      of: [{ type: 'string' }],
-      options: {
-        list: [
-          { title: 'Instructional Designer',   value: 'instructional-designer' },
-          { title: 'Implementation Consultant', value: 'implementation-consultant' },
-          { title: 'Technical Writer',          value: 'technical-writer' },
-          { title: 'Enablement / Onboarding',  value: 'enablement-onboarding' },
-          { title: 'Cybersecurity Training',    value: 'cybersecurity-training' },
-          { title: 'Data Analytics',            value: 'data-analytics' },
-          { title: 'L&D Partner',               value: 'ld-partner' },
-          { title: 'Training',                  value: 'training' },
-        ],
-      },
-      description: 'Which role types is this cert relevant to?',
+      of: [{ type: 'reference', to: [{ type: 'certCategory' }] }],
+      description: 'Which certification categories this belongs to',
+    }),
+    defineField({
+      name: 'categoryOrder',
+      title: 'Order within category',
+      type: 'number',
+      description: 'Lower numbers appear first within each category',
+      initialValue: 99,
     }),
   ],
   preview: {

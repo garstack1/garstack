@@ -150,6 +150,26 @@ const CERTIFICATIONS = [
   },
 ]
 
+const CERT_CATEGORIES = [
+  { key: 'instructional-design-and-l-and-d', label: 'Instructional Design & L&D' },
+  { key: 'technical-training-and-enablement', label: 'Technical Training & Enablement' },
+  { key: 'project-management-and-implementation', label: 'Project Management & Implementation' },
+  { key: 'data-and-analytics', label: 'Data & Analytics' },
+  { key: 'cloud-and-cybersecurity', label: 'Cloud & Cybersecurity' },
+  { key: 'technical-and-development', label: 'Technical & Development' },
+  { key: 'life-sciences-and-pharma', label: 'Life Sciences & Pharma' },
+]
+
+const ISSUER_COLORS: Record<string, string> = {
+  'Google': 'bg-blue-50 text-blue-700 border-blue-200 hover:border-blue-400',
+  'QQI': 'bg-green-50 text-green-700 border-green-200 hover:border-green-400',
+  'Scrum Alliance': 'bg-orange-50 text-orange-700 border-orange-200 hover:border-orange-400',
+  'DocuSign': 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:border-yellow-400',
+  'Vanderbilt University': 'bg-purple-50 text-purple-700 border-purple-200 hover:border-purple-400',
+  'University of Michigan': 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:border-indigo-400',
+  'Contentful': 'bg-red-50 text-red-700 border-red-200 hover:border-red-400',
+}
+
 export const revalidate = 60
 
 export default async function CVPage() {
@@ -159,6 +179,22 @@ export default async function CVPage() {
   const certsByIssuer = certifications.reduce((acc, cert) => {
     if (!acc[cert.issuer]) acc[cert.issuer] = []
     acc[cert.issuer].push(cert)
+    return acc
+  }, {} as Record<string, Certification[]>)
+
+  // Group by category
+  const certsByCategory = certifications.reduce((acc, cert) => {
+    const cats = cert.categories ?? []
+    if (cats.length === 0) {
+      if (!acc['other']) acc['other'] = []
+      acc['other'].push(cert)
+    } else {
+      cats.forEach((cat: any) => {
+        const key = cat.key ?? cat
+        if (!acc[key]) acc[key] = []
+        acc[key].push(cert)
+      })
+    }
     return acc
   }, {} as Record<string, Certification[]>)
   return (
@@ -253,27 +289,24 @@ export default async function CVPage() {
         <section className="py-24 border-b border-ink-200">
           <div className="container-site">
             <p className="label-tag mb-16">Licences & certifications</p>
-            {Object.keys(certsByIssuer).length > 0 ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
-                {Object.entries(certsByIssuer).map(([issuer, certs]) => (
-                  <div key={issuer}>
-                    <h3 className="text-display text-xl text-ink-900 mb-6">{issuer}</h3>
+
+            {/* Grouped by category */}
+            {certsByCategory && Object.keys(certsByCategory).length > 0 ? (
+              <div className="grid grid-cols-1 gap-y-12 mb-24">
+                {CERT_CATEGORIES.filter(cat => certsByCategory[cat.key]?.length > 0).map(cat => (
+                  <div key={cat.key}>
+                    <h3 className="font-mono text-xs tracking-widest uppercase text-signal mb-6">{cat.label}</h3>
                     <ul className="space-y-3">
-                      {certs.map((cert) => (
-                        <li key={cert._id} className="flex items-start gap-3 text-sm text-ink-500 leading-relaxed">
-                          <span className="text-signal mt-0.5 shrink-0">→</span>
-                          {cert.credentialUrl ? (
-                            <a
-                              href={cert.credentialUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:text-signal transition-colors"
-                            >
-                              {cert.name}
-                            </a>
-                          ) : (
-                            cert.name
-                          )}
+                      {certsByCategory[cat.key].map((cert: any) => (
+                        <li key={cert._id} className="flex items-start justify-between gap-4 text-sm border-b border-ink-100 pb-3">
+                          <span className="text-ink-700">
+                            {cert.credentialUrl ? (
+                              <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer" className="hover:text-signal transition-colors">
+                                {cert.name}
+                              </a>
+                            ) : cert.name}
+                          </span>
+                          <span className="text-ink-400 text-xs shrink-0">{cert.issuer}</span>
                         </li>
                       ))}
                     </ul>
@@ -282,6 +315,30 @@ export default async function CVPage() {
               </div>
             ) : (
               <p className="text-ink-400 text-sm">Certifications loading...</p>
+            )}
+
+            {/* Issuer badges */}
+            {certsByIssuer && Object.keys(certsByIssuer).length > 0 && (
+              <div>
+                <p className="label-tag mb-8">Issued by</p>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(certsByIssuer).map(([issuer, certs]: [string, any]) => (
+                    <div key={issuer} className="relative group">
+                      <div className={['px-4 py-2 text-sm font-mono font-medium cursor-default border transition-colors', ISSUER_COLORS[issuer] ?? 'bg-ink-100 text-ink-700 border-ink-200 hover:border-ink-400'].join(' ')}>
+                        {issuer}
+                      </div>
+                      <div className="absolute bottom-full left-0 mb-2 w-64 bg-ink-900 text-slate-site text-xs p-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                        <p className="font-mono text-signal mb-2 uppercase tracking-wider text-xs">{issuer}</p>
+                        <ul className="space-y-1">
+                          {(certs as any[]).map((c: any) => (
+                            <li key={c._id} className="text-ink-300">→ {c.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </section>

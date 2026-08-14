@@ -135,8 +135,9 @@ export async function getEmployerPage(slug: string): Promise<EmployerPage | null
 
 export async function getAllCertifications(): Promise<Certification[]> {
   return sanityClient.fetch(
-    `*[_type == "certification"] | order(issuedDate desc){
-      _id, name, issuer, issuedDate, expiryDate, credentialUrl, tier, categories
+    `*[_type == "certification" && hidden != true] | order(categoryOrder asc, name asc){
+      _id, name, issuer, issuedDate, credentialUrl, tier, categoryOrder,
+      categories[]->{ _id, label, "key": key.current, order }
     }`
   )
 }
