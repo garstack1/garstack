@@ -73,28 +73,7 @@ export default async function AboutPage() {
         <section className="py-24 border-b border-ink-200">
           <div className="container-site grid md:grid-cols-12 gap-16 items-start">
 
-            {/* Photo placeholder */}
-            <div className="md:col-span-4">
-              <div className="relative">
-                <div className="aspect-[3/4] bg-ink-100 overflow-hidden">
-                  {photoUrl ? (
-                    <Image
-                      src={photoUrl}
-                      alt={photoAlt}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 400px"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <p className="label-tag text-ink-300">Photo coming soon</p>
-                    </div>
-                  )}
-                </div>
-                {/* Orange accent */}
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-signal z-[-1]" />
-              </div>
-            </div>
+
 
             {/* Story */}
             <div className="md:col-span-8 space-y-6">
